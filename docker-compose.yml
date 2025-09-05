@@ -57,19 +57,19 @@ services:
     depends_on:
       - nginx
 
-#  tgbot:
-#    build:
-#      context: ./telegram bot
-#    environment:
-#      - token=${TG_BOT_TOKEN}
-#    volumes:
-#      - ./telegram bot:/app
-#      - /app/node_modules
-#    networks:
-#      - royal-apart-app
-#    depends_on:
-#      - api
-#    restart: unless-stopped
+  tgbot:
+    build:
+      context: ./telegram bot
+    environment:
+      - token=${TG_BOT_TOKEN}
+    volumes:
+      - ./telegram bot:/app
+      - /app/node_modules
+    networks:
+      - royal-apart-app
+    depends_on:
+      - api
+    restart: unless-stopped
 
 networks:
   royal-apart-app:
