@@ -40,15 +40,15 @@ app.use("/sales", salesRouter)
 cron.schedule("0 * * * *", async () => {
   try {
 
-    const response = await axios.delete("https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/sales/delete-expired");
+    const response = await axios.delete("https://royalapart.online/api/sales/delete-expired");
     console.log(response.data);
     await axios.get(
-      "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/getprices"
+      "https://royalapart.online/api/getprices"
     );
     console.log("First request: Prices updated successfully.");
 
     await axios.get(
-      "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/getprices/setPrice"
+      "https://royalapart.online/api/getprices/setPrice"
     );
     console.log("Second request: Successfully fetched data.");
   } catch (error) {
