@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const axios = require('axios');
 const Roomsrr = require("../models/rooms");
+require("dotenv").config();
 
 router.get("/", async (req, res) => {
   try {
     const apiUrl = 'https://kapi.wubook.net/kp/property/fetch_products';
-    const apiKey = 'wb_5dc6d45a-5f50-11ec-acc7-001a4a908fff'; // Replace with your actual API key
+    const apiKey = process.env.WUDOO_API_KEY; // Replace with your actual API key
 
     // Make a POST request to the specified API with the x-api-key header
     const response = await axios.post(apiUrl, {}, {
@@ -51,7 +52,7 @@ router.get("/", async (req, res) => {
 router.get("/setPrice", async (req, res) => {
   try {
     const apiUrl = 'https://kapi.wubook.net/kp/inventory/fetch_rate_values';
-    const apiKey = 'wb_5dc6d45a-5f50-11ec-acc7-001a4a908fff'; // Replace with your actual API key
+    const apiKey = process.env.WUDOO_API_KEY; // Replace with your actual API key
     let currentDate = new Date();
     let formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
 
@@ -100,7 +101,7 @@ router.get("/setPrice", async (req, res) => {
 router.get('/getPrices', async (req, res) => {
     try {
       const apiUrl = 'https://kapi.wubook.net/kp/inventory/fetch_rate_values';
-      const apiKey = 'wb_5dc6d45a-5f50-11ec-acc7-001a4a908fff'; // Replace with your actual API key
+      const apiKey = process.env.WUDOO_API_KEY; // Replace with your actual API key
   
       // Extract parameters from the request query
       const formattedDate = req.query.formattedDate;

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 let Roomsr = require("../models/rooms");
 router.use(express.json());
+require("dotenv").config();
 
 const getRtidsFromDb = async () => {
     try {
@@ -25,7 +26,7 @@ router.post("/", async (req, res) => {
 
         const wubids = await getRtidsFromDb();
 
-        const authHeader = `Basic ${Buffer.from("wb_5dc6d45a-5f50-11ec-acc7-001a4a908fff" + ":").toString("base64")}`;
+        const authHeader = `Basic ${Buffer.from(process.env.WUDOO_API_KEY + ":").toString("base64")}`;
 
         // Array to store responses for each wubid
         const responses = [];

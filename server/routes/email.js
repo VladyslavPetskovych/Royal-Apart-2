@@ -1,6 +1,7 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+require("dotenv").config();
 
 const router = express.Router();
 router.use(express.json());
@@ -14,7 +15,7 @@ router.post("/sendEmail", async (req, res) => {
       secure: false,
       auth: {
         user: "apartsr@gmail.com",
-        pass: "izjm kjyk lztd jbom",
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 

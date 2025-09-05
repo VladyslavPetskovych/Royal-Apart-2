@@ -8,6 +8,8 @@ const crypto = require("crypto");
 const fs = require("fs");
 const axios = require('axios')
 
+require("dotenv").config();
+
 router.get("/", async (req, res) => {
   try {
     let rooms = await Roomsr.find({});
@@ -25,7 +27,7 @@ router.get("/roomType", async (req, res) => {
       {},
       {
         headers: {
-          "x-api-key": "wb_5dc6d45a-5f50-11ec-acc7-001a4a908fff",
+          "x-api-key": process.env.WUDOO_API_KEY,
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
