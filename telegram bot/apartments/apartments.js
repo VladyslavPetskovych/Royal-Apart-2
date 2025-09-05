@@ -22,6 +22,7 @@ const roomOptions = {
   }),
 };
 
+
 const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
   const imageUrl = room.imgurl[0];
   const roomName = room.name;
@@ -40,7 +41,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
   let roomPrice;
   let roomPriceString = "";
 
-  if (context === "a") {
+  if (context === 'a') {
     roomPriceString = ""; // Hide price if context is "a"
   } else {
     if (prices && prices[0] > 10000) {
@@ -63,7 +64,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
 
     const sentMessage = await bot.sendPhoto(
       chatId,
-      `https://royalapart.online/imgs/${imageUrl}`,
+      `../server/imgs/${imageUrl}`,
       {
         caption: `Адреса: ${roomName}\n\nКількість кімнат: ${numroom}\n\nПлоща: ${roomSurface}m²\nКількість ліжок: ${roomBeds}\nКількість гостей: ${roomGuests}\nПоверх: ${roomFloor}\n${roomPriceString}\n\n${roomDescription}\n\n\n[Детальніше на сайті](https://www.royalapart.online/room/${wubidroom})`,
         reply_markup: replyMarkup,
@@ -96,6 +97,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
   }
 };
 
+
 const fetchRoomData = async () => {
   const apiUrl = "https://royalapart.online/api/aparts";
   try {
@@ -111,9 +113,7 @@ const fetchRoomData = async () => {
 const showApartments = async (chatId, rooms = []) => {
   await fetchRoomData();
   // Remove the local declaration of roomData here
-  const response = await axios.get(
-    `https://royalapart.online/api/users/${chatId}`
-  );
+  const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
 
   // Extract relevant data from the response
   const userData = response.data;
@@ -147,12 +147,9 @@ bot.on("message", async (msg) => {
     await fetchRoomData();
     let context = "a";
 
-    await axios.post(
-      `https://royalapart.online/api/users/updateContext/${chatId}`,
-      {
-        context,
-      }
-    );
+    await axios.post(`https://royalapart.online/api/users/updateContext/${chatId}`, {
+      context,
+    });
 
     //console.log("/apartments clicked" + currentRoom);
     const apiUrlUpdate = `https://royalapart.online/api/users`;
@@ -227,9 +224,7 @@ bot.on("callback_query", async (callbackQuery) => {
   }
 
   if (data === "send form") {
-    const response = await axios.get(
-      `https://royalapart.online/api/users/${chatId}`
-    );
+    const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
     const userData = response.data;
 
     const currentRoomId = userData.roomsid[userData.insexr];
