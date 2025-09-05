@@ -248,7 +248,7 @@ bot.on("callback_query", async (callbackQuery) => {
       console.error("Error:", error.message);
     }
     await bot.deleteMessage(chatId, userData.lastMessage);
-    await bot.sendPhoto(chatId, `../server/imgs/${currentRoom.imgurl[0]}`, {
+    await bot.sendPhoto(chatId, `https://royalapart.online/imgs/${currentRoom.imgurl[0]}`, {
       caption: `Ви обрали квартиру за адресою: ${currentRoom.name}\n`,
     });
 
