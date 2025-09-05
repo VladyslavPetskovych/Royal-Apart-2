@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm i && npm install -g pm2
+RUN npm install --omit=dev
 
 COPY . .
 
-CMD ["pm2", "start"]
+CMD ["npx", "pm2-runtime", "start", "app.js", "--name", "tgbot"]
