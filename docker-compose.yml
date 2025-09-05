@@ -1,14 +1,29 @@
 name: royal-apart-app
 
 services:
+  api:
+    build:
+      context: ./server
+      target: production
+    environment:
+      - MONGOPASS=${MONGOPASS}
+      - LGTOKEN=${LGTOKEN}
+      - PSTOKEN=${PSTOKEN}
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - royal-apart-app
+    restart: unless-stopped
+
   web:
     build:
       context: ./siteRoyal
       target: production
     networks:
       - royal-apart-app
-    #    depends_on:
-    #      - api
+    depends_on:
+      - api
     restart: unless-stopped
 
   nginx:
@@ -29,16 +44,30 @@ services:
       - web
     restart: unless-stopped
 
-  certbot:
-    image: certbot/certbot
+#  certbot:
+#    image: certbot/certbot
+#    volumes:
+#      - ./certbot/conf:/etc/letsencrypt
+#      - ./certbot/www:/var/www/certbot
+#    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
+#    networks:
+#      - royal-apart-app
+#    depends_on:
+#      - nginx
+
+  tgbot:
+    build:
+      context: ./telegram bot
+    environment:
+      - token=${TG_BOT_TOKEN}
     volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
+      - ./telegram bot:/app
+      - /app/node_modules
     networks:
       - royal-apart-app
     depends_on:
-      - nginx
+      - api
+    restart: unless-stopped
 
 networks:
   royal-apart-app:
