@@ -62,6 +62,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
       ? updatedRoomOptions.reply_markup
       : roomOptions.reply_markup;
 
+    console.log(imageUrl)
     const sentMessage = await bot.sendPhoto(
       chatId,
       `https://royalapart.online/api/imgs/${imageUrl}`,
