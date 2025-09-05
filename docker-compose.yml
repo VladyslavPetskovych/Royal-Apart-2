@@ -44,16 +44,16 @@ services:
       - web
     restart: unless-stopped
 
-#  certbot:
-#    image: certbot/certbot
-#    volumes:
-#      - ./certbot/conf:/etc/letsencrypt
-#      - ./certbot/www:/var/www/certbot
-#    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
-#    networks:
-#      - royal-apart-app
-#    depends_on:
-#      - nginx
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email ${CERT_EMAIL} -d ${DOMAIN} --agree-tos
+    networks:
+      - royal-apart-app
+    depends_on:
+      - nginx
 
   tgbot:
     build:
