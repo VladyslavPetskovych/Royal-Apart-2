@@ -8,4 +8,4 @@ RUN npm install --omit=dev
 
 COPY . .
 
-CMD ["npm", "start"]
+CMD ["npx", "pm2-runtime", "start", "app.js", "--name", "tgbot"]

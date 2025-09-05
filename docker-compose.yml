@@ -9,6 +9,8 @@ services:
       - MONGOPASS=${MONGOPASS}
       - LGTOKEN=${LGTOKEN}
       - PSTOKEN=${PSTOKEN}
+      - WUDOO_API_KEY=${WUDOO_API_KEY}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     volumes:
       - ./server:/app
       - /app/node_modules

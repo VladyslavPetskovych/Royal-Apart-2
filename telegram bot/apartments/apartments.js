@@ -63,9 +63,9 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
 
     const sentMessage = await bot.sendPhoto(
       chatId,
-      `https://royalapart.online/imgs/${imageUrl}`, // тепер Telegram отримає правильний URL
+      `https://royalapart.online/imgs/${imageUrl}`,
       {
-        caption: `Адреса: ${roomName}\n...`,
+        caption: `Адреса: ${roomName}\n\nКількість кімнат: ${numroom}\n\nПлоща: ${roomSurface}m²\nКількість ліжок: ${roomBeds}\nКількість гостей: ${roomGuests}\nПоверх: ${roomFloor}\n${roomPriceString}\n\n${roomDescription}\n\n\n[Детальніше на сайті](https://www.royalapart.online/room/${wubidroom})`,
         reply_markup: replyMarkup,
         parse_mode: "Markdown",
         disable_web_page_preview: true,
