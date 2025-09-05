@@ -62,7 +62,7 @@ const sendUserData = async (chatId) => {
   let data = {
     chatId: chatId,
   };
-  await axios.post("http://localhost:3000/email/sendEmail", data);
+  await axios.post("https://royalapart.online/api/email/sendEmail", data);
   bot.sendMessage(
     chatId,
     "Ваші дані надіслані менеджеру, дякуємо за бронювання, очікуйте."
@@ -80,7 +80,7 @@ const askForName = async (chatId) => {
   console.log(`User name: ${message.text}`);
 
   try {
-    await axios.post("http://localhost:3000/users", {
+    await axios.post("https://royalapart.online/api/users", {
       chatId: chatId,
       name: message.text,
     });
@@ -141,7 +141,7 @@ const askForPhone = async (chatId) => {
 
         // Send phone number to server
         axios
-          .post("http://localhost:3000/users", {
+          .post("https://royalapart.online/api/users", {
             chatId: chatId,
             phone: phoneNumber,
           })
@@ -193,7 +193,7 @@ const form = async (receivedChatId) => {
 
   // Now both name and phone should be provided
   const response = await axios.get(
-    `http://localhost:3000/users/${receivedChatId}`
+    `https://royalapart.online/api/users/${receivedChatId}`
   );
   let Userinf = response.data;
 
@@ -220,14 +220,14 @@ const askForComment = async (chatId) => {
   bot.sendMessage(chatId, `Будь ласка, залиште ваш коментар: \t...\t✍️`);
   const message = await waitForUserInput(chatId);
   try {
-    await axios.post("http://localhost:3000/users", {
+    await axios.post("https://royalapart.online/api/users", {
       chatId: chatId,
       coment: message.text,
     });
   } catch (error) {
     console.error("Error:", error.message);
   }
-  const response = await axios.get(`http://localhost:3000/users/${chatId}`);
+  const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
   let Userinf = response.data;
 
   let roomMessage;

@@ -15,7 +15,7 @@ const roomOptions = [
 
 const getUserSelections = async (chatId) => {
   try {
-    const response = await axios.get(`http://localhost:3000/users/${chatId}`);
+    const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
     return response.data.checkedRooms || {};
   } catch (error) {
     console.error("Error getting user selections:", error);
@@ -27,7 +27,7 @@ const updateUserSelections = async (chatId, selections, markup) => {
   try {
     const data = { chatId: chatId, checkedRooms: selections, markup: markup };
     console.log(chatId);
-    await axios.post("http://localhost:3000/users", data);
+    await axios.post("https://royalapart.online/api/users", data);
   } catch (error) {
     console.error("Error updating user selections:", error);
   }

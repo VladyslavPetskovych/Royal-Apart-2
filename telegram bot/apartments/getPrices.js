@@ -5,7 +5,7 @@ async function getPrices(chatId) {
   try {
    
     const userResponse = await axios.get(
-      `http://localhost:3000/users/${chatId}`
+      `https://royalapart.online/api/users/${chatId}`
     );
     const userData = userResponse.data;
     const context = userData.context;
@@ -30,7 +30,7 @@ async function getPrices(chatId) {
     console.log(n)
     console.log(n)
     const pricesResponse = await axios.get(
-      "http://localhost:3000/getprices/getPrices",
+      "https://royalapart.online/api/getprices/getPrices",
       {
         params: {
           n: n,

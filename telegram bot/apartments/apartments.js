@@ -73,7 +73,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
       }
     );
 
-    const apiUrl = `http://localhost:3000/users/updateLastMessage/${chatId}`;
+    const apiUrl = `https://royalapart.online/api/users/updateLastMessage/${chatId}`;
     const userData = {
       chatId: `${chatId}`,
       message: `${sentMessage.message_id}`,
@@ -99,7 +99,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
 
 
 const fetchRoomData = async () => {
-  const apiUrl = "http://localhost:3000/aparts";
+  const apiUrl = "https://royalapart.online/api/aparts";
   try {
     const response = await axios.get(apiUrl);
     roomData = response.data.data;
@@ -113,7 +113,7 @@ const fetchRoomData = async () => {
 const showApartments = async (chatId, rooms = []) => {
   await fetchRoomData();
   // Remove the local declaration of roomData here
-  const response = await axios.get(`http://localhost:3000/users/${chatId}`);
+  const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
 
   // Extract relevant data from the response
   const userData = response.data;
@@ -147,12 +147,12 @@ bot.on("message", async (msg) => {
     await fetchRoomData();
     let context = "a";
 
-    await axios.post(`http://localhost:3000/users/updateContext/${chatId}`, {
+    await axios.post(`https://royalapart.online/api/users/updateContext/${chatId}`, {
       context,
     });
 
     //console.log("/apartments clicked" + currentRoom);
-    const apiUrlUpdate = `http://localhost:3000/users`;
+    const apiUrlUpdate = `https://royalapart.online/api/users`;
     const userDataId = {
       chatId: chatId,
       insexr: 0,
@@ -173,7 +173,7 @@ bot.on("callback_query", async (callbackQuery) => {
 
   if (data === "prev room" || data === "next room") {
     const response = await axios.get(
-      `http://localhost:3000/users/${chatId}?_=${Date.now()}`
+      `https://royalapart.online/api/users/${chatId}?_=${Date.now()}`
     );
     const userData = response.data;
     let userRoomIndex =
@@ -192,7 +192,7 @@ bot.on("callback_query", async (callbackQuery) => {
     );
 
     console.log(`Updated room !!!!!!!!!!!!!!!!!!\n ${updatedRoom}`);
-    const apiUrlUpdate = `http://localhost:3000/users`;
+    const apiUrlUpdate = `https://royalapart.online/api/users`;
     const userDataId = {
       chatId: userData.chatId,
       insexr: userRoomIndex,
@@ -206,7 +206,7 @@ bot.on("callback_query", async (callbackQuery) => {
       let lastmsg;
 
       axios
-        .get(`http://localhost:3000/users/getLastMessageId/${chatId}`)
+        .get(`https://royalapart.online/api/users/getLastMessageId/${chatId}`)
         .then((response) => {
           lastmsg = response.data.lastMessageId;
           console.log("lastMEssageID:", response.data.lastMessageId);
@@ -224,7 +224,7 @@ bot.on("callback_query", async (callbackQuery) => {
   }
 
   if (data === "send form") {
-    const response = await axios.get(`http://localhost:3000/users/${chatId}`);
+    const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
     const userData = response.data;
 
     const currentRoomId = userData.roomsid[userData.insexr];
@@ -238,7 +238,7 @@ bot.on("callback_query", async (callbackQuery) => {
     const currentRoom = roomData.find((room) => room.wubid === currentRoomId);
 
     try {
-      const response = await axios.post("http://localhost:3000/users", {
+      const response = await axios.post("https://royalapart.online/api/users", {
         chatId: chatId,
         currentroom: currentRoom,
       });

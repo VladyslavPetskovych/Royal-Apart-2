@@ -28,7 +28,7 @@ bot.on("callback_query", async (msg) => {
     // Retrieve user-specific rooms from the map
     const userRooms = userRoomsMap.get(chatId) || [];
 
-    const response = await axios.get(`http://localhost:3000/users/${chatId}`);
+    const response = await axios.get(`https://royalapart.online/api/users/${chatId}`);
 
     // Extract relevant data from the response
     const userData = response.data;
@@ -86,7 +86,7 @@ bot.on("callback_query", async (msg) => {
       roomsid: filteredRooms.map((room) => room.wubid),
       insexr: 0,
     };
-    await axios.post(`http://localhost:3000/users`, checkedRoomsData);
+    await axios.post(`https://royalapart.online/api/users`, checkedRoomsData);
 
     // console.log(
     //   filteredRooms.map((room) => {

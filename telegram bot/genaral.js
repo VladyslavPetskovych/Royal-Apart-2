@@ -5,7 +5,7 @@ const startButton = async (chatId) =>{
   const checkedRoomsData = {
     chatId: chatId,
   };
-  await axios.post(`http://localhost:3000/users`, checkedRoomsData);
+  await axios.post(`https://royalapart.online/api/users`, checkedRoomsData);
 
   return bot.sendMessage(
     chatId,

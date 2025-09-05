@@ -14,7 +14,7 @@ app.get("/getData", async function (req, res) {
     console.log("Request received at /getData");
 
 
-    const response = await axios.post("https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/advert/sendData");
+    const response = await axios.post("https://royalapart.online/api/advert/sendData");
 
     const imageData = Buffer.from(response.data.imgData, "base64");
 
@@ -26,7 +26,7 @@ app.get("/getData", async function (req, res) {
 
     // Fetch chat IDs from the server
     console.log("Making GET request to /getAllUsers/AllUsers");
-    const chatIdsResponse = await axios.get("https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/getAllUsers/AllUsers");
+    const chatIdsResponse = await axios.get("https://royalapart.online/api/getAllUsers/AllUsers");
     console.log("Received response from /getAllUsers/AllUsers:", chatIdsResponse.data);
 
     const chatIds = chatIdsResponse.data.userIds;

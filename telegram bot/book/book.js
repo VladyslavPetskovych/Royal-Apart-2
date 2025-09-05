@@ -46,7 +46,7 @@ bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
   if (text === "/book") {
     let context = "b";
-    await axios.post(`http://localhost:3000/users/updateContext/${chatId}`, {
+    await axios.post(`https://royalapart.online/api/users/updateContext/${chatId}`, {
       context,
     });
     return sendBookingInstructions(chatId);
@@ -85,7 +85,7 @@ bot.on("callback_query", async (msg) => {
     console.log(chkoutDate);
 
     if (chkinDate < chkoutDate) {
-      const apiUrl = "http://localhost:3000/freeRooms";
+      const apiUrl = "https://royalapart.online/api/freeRooms";
       let chkinDate2 = moment(chkinString, "DD.MM.YYYY").format("DD/MM/YYYY");
       let chkoutDate2 = moment(chkoutString, "DD.MM.YYYY").format("DD/MM/YYYY");
       const postData = {
@@ -109,7 +109,7 @@ bot.on("callback_query", async (msg) => {
           console.error("Error:", error.message);
         });
       const data = { chatId: chatId, chkin: chkinString, chkout: chkoutString };
-      await axios.post("http://localhost:3000/users", data);
+      await axios.post("https://royalapart.online/api/users", data);
     } else {
       await bot.sendMessage(
         chatId,
