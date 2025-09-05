@@ -14,7 +14,7 @@ function SaleButton() {
     const fetchSales = async () => {
       try {
         const salesResponse = await axios.get(
-          "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/sales/all"
+          "https://royalapart.online/api/sales/all"
         );
         if (salesResponse.data.length > 0) {
           setHasSales(true);

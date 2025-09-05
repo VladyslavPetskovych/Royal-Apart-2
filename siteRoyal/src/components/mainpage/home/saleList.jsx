@@ -23,7 +23,7 @@ function OneSale({ sale, room }) {
         <p className="text-2xl mb-1">{room.name}</p>
         {room.imgurl && room.imgurl[0] && (
           <img
-            src={`https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/imgsRoyal/${room.wubid}/${room.imgurl[0]}`}
+            src={`https://royalapart.online/api/imgsRoyal/${room.wubid}/${room.imgurl[0]}`}
             alt={room.name}
             className="md:w-[50%] "
           />

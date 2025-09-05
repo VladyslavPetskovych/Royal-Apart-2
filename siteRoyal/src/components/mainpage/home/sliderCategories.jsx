@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const API_URL = "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/aparts";
+const API_URL = "https://royalapart.online/api/aparts";
 
 const Article = ({ data }) => {
   const { name, category, imgurl } = data;
@@ -16,7 +16,7 @@ const Article = ({ data }) => {
   return (
     <figure className="snip1584 ">
       <img
-        src={`https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/imgs/${imgurl[0]}`}
+        src={`https://royalapart.online/api/imgs/${imgurl[0]}`}
         alt={name}
         className="w-full h-48 lg:h-[350px] object-cover"
       />
@@ -98,7 +98,7 @@ function SliderCategories() {
 
   useEffect(() => {
     axios
-      .get("https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/aparts")
+      .get("https://royalapart.online/api/aparts")
       .then((response) => {
         setData(response.data);
         setLoading(false);

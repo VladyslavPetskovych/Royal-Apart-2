@@ -20,12 +20,12 @@ function SaleModal({ toggleModal }) {
     const fetchData = async () => {
       try {
         const salesResponse = await axios.get(
-          "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/sales/all"
+          "https://royalapart.online/api/sales/all"
         );
         setSales(salesResponse.data);
 
         const roomsResponse = await axios.get(
-          "https://ip-194-99-21-21-101470.vps.hosted-by-mvps.net/siteRoyal/copied-rooms"
+          "https://royalapart.online/api/siteRoyal/copied-rooms"
         );
         setRooms(roomsResponse.data.data);
         console.log(roomsResponse.data.data)
