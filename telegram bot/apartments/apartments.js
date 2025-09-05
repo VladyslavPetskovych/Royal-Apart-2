@@ -64,7 +64,7 @@ const sendRoomDetails = async (chatId, room, updatedRoomOptions = null) => {
 
     const sentMessage = await bot.sendPhoto(
       chatId,
-      `../server/imgs/${imageUrl}`,
+      `https://royalapart.online/api/imgs/${imageUrl}`,
       {
         caption: `Адреса: ${roomName}\n\nКількість кімнат: ${numroom}\n\nПлоща: ${roomSurface}m²\nКількість ліжок: ${roomBeds}\nКількість гостей: ${roomGuests}\nПоверх: ${roomFloor}\n${roomPriceString}\n\n${roomDescription}\n\n\n[Детальніше на сайті](https://www.royalapart.online/room/${wubidroom})`,
         reply_markup: replyMarkup,
@@ -248,7 +248,7 @@ bot.on("callback_query", async (callbackQuery) => {
       console.error("Error:", error.message);
     }
     await bot.deleteMessage(chatId, userData.lastMessage);
-    await bot.sendPhoto(chatId, `https://royalapart.online/imgs/${currentRoom.imgurl[0]}`, {
+    await bot.sendPhoto(chatId, `https://royalapart.online/api/imgs/${currentRoom.imgurl[0]}`, {
       caption: `Ви обрали квартиру за адресою: ${currentRoom.name}\n`,
     });
 
