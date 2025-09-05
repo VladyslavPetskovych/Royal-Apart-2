@@ -225,12 +225,16 @@ router.get("/update-wodoo-images", async (req, res) => {
           }
         );
 
-        // Витягуємо всі image_link вручну з XML
-        const matches = response.data.match(
-          /<name>image_link<\/name>\s*<value><string>(.*?)<\/string><\/value>/g
-        );
+ 
 
-        if (!matches || matches.length === 0) {
+        // Витягуємо всі image_link
+        const matches = [
+          ...response.data.matchAll(
+            /<name>image_link<\/name>\s*<value>\s*<string>(.*?)<\/string>\s*<\/value>/g
+          ),
+        ];
+
+        if (matches.length === 0) {
           results.push({
             name: room.name,
             wdid: room.wdid,
@@ -239,12 +243,7 @@ router.get("/update-wodoo-images", async (req, res) => {
           continue;
         }
 
-        const images = matches
-          .map((m) => {
-            const match = m.match(/<string>(.*?)<\/string>/);
-            return match ? match[1] : null;
-          })
-          .filter(Boolean);
+        const images = matches.map((m) => m[1]);
 
         const updateResult = await WodooApart.updateOne(
           { _id: room._id },
