@@ -51,8 +51,8 @@ function SingleRoom({ room }) {
           </Link>
         </div>
 
-        <div className="w-[100%] md:mt-10 font-roboto font-semibold text-lg">
-          <button className=" h-10 bg-gradient-to-br from-amber-600 to-amber-400 rounded-md w-[70%] hover:shadow-lg shadow-md shadow-orange-500/90  hover:shadow-orange-500/90">
+        <div className="w-[100%] md:mt-10 font-roboto font-semibold text-sm">
+          <button className="h-10 w-[70%] p-1 bg-amber-500 text-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-300 font-open-sans">
             <Link to={"/book"}>{t("book_now")}</Link>
           </button>
         </div>

@@ -6,39 +6,39 @@ import jac3 from "../../assets/jaccuzzi/jac3.webp";
 
 function Jaccuzzi() {
   return (
-    <div className="bg-back h-[600px] w-full text-black">
+    <div className="bg-back py-16 w-full">
+      {/* Заголовок та кнопка */}
       <div
-        className="flex flex-col justify-arround items-center "
+        className="flex flex-col items-center text-center mb-12"
         data-aos="fade-up"
       >
-        <p className="font-bold  font-popins text-2xl text-black ">
+        <h2 className="text-3xl md:text-4xl font-bold font-popins text-amber-900 mb-4">
           Апартаменти з джакузі / ванною
-        </p>
-        <Link to={"/aparts?category=bath"}>
-          <button className=" m-2 mb-4 bg-gradient-to-br  text-back from-amber-500 to-amber-400 text-lg font-bold shadow-orange-500/90  hover:shadow-orange-500/90  p-3 ">
-            Джакузі / Ванна
+        </h2>
+        <Link to="/aparts?category=bath">
+          <button className="px-6 py-3 bg-gradient-to-br from-amber-500 to-amber-400 text-white font-semibold rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+            Детальніше
           </button>
         </Link>
       </div>
-      <div className="w-full  flex flex-row  justify-around  pb-20">
-        <Link
-          to={"/aparts?category=bath"}
-          className="w-[90%] md:w-1/4 h-96  hover:p-2"
-        >
-          <img className="w-full h-full  object-cover" src={jac1} alt="" />
-        </Link>
-        <Link
-          to={"/aparts?category=bath"}
-          className=" hidden md:block   md:w-1/4 h-96  hover:p-2"
-        >
-          <img className="  w-full h-full object-cover" src={jac2} alt="" />
-        </Link>
-        <Link
-          to={"/aparts?category=bath"}
-          className="hidden md:block w-1/4 h-96 hover:p-2 "
-        >
-          <img className="w-full h-full  object-cover" src={jac3} alt="" />
-        </Link>
+
+      {/* Галерея */}
+      <div className="flex flex-wrap justify-center gap-6 px-4 md:px-16">
+        {[jac1, jac2, jac3].map((img, index) => (
+          <Link
+            key={index}
+            to="/aparts?category=bath"
+            className="group relative w-full sm:w-80 md:w-96 h-96 overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300"
+          >
+            <img
+              src={img}
+              alt={`Jacuzzi ${index + 1}`}
+              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+            />
+            {/* Підсвічування при наведенні */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-xl"></div>
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -5,44 +5,52 @@ import back2 from "../../assets/miniHotel/back2.jpg";
 import back3 from "../../assets/miniHotel/back3.jpg";
 
 import AOS from "aos";
-import "aos/dist/aos.css"
+import "aos/dist/aos.css";
 
-function miniHotelButton() {
+function MiniHotel() {
   useEffect(() => {
-    AOS.init({duration:700})
+    AOS.init({ duration: 700 });
   }, []);
 
+  const images = [back1, back2, back3];
+
   return (
-    <div className="flex flex-col justify-center items-center bg-back ">
-      <div className="flex flex-col justify-arround items-center h-24 m-8 md:m-4" data-aos="fade-up">
-        <p className="font-bold  font-popins text-2xl text-black " >
+    <div className="bg-back py-16 w-full">
+      {/* Заголовок та кнопка */}
+      <div
+        className="flex flex-col items-center text-center mb-12"
+        data-aos="fade-up"
+      >
+        <h2 className="text-3xl md:text-4xl font-bold font-popins text-amber-900 mb-4">
           Особлива пропозиція смарт-апартаментів
-        </p>
-        <Link to={"/mini-hotel"}>
-          <button className=" m-0.5 bg-gradient-to-br  from-amber-500 to-amber-400 text-lg font-bold shadow-orange-500/90  hover:shadow-orange-500/90  p-3 ">
-            Міні-готель
+        </h2>
+        <Link to="/mini-hotel">
+          <button className="px-6 py-3 bg-gradient-to-br from-amber-500 to-amber-400 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300">
+            Детальніше
           </button>
         </Link>
       </div>
-      <div className="w-full  flex flex-row  justify-around  pb-20">
-        <Link to={"/mini-hotel"} className="w-[90%] md:w-1/4 h-96  hover:p-2">
-          <img className="w-full h-full  object-cover" src={back1} alt="" />
-        </Link>
-        <Link
-          to={"/mini-hotel"}
-          className=" hidden md:block   md:w-1/4 h-96  hover:p-2"
-        >
-          <img className="  w-full h-full object-cover" src={back2} alt="" />
-        </Link>
-        <Link
-          to={"/mini-hotel"}
-          className="hidden md:block w-1/4 h-96 hover:p-2 "
-        >
-          <img className="w-full h-full  object-cover" src={back3} alt="" />
-        </Link>
+
+      {/* Галерея */}
+      <div className="flex flex-wrap justify-center gap-6 px-4 md:px-16">
+        {images.map((img, index) => (
+          <Link
+            key={index}
+            to="/mini-hotel"
+            className="group relative w-full sm:w-80 md:w-96 h-96 overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300"
+          >
+            <img
+              src={img}
+              alt={`MiniHotel ${index + 1}`}
+              className="w-full h-full object-cover rounded-xl transform group-hover:scale-105 transition-transform duration-500"
+            />
+            {/* Підсвічування при наведенні */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-xl"></div>
+          </Link>
+        ))}
       </div>
     </div>
   );
 }
 
-export default miniHotelButton;
+export default MiniHotel;
