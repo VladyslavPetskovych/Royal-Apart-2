@@ -1,111 +1,111 @@
 /* eslint-disable react/prop-types */
 import Container from "./Container";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   const { t } = useTranslation();
+
   const navigation = [
-    t("services"),
-    t("opportunities"),
-    t("prices"),
-    t("company"),
-    t("blog"),
+    { label: t("services"), href: "/" },
+    { label: t("opportunities"), href: "/" },
+    { label: t("prices"), href: "/" },
+    { label: t("company"), href: "/" },
+    { label: t("blog"), href: "/" },
   ];
-  const legal = [t("terms"), t("privacy"), t("legality")];
+
+  const legal = [
+    { label: t("terms"), href: "/terms-and-conditions" },
+    { label: t("privacy"), href: "/privacy-policy" },
+    { label: t("legality"), href: "/legal" },
+  ];
+
   return (
-    <div className="relative bg-back text-black text-sm font-roboto">
+    <footer className="relative bg-back text-black text-sm font-roboto border-t border-gray-200">
       <Container>
-        <div className="grid max-w-screen-xl grid-cols-1  pt-1 mx-auto mt-5  lg:grid-cols-4">
-          <div className="">
-            <div className=" mt-2 text-black text-base  ">
+        <div className="grid max-w-screen-xl grid-cols-1 gap-6 pt-6 mx-auto mt-5 lg:grid-cols-4">
+          {/* Контактна інформація */}
+          <div>
+            <div className="mt-2 text-black text-base font-semibold">
               {t("contact_information")}:
             </div>
             <div>{t("address")}: м. Львів, вулиця Весела 5</div>
-            <div>{t("phone")}: +38(067)677-73-30</div>
+            <div>{t("phone")}: +38 (067) 677-73-30</div>
             <div>{t("email")}: royal.apartments@ukr.net</div>
-            <div className="">
-              <a
-                href="https://vercel.com/?utm_source=web3templates&utm_campaign=oss"
-                target="_blank"
-                rel="noopener"
-                className="relative block w-44"
-              ></a>
-            </div>
           </div>
+
+          {/* Навігація */}
           <div>
             <div className="flex flex-wrap w-full mt-2 -ml-3 lg:ml-0">
               {navigation.map((item, index) => (
-                <a
+                <Link
                   key={index}
-                  href="/"
-                  className="w-full px-4 py-2 text-gray-900 rounded-md  hover:text-amber-500 focus:text-amber-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700"
+                  to={item.href}
+                  className="w-full px-4 py-2 text-gray-900 rounded-md hover:text-amber-500 transition-colors"
                 >
-                  {item}
-                </a>
+                  {item.label}
+                </Link>
               ))}
             </div>
           </div>
+
+          {/* Правова інформація */}
           <div>
             <div className="flex flex-wrap w-full mt-2 -ml-3 lg:ml-0">
               {legal.map((item, index) => (
-                <a
+                <Link
                   key={index}
-                  href="/"
-                  className="w-full px-4 py-2 text-black rounded-md  hover:text-amber-500 focus:text-amber-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-trueGray-700"
+                  to={item.href}
+                  className="w-full px-4 py-2 text-black rounded-md hover:text-amber-500 transition-colors"
                 >
-                  {item}
-                </a>
+                  {item.label}
+                </Link>
               ))}
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center lg:-mt-28"> 
-            <div className="flex mt-5 items-center justify-center text-black ">
+
+          {/* Соцмережі */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center justify-center text-black">
               <p className="text-base m-1">{t("subscribe_us")}</p>
               <a
                 href="https://www.instagram.com/royal.apart/"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
+                className="relative"
               >
-                 <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-amber-500 opacity-75"></span>
-                <span className="sr-only ">Instagram</span>
+                <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-amber-500 opacity-75 top-1 right-1"></span>
+                <span className="sr-only">Instagram</span>
                 <Instagram />
               </a>
             </div>
           </div>
         </div>
 
-        <div className="my-1 text-sm text-center text-gray-600 dark:text-gray-400">
-          {t("copyright")} {new Date().getFullYear()}. {t("made_with_love")}{" "}
-          Royal Apart IT {t("department")}
+        {/* Нижня частина футера */}
+        <div className="mt-6 mb-2 text-sm text-center text-gray-600">
+          <p>
+            © {new Date().getFullYear()} Royal Apart. {t("made_with_love")} ❤️{" "}
+            <span className="text-amber-500 font-medium">
+              Royal Apart IT {t("department")}
+            </span>
+          </p>
+          <p className="mt-1 text-gray-500">
+            Використовуючи цей сайт, ви погоджуєтесь із{" "}
+            <Link
+              to="/terms-and-conditions"
+              className="text-amber-600 hover:text-amber-500 underline underline-offset-2 transition-colors"
+            >
+              Правилами та умовами користування
+            </Link>
+            .
+          </p>
         </div>
       </Container>
-    </div>
+    </footer>
   );
 }
 
-const Twitter = ({ size = 24 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M24 4.37a9.6 9.6 0 0 1-2.83.8 5.04 5.04 0 0 0 2.17-2.8c-.95.58-2 1-3.13 1.22A4.86 4.86 0 0 0 16.61 2a4.99 4.99 0 0 0-4.79 6.2A13.87 13.87 0 0 1 1.67 2.92 5.12 5.12 0 0 0 3.2 9.67a4.82 4.82 0 0 1-2.23-.64v.07c0 2.44 1.7 4.48 3.95 4.95a4.84 4.84 0 0 1-2.22.08c.63 2.01 2.45 3.47 4.6 3.51A9.72 9.72 0 0 1 0 19.74 13.68 13.68 0 0 0 7.55 22c9.06 0 14-7.7 14-14.37v-.65c.96-.71 1.79-1.6 2.45-2.61z" />
-  </svg>
-);
-
-const Facebook = ({ size = 24 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07" />
-  </svg>
-);
 const Instagram = ({ size = 24 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

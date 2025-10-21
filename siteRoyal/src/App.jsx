@@ -11,6 +11,7 @@ import RoomPage from "./pages/roomPage/roomPage";
 import MiniHotel from "./pages/mini-hotel/MiniHotel";
 import NotFound from "./components/utils/NotFound";
 import Loader from "./components/utils/loader";
+import TermsAndConditions from "./pages/thermsAndConditions";
 
 function AppContent() {
   const location = useLocation();
@@ -41,6 +42,10 @@ function AppContent() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/mini-hotel" element={<MiniHotel />} />
             <Route path="/room/:roomId" element={<RoomPage />} />
+            <Route
+              path="/terms-and-conditions"
+              element={<TermsAndConditions />}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />
