@@ -14,9 +14,9 @@ function siteCopyDB() {
     <div>
       <button
         onClick={handleClick}
-        className="bg-amber-600 h-10 w-[240px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 hover:bg-sky-700"
+        className="bg-amber-600 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 rounded-lg hover:bg-amber-700"
       >
-        оновити дані на сайті
+        Оновити дані на сайті
       </button>
     </div>
   );
