@@ -37,7 +37,7 @@ app.use("/siteRoyal", siteRouter);
 app.use("/advert", advertRouter);
 app.use("/getAllUsers", allchatIdRouter);
 app.use("/sales", salesRouter)
-app.use("/wubook", wubookRouter);
+app.use("/analis", wubookRouter);
 
 cron.schedule("0 * * * *", async () => {
   try {
