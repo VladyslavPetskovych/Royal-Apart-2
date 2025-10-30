@@ -1,0 +1,46 @@
+import React from "react";
+
+export default function RoomsTable({ rooms, dfrom, dto }) {
+  const getDateRange = () => {
+    const start = new Date(dfrom);
+    const end = new Date(dto);
+    const dates = [];
+
+    while (start <= end) {
+      dates.push(start.toLocaleDateString("en-GB"));
+      start.setDate(start.getDate() + 1);
+    }
+    return dates;
+  };
+
+  const dates = getDateRange();
+
+  return (
+    <table className="w-full bg-gray-800 rounded-lg text-sm">
+      <thead>
+        <tr className="bg-gray-700">
+          <th className="px-3 py-2 text-left">Квартира</th>
+          {dates.map((d, i) => (
+            <th key={i} className="px-3 py-2">
+              {d}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {rooms.map((room) => (
+          <tr key={room._id} className="border-b border-gray-700">
+            <td className="px-3 py-2 font-medium">{room.name}</td>
+
+            {dates.map((_, i) => (
+              <td key={i} className="px-3 py-2">
+                {room.prices?.[i] ? `${room.prices[i]} грн` : "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
