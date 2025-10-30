@@ -16,24 +16,31 @@ export default function WuBookPanel({ rooms, setRooms }) {
 
   const fetchPrices = async () => {
     console.log("▶ Fetching prices...");
-    console.log("Selected rooms:", rooms);
-    console.log("Dates:", dfrom, dto);
+    console.log("Rooms:", rooms);
+    console.log("Dates selected:", dfrom, dto);
+
+    // Validate date range (max 31 days)
+    const diffDays = (new Date(dto) - new Date(dfrom)) / (1000 * 60 * 60 * 24);
+    if (diffDays > 31) {
+      alert("Максимальний період — 31 день");
+      return;
+    }
 
     setLoading(true);
 
     const df = new Date(dfrom).toLocaleDateString("en-GB");
     const dt = new Date(dto).toLocaleDateString("en-GB");
 
-    console.log("Formatted WuBook dates:", df, dt);
+    console.log("📅 WuBook date format:", df, dt);
 
     const updatedRooms = [];
 
     for (const room of rooms) {
       console.log(`\n🏠 Processing room: ${room.name}`);
-      console.log("wubid:", room.wubid);
+      console.log("globalId:", room.globalId);
 
-      if (!room.wubid) {
-        console.warn("❌ No wubid → skipping");
+      if (!room.globalId) {
+        console.warn("❌ No globalId → skipping");
         updatedRooms.push(room);
         continue;
       }
@@ -47,7 +54,7 @@ export default function WuBookPanel({ rooms, setRooms }) {
           dto: dt,
         };
 
-        console.log("📤 Sending body:", body);
+        console.log("📤 Sending body to backend:", body);
 
         const res = await axios.post(
           "https://royalapart.online/api/analis/prices",

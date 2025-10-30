@@ -8,9 +8,8 @@ router.get("/ping", (req, res) => {
 });
 
 router.post("/prices", async (req, res) => {
-  const { lcode, pid, wubid, dfrom, dto } = req.body;
+  const { lcode, pid, globalId, dfrom, dto } = req.body; // ✅ тут змінили
 
-  // Your WuBook token (you can move it to env variable)
   const token = "wr_9fd536d9-2894-441a-85eb-4b1a670e2ff2";
 
   const xml = `<?xml version="1.0"?>
@@ -25,7 +24,7 @@ router.post("/prices", async (req, res) => {
       <param>
         <value>
           <array><data>
-            <value><int>${wubid}</int></value>
+            <value><int>${globalId}</int></value>   <!-- ✅ тут -->
           </data></array>
         </value>
       </param>
