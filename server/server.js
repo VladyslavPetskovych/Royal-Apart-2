@@ -25,6 +25,7 @@ const siteRouter = require("./routes/siteRoyal");
 const advertRouter = require("./routes/advert");
 const allchatIdRouter = require("./routes/getAllUsers");
 const salesRouter = require("./routes/sales")
+const wubookRouter = require("./routes/analis");
 
 app.use("/aparts", apartRouter);
 app.use("/users", userRouter);
@@ -36,6 +37,7 @@ app.use("/siteRoyal", siteRouter);
 app.use("/advert", advertRouter);
 app.use("/getAllUsers", allchatIdRouter);
 app.use("/sales", salesRouter)
+app.use("/wubook", wubookRouter);
 
 cron.schedule("0 * * * *", async () => {
   try {
