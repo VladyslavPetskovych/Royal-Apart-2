@@ -6,7 +6,7 @@ const axios = require("axios");
 const dbConfig = require("./db");
 
 app.use(cors());
-
+app.use(express.json());
 app.use("/imgs", express.static("imgs"));
 app.use("/imgsRoyal", express.static("imgsRoyal"));
 app.use("/advertImgs", express.static("advertImgs"));
@@ -37,7 +37,8 @@ app.use("/siteRoyal", siteRouter);
 app.use("/advert", advertRouter);
 app.use("/getAllUsers", allchatIdRouter);
 app.use("/sales", salesRouter)
-app.use("/analis", wubookRouter);
+app.use("/api/analis", wubookRouter);
+
 
 cron.schedule("0 * * * *", async () => {
   try {

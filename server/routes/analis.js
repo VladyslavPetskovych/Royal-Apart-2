@@ -3,10 +3,10 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 
-/**
- * POST /api/wubook/prices
- * Fetches daily prices for a given room (wubid) between two dates
- */
+router.get("/ping", (req, res) => {
+  res.json({ ok: true, route: "analis works" });
+});
+
 router.post("/prices", async (req, res) => {
   const { lcode, pid, wubid, dfrom, dto } = req.body;
 
