@@ -21,7 +21,7 @@ export default function RoomsTable({ rooms, dfrom, dto }) {
         <tr className="bg-gray-700">
           <th className="px-3 py-2 text-left">Квартира</th>
           {dates.map((d, i) => (
-            <th key={i} className="px-3 py-2">
+            <th key={i} className="px-3 py-2 text-center">
               {d}
             </th>
           ))}
@@ -34,8 +34,10 @@ export default function RoomsTable({ rooms, dfrom, dto }) {
             <td className="px-3 py-2 font-medium">{room.name}</td>
 
             {dates.map((_, i) => (
-              <td key={i} className="px-3 py-2">
-                {room.prices?.[i] ? `${room.prices[i]} грн` : "-"}
+              <td key={i} className="border px-2 py-1 text-center">
+                {room.prices && room.prices[i]
+                  ? Math.round(room.prices[i]) // округлимо щоб красиво
+                  : "—"}
               </td>
             ))}
           </tr>

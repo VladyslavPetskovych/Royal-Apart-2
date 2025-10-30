@@ -15,7 +15,7 @@ function Analis() {
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get("https://royalapart.online/api/aparts");
+      const res = await axios.get("https://royalapart.online/api/siteRoyal/get-all-wodoo");
       setRooms(res.data.data || []);
     } catch (e) {
       console.error("API Error", e);

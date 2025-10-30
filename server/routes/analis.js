@@ -24,7 +24,7 @@ router.post("/prices", async (req, res) => {
       <param>
         <value>
           <array><data>
-            <value><int>${globalId}</int></value>   <!-- ✅ тут -->
+            <value><int>${globalId}</int></value>  
           </data></array>
         </value>
       </param>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import DateRangePicker from "./dateRangePicker";
 import RoomsTable from "./roomsTable";
+import { XMLParser } from "fast-xml-parser";
 
 export default function WuBookPanel({ rooms, setRooms }) {
   const formatDate = (d) => d.toISOString().split("T")[0];
@@ -15,11 +16,8 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [loading, setLoading] = useState(false);
 
   const fetchPrices = async () => {
-    console.log("▶ Fetching prices...");
-    console.log("Rooms:", rooms);
-    console.log("Dates selected:", dfrom, dto);
+    console.log("▶ Fetching WuBook prices...");
 
-    // Validate date range (max 31 days)
     const diffDays = (new Date(dto) - new Date(dfrom)) / (1000 * 60 * 60 * 24);
     if (diffDays > 31) {
       alert("Максимальний період — 31 день");
@@ -31,55 +29,48 @@ export default function WuBookPanel({ rooms, setRooms }) {
     const df = new Date(dfrom).toLocaleDateString("en-GB");
     const dt = new Date(dto).toLocaleDateString("en-GB");
 
-    console.log("📅 WuBook date format:", df, dt);
-
     const updatedRooms = [];
+    const parser = new XMLParser();
 
     for (const room of rooms) {
-      console.log(`\n🏠 Processing room: ${room.name}`);
-      console.log("globalId:", room.globalId);
-
-      if (!room.globalId) {
-        console.warn("❌ No globalId → skipping");
+      if (!room.wdid) {
         updatedRooms.push(room);
         continue;
       }
 
+      const body = {
+        lcode: 1638349860,
+        pid: 0,
+        globalId: room.wdid,
+        dfrom: df,
+        dto: dt,
+      };
+
       try {
-        const body = {
-          lcode: 1638349860,
-          pid: 0,
-          globalId: room.globalId,
-          dfrom: df,
-          dto: dt,
-        };
-
-        console.log("📤 Sending body to backend:", body);
-
         const res = await axios.post(
           "https://royalapart.online/api/analis/prices",
-          body
+          body,
+          { headers: { "Content-Type": "application/json" } }
         );
 
-        console.log("📥 Raw response:", res.data);
+        const parsed = parser.parse(res.data);
 
-        const data = res.data;
-        const priceObj = data?.[1] || {};
-        const priceArr = priceObj[room.globalId] || [];
+        const priceArray =
+          parsed.methodResponse.params.param.value.array.data.value[1].struct
+            .member.value.array.data.value;
 
-        console.log("✅ Parsed prices:", priceArr);
+        const prices = priceArray.map((v) => Number(v.double));
 
         updatedRooms.push({
           ...room,
-          prices: priceArr,
+          prices,
         });
       } catch (err) {
-        console.error(`❌ Error for ${room.name}`, err);
+        console.error(`❌ Error for room: ${room.name}`, err);
         updatedRooms.push(room);
       }
     }
 
-    console.log("✅ Final rooms:", updatedRooms);
     setRooms(updatedRooms);
     setLoading(false);
   };
