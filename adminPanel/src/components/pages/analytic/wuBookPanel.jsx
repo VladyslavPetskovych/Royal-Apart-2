@@ -17,7 +17,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
 
   // 🟩 НОВЕ — тягнемо CSV / Excel JSON
   const [excelData, setExcelData] = useState([]);
-
   useEffect(() => {
     const fetchExcel = async () => {
       try {
@@ -25,9 +24,16 @@ export default function WuBookPanel({ rooms, setRooms }) {
           "https://royalapart.online/api/analis/data"
         );
 
-        console.log("📦 Excel JSON:", res); // 👉 ВИВІД У КОНСОЛЬ
+        console.log("🔵 FETCHED FROM BACKEND:", res.data);
 
-        setExcelData(res.data.data);
+        // Перевіряємо структуру
+        if (!res.data || !res.data.days) {
+          console.log("❌ BACKEND HAS NO days FIELD");
+        } else {
+          console.log("🟢 days keys:", Object.keys(res.data.days));
+        }
+
+        setExcelData(res.data.days);
       } catch (err) {
         console.error("❌ Excel fetch error:", err);
       }
@@ -35,7 +41,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
 
     fetchExcel();
   }, []);
-  // --------------------------------------------------------
 
   const fetchPrices = async () => {
     console.log("▶ Fetching WuBook prices...");
