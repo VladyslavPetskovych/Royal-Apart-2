@@ -48,14 +48,40 @@ router.post("/prices", async (req, res) => {
 router.get("/data", (req, res) => {
   try {
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
-    console.log("📄 Reading:", filePath);
 
-    const workbook = XLSX.readFile(filePath); // <– не ламає бекенд
-
+    const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    // 🔥 Конвертація Excel-дат → нормальні дати
+    const excelDateToJS = (serial) => {
+      if (!serial || typeof serial !== "number") return "";
+      const utc_days = serial - 25569;
+      const utc_value = utc_days * 86400;
+      const date_info = new Date(utc_value * 1000);
+      return date_info.toISOString().split("T")[0];
+    };
+
+    // 🔥 Нормалізація даних
+    json = json.map((row) => ({
+      code: row["Code"] || "",
+      created: excelDateToJS(row["Created"]),
+      cancellation: row["Cancellation"] || "",
+      agency: row["Agency"] || "",
+      country: row["Country"] || "",
+      policy: row["Policy"] || "",
+      price: Number(row["Price"]) || 0,
+      from: excelDateToJS(row["From"]),
+      to: excelDateToJS(row["To"]),
+      nights: Number(row["Nights"]) || 0,
+      roomDailyPrice: Number(row["Room daily price"]) || 0,
+      typeCode: row["Type Code"] || "",
+      typeName: row["Type Name"] || "",
+      roomCode: row["Room Code"] || "",
+      roomName: row["Room Name"] || "",
+    }));
 
     res.json({ success: true, data: json });
   } catch (error) {
