@@ -55,48 +55,53 @@ router.get("/data", (req, res) => {
 
     let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // 🔥 Конвертація Excel date → YYYY-MM-DD
-    const excelDateToJS = (serial) => {
-      if (!serial || typeof serial !== "number") return "";
-      const utc_days = serial - 25569;
-      const date = new Date(utc_days * 86400 * 1000);
-      return date.toISOString().split("T")[0];
+    // 🔥 Конвертація DD.MM.YYYY → YYYY-MM-DD
+    const convertDate = (str) => {
+      if (!str || typeof str !== "string") return "";
+      const [day, month, year] = str.split(".");
+      if (!day || !month || !year) return "";
+      return `${year}-${month}-${day}`;
     };
 
-    // 🔥 Тут формуємо словник дат
     const result = {};
 
     for (const row of rows) {
-      // ❗ Пропускаємо дублікати (порожні рядки)
+      // ❗ пропускаємо дублікати
       if (!row["Room Name"] || !row["Room Code"]) continue;
 
-      const guestCode = row["Code"];
-      const roomName = row["Room Name"];
-      const roomCode = row["Room Code"];
-      const price = Number(row["Price"]) || 0;
-      const nights = Number(row["Nights"]) || 0;
+      const entry = {
+        guestCode: row["Code"],
+        created: convertDate(row["Created"]),
+        cancellation: convertDate(row["Cancellation"]),
+        arrived: row["Arrived"] || "",
+        agency: row["Agency"] || "",
+        corporate: row["Corporate"] || "",
+        booker: row["Booker"] || "",
+        country: row["Country"] || "",
+        price: Number(row["Price"]) || 0,
+        nights: Number(row["Nights"]) || 0,
+        roomName: row["Room Name"],
+        roomCode: row["Room Code"],
+        typeCode: row["Type Code"],
+        typeName: row["Type Name"],
+        roomDailyPrice: Number(row["Room daily price"]) || 0,
+      };
 
-      const from = excelDateToJS(row["From"]);
-      const to = excelDateToJS(row["To"]);
+      const from = convertDate(row["From"]);
+      const to = convertDate(row["To"]);
 
       if (!from || !to) continue;
 
-      // дата перебування day-by-day
-      const start = new Date(from);
-      const end = new Date(to);
+      let start = new Date(from);
+      let end = new Date(to);
 
+      // 🔥 Генеруємо проміжні дати
       while (start < end) {
         const dateStr = start.toISOString().split("T")[0];
 
         if (!result[dateStr]) result[dateStr] = [];
 
-        result[dateStr].push({
-          roomName,
-          roomCode,
-          price,
-          nights,
-          guestCode,
-        });
+        result[dateStr].push({ ...entry });
 
         start.setDate(start.getDate() + 1);
       }
