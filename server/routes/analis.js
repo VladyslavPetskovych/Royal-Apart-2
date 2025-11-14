@@ -43,4 +43,26 @@ router.post("/prices", async (req, res) => {
   }
 });
 
+router.get("/data", (req, res) => {
+  try {
+    // 🔥 Вкажи шлях до свого Excel-файлу
+    const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
+
+    // Читаємо Excel
+    const workbook = XLSX.readFile(filePath);
+
+    // Беремо перший лист
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    // Конвертуємо в JSON
+    const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    res.json({ success: true, data: json });
+  } catch (error) {
+    console.error("Excel read error:", error);
+    res.status(500).json({ success: false, error: "Failed to read Excel" });
+  }
+});
+
 module.exports = router;
