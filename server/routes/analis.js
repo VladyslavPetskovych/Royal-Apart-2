@@ -53,37 +53,53 @@ router.get("/data", (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    let json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // 🔥 Конвертація Excel-дат → нормальні дати
+    // 🔥 Конвертація Excel date → YYYY-MM-DD
     const excelDateToJS = (serial) => {
       if (!serial || typeof serial !== "number") return "";
       const utc_days = serial - 25569;
-      const utc_value = utc_days * 86400;
-      const date_info = new Date(utc_value * 1000);
-      return date_info.toISOString().split("T")[0];
+      const date = new Date(utc_days * 86400 * 1000);
+      return date.toISOString().split("T")[0];
     };
 
-    // 🔥 Нормалізація даних
-    json = json.map((row) => ({
-      code: row["Code"] || "",
-      created: excelDateToJS(row["Created"]),
-      cancellation: row["Cancellation"] || "",
-      agency: row["Agency"] || "",
-      country: row["Country"] || "",
-      policy: row["Policy"] || "",
-      price: Number(row["Price"]) || 0,
-      from: excelDateToJS(row["From"]),
-      to: excelDateToJS(row["To"]),
-      nights: Number(row["Nights"]) || 0,
-      roomDailyPrice: Number(row["Room daily price"]) || 0,
-      typeCode: row["Type Code"] || "",
-      typeName: row["Type Name"] || "",
-      roomCode: row["Room Code"] || "",
-      roomName: row["Room Name"] || "",
-    }));
+    // 🔥 Тут формуємо словник дат
+    const result = {};
 
-    res.json({ success: true, data: json });
+    for (const row of rows) {
+      const guestCode = row["Code"];
+      const roomName = row["Room Name"] || "";
+      const roomCode = row["Room Code"] || "";
+      const price = Number(row["Price"]) || 0;
+      const nights = Number(row["Nights"]) || 0;
+
+      const from = excelDateToJS(row["From"]);
+      const to = excelDateToJS(row["To"]);
+
+      if (!from || !to) continue;
+
+      // Генеруємо дні перебування (з From до To виключно)
+      const start = new Date(from);
+      const end = new Date(to);
+
+      while (start < end) {
+        const dateStr = start.toISOString().split("T")[0];
+
+        if (!result[dateStr]) result[dateStr] = [];
+
+        result[dateStr].push({
+          roomName,
+          roomCode,
+          price,
+          nights,
+          guestCode,
+        });
+
+        start.setDate(start.getDate() + 1);
+      }
+    }
+
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error("❌ Excel read error:", error);
     res.status(500).json({ success: false, error: "Failed to read Excel" });
