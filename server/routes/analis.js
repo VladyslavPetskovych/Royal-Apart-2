@@ -45,6 +45,22 @@ router.post("/prices", async (req, res) => {
   }
 });
 
+function parseDate(str) {
+  if (!str) return null;
+
+  // Прибираємо пробіли
+  str = str.trim();
+
+  if (!str) return null;
+
+  // Дата у форматі 31.08.2024
+  const parts = str.split(".");
+  if (parts.length !== 3) return null;
+
+  const [d, m, y] = parts;
+  return new Date(`${y}-${m}-${d}`);
+}
+
 router.get("/data", (req, res) => {
   try {
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
@@ -55,23 +71,19 @@ router.get("/data", (req, res) => {
 
     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // === ГРУПУВАННЯ ПО ДНЯХ ===
     const result = {};
 
     rows.forEach((row) => {
-      const from = row.From;
-      const to = row.To;
+      const start = parseDate(row.From);
+      const end = parseDate(row.To);
 
-      if (!from || !to) return;
+      if (!start || !end || isNaN(start) || isNaN(end)) {
+        console.log("⛔ BAD DATES:", row.From, row.To);
+        return; // пропускаємо
+      }
 
-      // Конвертуємо дати
-      const start = new Date(from.split(".").reverse().join("-"));
-      const end = new Date(to.split(".").reverse().join("-"));
-
-      // Проходимо всі дні між From і To
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const day = d.toISOString().slice(0, 10);
-
         if (!result[day]) result[day] = [];
         result[day].push(row);
       }
@@ -79,8 +91,8 @@ router.get("/data", (req, res) => {
 
     res.json({ success: true, days: result });
   } catch (error) {
-    console.error("❌ Excel read error:", error);
-    res.status(500).json({ success: false, error: "Failed to read Excel" });
+    console.error("❌ Error:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
