@@ -60,6 +60,15 @@ function excelDateToJSDate(serial) {
 
 router.get("/data", (req, res) => {
   try {
+    const { dfrom, dto } = req.query;
+
+    if (!dfrom || !dto) {
+      return res.status(400).json({ error: "Missing dfrom / dto" });
+    }
+
+    const startLimit = new Date(dfrom);
+    const endLimit = new Date(dto);
+
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
 
     const workbook = XLSX.readFile(filePath);
@@ -76,18 +85,19 @@ router.get("/data", (req, res) => {
       Cancellation: excelDateToJSDate(r.Cancellation),
     }));
 
-    console.log("📘 Parsed rows example:", rows[0]);
-
-    // 🔥 ТУТ ГОЛОВНА ЗМІНА — ГРУПУЄМО ЛИШЕ ПО From
     const days = {};
 
     rows.forEach((row) => {
-      const day = row.From; // день заїзду
+      if (!row.From) return;
 
-      if (!day) return; // немає From — пропускаємо
+      const f = new Date(row.From);
 
-      if (!days[day]) days[day] = [];
-      days[day].push(row);
+      // 🔥 включаємо тільки ті бронювання, де From всередині обраного періоду
+      if (f < startLimit || f > endLimit) return;
+
+      if (!days[row.From]) days[row.From] = [];
+
+      days[row.From].push(row);
     });
 
     res.json({ ok: true, days });
