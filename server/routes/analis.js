@@ -60,15 +60,6 @@ function excelDateToJSDate(serial) {
 
 router.get("/data", (req, res) => {
   try {
-    const { dfrom, dto } = req.query;
-
-    if (!dfrom || !dto) {
-      return res.status(400).json({ error: "Missing dfrom / dto" });
-    }
-
-    const startLimit = new Date(dfrom);
-    const endLimit = new Date(dto);
-
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
 
     const workbook = XLSX.readFile(filePath);
@@ -77,7 +68,7 @@ router.get("/data", (req, res) => {
 
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    const rows = rawRows.map(r => ({
+    const rows = rawRows.map((r) => ({
       ...r,
       From: excelDateToJSDate(r.From),
       To: excelDateToJSDate(r.To),
@@ -85,44 +76,39 @@ router.get("/data", (req, res) => {
       Cancellation: excelDateToJSDate(r.Cancellation),
     }));
 
+    console.log("📘 Parsed rows example:", rows[0]);
+
+    // 🔥 ТУТ ГОЛОВНА ЗМІНА — ГРУПУЄМО ЛИШЕ ПО From
     const days = {};
 
-    rows.forEach(row => {
-      if (!row.From || !row.To) return;
+    rows.forEach((row) => {
+      const day = row.From; // день заїзду
 
-      let start = new Date(row.From);
-      const end = new Date(row.To);
+      if (!day) return; // немає From — пропускаємо
 
-      if (isNaN(start) || isNaN(end)) return;
-
-      // Якщо бронювання закінчується до обраного періоду → пропустити
-      if (end < startLimit) return;
-
-      // Якщо бронювання починається після обраного періоду → пропустити
-      if (start > endLimit) return;
-
-      // Корегуємо початок
-      if (start < startLimit) start = new Date(startLimit);
-
-      // Генеруємо тільки дні у межах dfrom → dto
-      for (let d = new Date(start); d <= end && d <= endLimit; d.setDate(d.getDate() + 1)) {
-        const day = d.toISOString().split("T")[0];
-
-        if (!days[day]) days[day] = [];
-        days[day].push(row);
-      }
+      if (!days[day]) days[day] = [];
+      days[day].push(row);
     });
 
-    res.json({
-      ok: true,
-      days
-    });
-
+    res.json({ ok: true, days });
   } catch (err) {
     console.error("❌ FULL ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
+function excelDateToJSDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+
+  const utc_days = serial - 25569;
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+
+  const year = date_info.getFullYear();
+  const month = String(date_info.getMonth() + 1).padStart(2, "0");
+  const day = String(date_info.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 module.exports = router;

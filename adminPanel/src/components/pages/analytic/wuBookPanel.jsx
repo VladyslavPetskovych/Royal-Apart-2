@@ -21,17 +21,16 @@ export default function WuBookPanel({ rooms, setRooms }) {
     const fetchExcel = async () => {
       try {
         const res = await axios.get(
-          "https://royalapart.online/api/analis/data"
+          "https://royalapart.online/api/analis/data",
+          {
+            params: {
+              dfrom,
+              dto,
+            },
+          }
         );
 
-        console.log("🔵 FETCHED FROM BACKEND:", res.data);
-
-        // Перевіряємо структуру
-        if (!res.data || !res.data.days) {
-          console.log("❌ BACKEND HAS NO days FIELD");
-        } else {
-          console.log("🟢 days keys:", Object.keys(res.data.days));
-        }
+        console.log("🔵 FETCHED DAYS:", res.data.days);
 
         setExcelData(res.data.days);
       } catch (err) {
@@ -40,7 +39,7 @@ export default function WuBookPanel({ rooms, setRooms }) {
     };
 
     fetchExcel();
-  }, []);
+  }, [dfrom, dto]);
 
   const fetchPrices = async () => {
     console.log("▶ Fetching WuBook prices...");
