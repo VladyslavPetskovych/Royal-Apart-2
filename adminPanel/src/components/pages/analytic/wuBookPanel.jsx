@@ -25,7 +25,7 @@ export default function WuBookPanel({ rooms, setRooms }) {
           "https://royalapart.online/api/analis/data"
         );
 
-        console.log("📦 Excel JSON:", res.data.data); // 👉 ВИВІД У КОНСОЛЬ
+        console.log("📦 Excel JSON:", res); // 👉 ВИВІД У КОНСОЛЬ
 
         setExcelData(res.data.data);
       } catch (err) {

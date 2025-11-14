@@ -67,9 +67,12 @@ router.get("/data", (req, res) => {
     const result = {};
 
     for (const row of rows) {
+      // ❗ Пропускаємо дублікати (порожні рядки)
+      if (!row["Room Name"] || !row["Room Code"]) continue;
+
       const guestCode = row["Code"];
-      const roomName = row["Room Name"] || "";
-      const roomCode = row["Room Code"] || "";
+      const roomName = row["Room Name"];
+      const roomCode = row["Room Code"];
       const price = Number(row["Price"]) || 0;
       const nights = Number(row["Nights"]) || 0;
 
@@ -78,7 +81,7 @@ router.get("/data", (req, res) => {
 
       if (!from || !to) continue;
 
-      // Генеруємо дні перебування (з From до To виключно)
+      // дата перебування day-by-day
       const start = new Date(from);
       const end = new Date(to);
 
