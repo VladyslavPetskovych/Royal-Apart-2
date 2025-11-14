@@ -44,6 +44,54 @@ router.post("/prices", async (req, res) => {
     res.status(500).json({ error: "WuBook API request failed" });
   }
 });
+
+
+router.get("/data", (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
+
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    // === 1. Фіксимо дати з формату Excel Number ===
+    const rows = rawRows.map((r) => ({
+      ...r,
+      From: excelDateToJSDate(r.From),
+      To: excelDateToJSDate(r.To),
+      Created: excelDateToJSDate(r.Created),
+      Cancellation: excelDateToJSDate(r.Cancellation),
+    }));
+
+    // === 2. Групування по днях ===
+    const days = {};
+
+    rows.forEach((row) => {
+      if (!row.From || !row.To) return;
+
+      const start = new Date(row.From);
+      const end = new Date(row.To);
+
+      if (isNaN(start) || isNaN(end)) return;
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const day = d.toISOString().slice(0, 10);
+
+        if (!days[day]) days[day] = [];
+        days[day].push(row);
+      }
+    });
+
+    res.json({ success: true, days });
+  } catch (err) {
+    console.error("❌ FULL ERROR:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// === Utility: Convert Excel Serial → Normal Date ===
 function excelDateToJSDate(serial) {
   if (!serial || isNaN(serial)) return null;
 
@@ -57,31 +105,5 @@ function excelDateToJSDate(serial) {
 
   return `${year}-${month}-${day}`;
 }
-router.get("/data", (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
-
-    const workbook = XLSX.readFile(filePath);
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-
-    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
-    const rows = rawRows.map((r) => ({
-      ...r,
-      From: excelDateToJSDate(r.From),
-      To: excelDateToJSDate(r.To),
-      Created: excelDateToJSDate(r.Created),
-      Cancellation: excelDateToJSDate(r.Cancellation),
-    }));
-
-    console.log("📘 Parsed rows example:", rows[0]);
-
-    res.json({ ok: true, rows });
-  } catch (err) {
-    console.error("❌ FULL ERROR:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 module.exports = router;
