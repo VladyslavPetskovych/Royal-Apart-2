@@ -53,9 +53,12 @@ router.get("/data", (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    let rows = XLSX.utils.sheet_to_json(sheet, {
+      defval: "",
+      raw: false, // ← забороняє конвертувати дати в числа
+      rawNumbers: false, // ← не переводити дати у формат Excel-серіалу
+    });
 
-    // DD.MM.YYYY -> YYYY-MM-DD (без Date)
     const convertDate = (str) => {
       if (!str || typeof str !== "string") return "";
       const [day, month, year] = str.split(".");
