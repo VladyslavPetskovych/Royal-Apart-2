@@ -68,6 +68,7 @@ router.get("/data", (req, res) => {
 
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
+    // === 1) Конвертація дат ===
     const rows = rawRows.map((r) => ({
       ...r,
       From: excelDateToJSDate(r.From),
@@ -76,13 +77,51 @@ router.get("/data", (req, res) => {
       Cancellation: excelDateToJSDate(r.Cancellation),
     }));
 
-    console.log("📘 Parsed rows example:", rows[0]);
+    // === 2) Створюємо об’єкт для дат ===
+    const days = {};
 
-    res.json({ ok: true, rows });
+    rows.forEach((row) => {
+      if (!row.From || !row.To) return;
+
+      const start = new Date(row.From);
+      const end = new Date(row.To);
+
+      if (isNaN(start) || isNaN(end)) return;
+
+      // Генеруємо всі дні між From → To включно
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const day = d.toISOString().split("T")[0]; // YYYY-MM-DD
+
+        if (!days[day]) days[day] = [];
+
+        days[day].push(row);
+      }
+    });
+
+    // === Результат ===
+    res.json({
+      ok: true,
+      days,
+    });
   } catch (err) {
     console.error("❌ FULL ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
+// === Convert Excel serial date → normal date ===
+function excelDateToJSDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+
+  const utc_days = serial - 25569;
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+
+  const year = date_info.getFullYear();
+  const month = String(date_info.getMonth() + 1).padStart(2, "0");
+  const day = String(date_info.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 module.exports = router;
