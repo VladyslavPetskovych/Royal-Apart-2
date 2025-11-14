@@ -55,7 +55,7 @@ router.get("/data", (req, res) => {
 
     let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // 🔥 Конвертація DD.MM.YYYY → YYYY-MM-DD
+    // DD.MM.YYYY -> YYYY-MM-DD (без Date)
     const convertDate = (str) => {
       if (!str || typeof str !== "string") return "";
       const [day, month, year] = str.split(".");
@@ -63,11 +63,29 @@ router.get("/data", (req, res) => {
       return `${year}-${month}-${day}`;
     };
 
+    // YYYY-MM-DD -> Date (локальна)
+    const toJSDate = (iso) => {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d); // без таймзони/UTC
+    };
+
+    // Date -> YYYY-MM-DD (локальна)
+    const formatDateLocal = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
     const result = {};
 
     for (const row of rows) {
-      // ❗ пропускаємо дублікати
+      // пропускаємо технічні дублікати
       if (!row["Room Name"] || !row["Room Code"]) continue;
+
+      const fromStr = convertDate(row["From"]);
+      const toStr = convertDate(row["To"]);
+      if (!fromStr || !toStr) continue;
 
       const entry = {
         guestCode: row["Code"],
@@ -87,20 +105,14 @@ router.get("/data", (req, res) => {
         roomDailyPrice: Number(row["Room daily price"]) || 0,
       };
 
-      const from = convertDate(row["From"]);
-      const to = convertDate(row["To"]);
+      let start = toJSDate(fromStr);
+      const end = toJSDate(toStr);
 
-      if (!from || !to) continue;
-
-      let start = new Date(from);
-      let end = new Date(to);
-
-      // 🔥 Генеруємо проміжні дати
+      // День за днем: [from; to) – to не включно
       while (start < end) {
-        const dateStr = start.toISOString().split("T")[0];
+        const dateStr = formatDateLocal(start); // БЕЗ toISOString
 
         if (!result[dateStr]) result[dateStr] = [];
-
         result[dateStr].push({ ...entry });
 
         start.setDate(start.getDate() + 1);
