@@ -45,29 +45,59 @@ router.post("/prices", async (req, res) => {
   }
 });
 
+function excelDateToJSDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+
+  const utc_days = serial - 25569;
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+
+  const year = date_info.getFullYear();
+  const month = String(date_info.getMonth() + 1).padStart(2, "0");
+  const day = String(date_info.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 router.get("/data", (req, res) => {
   try {
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
 
-    console.log("🔍 TRY READ:", filePath);
-
     const workbook = XLSX.readFile(filePath);
-    console.log("📘 Workbook loaded OK");
-
     const sheetName = workbook.SheetNames[0];
-    console.log("📄 Sheet:", sheetName);
-
     const sheet = workbook.Sheets[sheetName];
-    const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    console.log("📊 Rows count:", rows.length);
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // Test response
-    res.json({ ok: true, rows: rows.slice(0, 3) });
+    const rows = rawRows.map((r) => ({
+      ...r,
+      From: excelDateToJSDate(r.From),
+      To: excelDateToJSDate(r.To),
+      Created: excelDateToJSDate(r.Created),
+      Cancellation: excelDateToJSDate(r.Cancellation),
+    }));
+
+    console.log("📘 Parsed rows example:", rows[0]);
+
+    res.json({ ok: true, rows });
   } catch (err) {
     console.error("❌ FULL ERROR:", err);
-    res.status(500).json({ error: err.message, stack: err.stack });
+    res.status(500).json({ error: err.message });
   }
 });
+
+function excelDateToJSDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+
+  const utc_days = serial - 25569;
+  const utc_value = utc_days * 86400;
+  const date_info = new Date(utc_value * 1000);
+
+  const year = date_info.getFullYear();
+  const month = String(date_info.getMonth() + 1).padStart(2, "0");
+  const day = String(date_info.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 module.exports = router;
