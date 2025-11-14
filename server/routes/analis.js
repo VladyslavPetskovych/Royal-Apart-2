@@ -2,7 +2,8 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
-
+const path = require("path");
+const XLSX = require("xlsx");
 
 router.get("/ping", (req, res) => {
   res.json({ ok: true, route: "analis works" });
@@ -44,26 +45,23 @@ router.post("/prices", async (req, res) => {
   }
 });
 
-// router.get("/data", (req, res) => {
-//   try {
-//     // 🔥 Вкажи шлях до свого Excel-файлу
-//     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
+router.get("/data", (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
+    console.log("📄 Reading:", filePath);
 
-//     // Читаємо Excel
-//     const workbook = XLSX.readFile(filePath);
+    const workbook = XLSX.readFile(filePath); // <– не ламає бекенд
 
-//     // Беремо перший лист
-//     const sheetName = workbook.SheetNames[0];
-//     const sheet = workbook.Sheets[sheetName];
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
 
-//     // Конвертуємо в JSON
-//     const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+    const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-//     res.json({ success: true, data: json });
-//   } catch (error) {
-//     console.error("Excel read error:", error);
-//     res.status(500).json({ success: false, error: "Failed to read Excel" });
-//   }
-// });
+    res.json({ success: true, data: json });
+  } catch (error) {
+    console.error("❌ Excel read error:", error);
+    res.status(500).json({ success: false, error: "Failed to read Excel" });
+  }
+});
 
 module.exports = router;
