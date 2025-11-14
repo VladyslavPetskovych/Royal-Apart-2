@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DateRangePicker from "./dateRangePicker";
 import RoomsTable from "./roomsTable";
@@ -14,6 +14,28 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [dfrom, setDfrom] = useState(formatDate(today));
   const [dto, setDto] = useState(formatDate(nextWeek));
   const [loading, setLoading] = useState(false);
+
+  // 🟩 НОВЕ — тягнемо CSV / Excel JSON
+  const [excelData, setExcelData] = useState([]);
+
+  useEffect(() => {
+    const fetchExcel = async () => {
+      try {
+        const res = await axios.get(
+          "https://royalapart.online/api/analis/data"
+        );
+
+        console.log("📦 Excel JSON:", res.data.data); // 👉 ВИВІД У КОНСОЛЬ
+
+        setExcelData(res.data.data);
+      } catch (err) {
+        console.error("❌ Excel fetch error:", err);
+      }
+    };
+
+    fetchExcel();
+  }, []);
+  // --------------------------------------------------------
 
   const fetchPrices = async () => {
     console.log("▶ Fetching WuBook prices...");
@@ -93,7 +115,8 @@ export default function WuBookPanel({ rooms, setRooms }) {
         {loading ? "Завантаження..." : "Отримати ціни"}
       </button>
 
-      <RoomsTable rooms={rooms} dfrom={dfrom} dto={dto} />
+      {/* 🟩 Передаємо excelData далі у RoomsTable */}
+      <RoomsTable rooms={rooms} dfrom={dfrom} dto={dto} excelData={excelData} />
     </div>
   );
 }

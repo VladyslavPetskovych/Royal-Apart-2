@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-export default function RoomsTable({ rooms, dfrom, dto }) {
+export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
+  // 🟩 Вивід у консоль
+  useEffect(() => {
+    console.log("📄 Отримані Excel дані у RoomsTable:", excelData);
+  }, [excelData]);
+
   const getDateRange = () => {
     const start = new Date(dfrom);
     const end = new Date(dto);
@@ -36,7 +41,7 @@ export default function RoomsTable({ rooms, dfrom, dto }) {
             {dates.map((_, i) => (
               <td key={i} className="border px-2 py-1 text-center">
                 {room.prices && room.prices[i]
-                  ? Math.round(room.prices[i]) // округлимо щоб красиво
+                  ? Math.round(room.prices[i])
                   : "—"}
               </td>
             ))}
