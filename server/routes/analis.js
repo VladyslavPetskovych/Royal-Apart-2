@@ -60,6 +60,15 @@ function excelDateToJSDate(serial) {
 
 router.get("/data", (req, res) => {
   try {
+    const { dfrom, dto } = req.query;
+
+    if (!dfrom || !dto) {
+      return res.status(400).json({ error: "Missing dfrom / dto" });
+    }
+
+    const startLimit = new Date(dfrom);
+    const endLimit = new Date(dto);
+
     const filePath = path.join(__dirname, "../data2025/export_14_11_2025.csv");
 
     const workbook = XLSX.readFile(filePath);
@@ -68,8 +77,7 @@ router.get("/data", (req, res) => {
 
     const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    // === 1) Конвертація дат ===
-    const rows = rawRows.map((r) => ({
+    const rows = rawRows.map(r => ({
       ...r,
       From: excelDateToJSDate(r.From),
       To: excelDateToJSDate(r.To),
@@ -77,51 +85,44 @@ router.get("/data", (req, res) => {
       Cancellation: excelDateToJSDate(r.Cancellation),
     }));
 
-    // === 2) Створюємо об’єкт для дат ===
     const days = {};
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
       if (!row.From || !row.To) return;
 
-      const start = new Date(row.From);
+      let start = new Date(row.From);
       const end = new Date(row.To);
 
       if (isNaN(start) || isNaN(end)) return;
 
-      // Генеруємо всі дні між From → To включно
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        const day = d.toISOString().split("T")[0]; // YYYY-MM-DD
+      // Якщо бронювання закінчується до обраного періоду → пропустити
+      if (end < startLimit) return;
+
+      // Якщо бронювання починається після обраного періоду → пропустити
+      if (start > endLimit) return;
+
+      // Корегуємо початок
+      if (start < startLimit) start = new Date(startLimit);
+
+      // Генеруємо тільки дні у межах dfrom → dto
+      for (let d = new Date(start); d <= end && d <= endLimit; d.setDate(d.getDate() + 1)) {
+        const day = d.toISOString().split("T")[0];
 
         if (!days[day]) days[day] = [];
-
         days[day].push(row);
       }
     });
 
-    // === Результат ===
     res.json({
       ok: true,
-      days,
+      days
     });
+
   } catch (err) {
     console.error("❌ FULL ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// === Convert Excel serial date → normal date ===
-function excelDateToJSDate(serial) {
-  if (!serial || isNaN(serial)) return null;
-
-  const utc_days = serial - 25569;
-  const utc_value = utc_days * 86400;
-  const date_info = new Date(utc_value * 1000);
-
-  const year = date_info.getFullYear();
-  const month = String(date_info.getMonth() + 1).padStart(2, "0");
-  const day = String(date_info.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
 
 module.exports = router;
