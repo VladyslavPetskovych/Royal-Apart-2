@@ -55,7 +55,29 @@ router.get("/data", (req, res) => {
 
     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-    res.json({ success: true, data: rows });
+    // === ГРУПУВАННЯ ПО ДНЯХ ===
+    const result = {};
+
+    rows.forEach((row) => {
+      const from = row.From;
+      const to = row.To;
+
+      if (!from || !to) return;
+
+      // Конвертуємо дати
+      const start = new Date(from.split(".").reverse().join("-"));
+      const end = new Date(to.split(".").reverse().join("-"));
+
+      // Проходимо всі дні між From і To
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const day = d.toISOString().slice(0, 10);
+
+        if (!result[day]) result[day] = [];
+        result[day].push(row);
+      }
+    });
+
+    res.json({ success: true, days: result });
   } catch (error) {
     console.error("❌ Excel read error:", error);
     res.status(500).json({ success: false, error: "Failed to read Excel" });
