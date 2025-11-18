@@ -1,55 +1,125 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
+
+/* ========== Алгоритм Fuzzy Match ========== */
+
+function similarity(a, b) {
+  let longer = a,
+    shorter = b;
+  if (a.length < b.length) {
+    longer = b;
+    shorter = a;
+  }
+
+  const longerLength = longer.length;
+  if (longerLength === 0) return 1.0;
+
+  return (longerLength - editDistance(longer, shorter)) / longerLength;
+}
+
+function editDistance(a, b) {
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+  const costs = [];
+
+  for (let i = 0; i <= a.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= b.length; j++) {
+      if (i === 0) costs[j] = j;
+      else if (j > 0) {
+        let newValue = costs[j - 1];
+        if (a[i - 1] !== b[j - 1])
+          newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        costs[j - 1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if (i > 0) costs[b.length] = lastValue;
+  }
+
+  return costs[b.length];
+}
+
+function normalize(str) {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "")
+    .replace(/і/g, "i")
+    .replace(/ї/g, "i")
+    .replace(/є/g, "e");
+}
+
+function findClosestRoom(excelRooms, roomName) {
+  const target = normalize(roomName);
+
+  let best = null;
+  let bestScore = 0;
+
+  excelRooms.forEach((b) => {
+    const excelName = normalize(b["Room Name"]);
+    const score = similarity(target, excelName);
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = b["Room Name"];
+    }
+  });
+
+  if (bestScore >= 0.55) return best;
+  return null;
+}
+
+/* ========== Таблиця ========== */
 
 export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
-  useEffect(() => {
-    console.log("📄 Excel Data in table:", excelData);
-  }, [excelData]);
+  console.log("📌 excelData in RoomsTable:", excelData);
 
-  // ==== ДАТИ ДЛЯ ТАБЛИЦІ ====
-  const getDateRange = () => {
+  /* --- Генеруємо діапазон дат --- */
+  const dates = useMemo(() => {
     const start = new Date(dfrom);
     const end = new Date(dto);
-    const dates = [];
+    const arr = [];
 
     while (start <= end) {
-      const iso = start.toISOString().slice(0, 10); // YYYY-MM-DD
-      dates.push(iso);
+      arr.push(start.toISOString().slice(0, 10));
       start.setDate(start.getDate() + 1);
     }
-    return dates;
-  };
+    return arr;
+  }, [dfrom, dto]);
 
-  const dates = getDateRange();
-
-  // ==== 🔥 Будуємо структуру: квартира → дата → броні ====
-  const calendarMap = useMemo(() => {
-    if (!excelData || !excelData.days) return {};
-
+  /* --- Перетворюємо excelData.days у Map: roomName → date → booking --- */
+  const bookingMap = useMemo(() => {
     const map = {};
 
-    Object.entries(excelData.days).forEach(([day, bookings]) => {
+    if (!excelData || Object.keys(excelData).length === 0) {
+      console.warn("⚠️ bookingMap empty, excelData:", excelData);
+      return map;
+    }
+
+    for (const [day, bookings] of Object.entries(excelData)) {
       bookings.forEach((b) => {
-        const roomCode = b["Room Code"]; // fr14, mos4, b23…
-
-        if (!map[roomCode]) map[roomCode] = {};
-        if (!map[roomCode][day]) map[roomCode][day] = [];
-
-        map[roomCode][day].push(b);
+        const name = b["Room Name"];
+        if (!map[name]) map[name] = {};
+        map[name][day] = b;
       });
-    });
+    }
 
-    console.log("📌 CALENDAR MAP:", map);
+    console.log("🟦 bookingMap:", map);
     return map;
   }, [excelData]);
+
+  const allExcelRooms = useMemo(
+    () => Object.values(excelData).flat(),
+    [excelData]
+  );
 
   return (
     <table className="w-full bg-gray-800 rounded-lg text-sm">
       <thead>
         <tr className="bg-gray-700">
           <th className="px-3 py-2 text-left">Квартира</th>
-
-          {dates.map((d, i) => (
-            <th key={i} className="px-3 py-2 text-center">
+          {dates.map((d) => (
+            <th key={d} className="px-3 py-2 text-center">
               {d}
             </th>
           ))}
@@ -58,28 +128,46 @@ export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
 
       <tbody>
         {rooms.map((room) => {
-          const rCode = room.code; // наприклад "fr14"
+          /* 🔥 fuzzy match */
+          const matchedName = findClosestRoom(allExcelRooms, room.name);
 
           return (
             <tr key={room._id} className="border-b border-gray-700">
-              <td className="px-3 py-2 font-medium">{room.name}</td>
+              <td className="px-3 py-2 font-medium">
+                {room.name}
+
+                {matchedName && matchedName !== room.name && (
+                  <div className="text-xs text-gray-400">→ {matchedName}</div>
+                )}
+              </td>
 
               {dates.map((day, i) => {
-                const hasBooking =
-                  calendarMap[rCode] &&
-                  calendarMap[rCode][day] &&
-                  calendarMap[rCode][day].length > 0;
+                const tariff = room.prices?.[i] || null;
+
+                const book =
+                  matchedName && bookingMap[matchedName]
+                    ? bookingMap[matchedName][day]
+                    : null;
+
+                const factPrice = book ? book["Room daily price"] : null;
 
                 return (
                   <td
-                    key={i}
+                    key={day}
                     className="border px-2 py-1 text-center"
                     style={{
-                      background: hasBooking ? "#22c55e55" : "transparent",
-                      color: hasBooking ? "white" : "#ccc",
+                      backgroundColor: factPrice ? "#22c55e55" : "transparent",
                     }}
                   >
-                    {hasBooking ? "🟩" : "—"}
+                    {/* Тариф */}
+                    <div>{tariff ? Math.round(tariff) : "—"}</div>
+
+                    {/* Фактична ціна */}
+                    {factPrice && (
+                      <div className="text-xs text-green-300">
+                        ({Math.round(factPrice)})
+                      </div>
+                    )}
                   </td>
                 );
               })}

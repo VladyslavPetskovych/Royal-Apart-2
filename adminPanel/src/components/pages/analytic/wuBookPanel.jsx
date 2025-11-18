@@ -15,26 +15,29 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [dto, setDto] = useState(formatDate(nextWeek));
   const [loading, setLoading] = useState(false);
 
-  // 🟩 НОВЕ — тягнемо CSV / Excel JSON
   const [excelData, setExcelData] = useState([]);
+
+  // ============================================================
+  //  1) EXCEL DATA LOGS — Тільки ключове
+  // ============================================================
   useEffect(() => {
     const fetchExcel = async () => {
       try {
+        console.log("====== 📊 EXCEL FETCH ======");
+
         const res = await axios.get(
           "https://royalapart.online/api/analis/data",
-          {
-            params: {
-              dfrom,
-              dto,
-            },
-          }
+          { params: { dfrom, dto } }
         );
 
-        console.log("🔵 FETCHED DAYS:", res.data.days);
+        const days = res.data?.days || {};
 
-        setExcelData(res.data.days);
+        console.log("📅 Дати (Excel):", days);
+        //console.log("📁 Приклад першої дати:", days[Object.keys(days)[0]]);
+
+        setExcelData(days);
       } catch (err) {
-        console.error("❌ Excel fetch error:", err);
+        console.error("❌ Excel ERROR:", err.message);
       }
     };
 
@@ -42,9 +45,8 @@ export default function WuBookPanel({ rooms, setRooms }) {
   }, [dfrom, dto]);
 
   const fetchPrices = async () => {
-    console.log("▶ Fetching WuBook prices...");
 
-    const diffDays = (new Date(dto) - new Date(dfrom)) / (1000 * 60 * 60 * 24);
+    const diffDays = (new Date(dto) - new Date(dfrom)) / 86400000;
     if (diffDays > 31) {
       alert("Максимальний період — 31 день");
       return;
@@ -55,8 +57,11 @@ export default function WuBookPanel({ rooms, setRooms }) {
     const df = new Date(dfrom).toLocaleDateString("en-GB");
     const dt = new Date(dto).toLocaleDateString("en-GB");
 
-    const updatedRooms = [];
     const parser = new XMLParser();
+    const updatedRooms = [];
+
+    // Лише ПІДСУМОК для кінця
+    const summary = [];
 
     for (const room of rooms) {
       if (!room.wdid) {
@@ -64,42 +69,87 @@ export default function WuBookPanel({ rooms, setRooms }) {
         continue;
       }
 
-      const body = {
-        lcode: 1638349860,
-        pid: 0,
-        globalId: room.wdid,
-        dfrom: df,
-        dto: dt,
-      };
-
       try {
         const res = await axios.post(
-          "https://royalapart.online/api/analis/prices",
-          body,
+          "https://royalapart.online/api/analis/prices/get",
+          {
+            lcode: 1638349860,
+            pid: 0,
+            globalId: room.wdid,
+            dfrom: df,
+            dto: dt,
+          },
           { headers: { "Content-Type": "application/json" } }
         );
 
         const parsed = parser.parse(res.data);
 
-        const priceArray =
-          parsed.methodResponse.params.param.value.array.data.value[1].struct
-            .member.value.array.data.value;
+        const root = parsed?.methodResponse?.params?.param?.value?.array?.data;
 
-        const prices = priceArray.map((v) => Number(v.double));
+        if (!root) {
+          summary.push({
+            room: room.name,
+            status: "error",
+            reason: "Invalid XML",
+          });
+          updatedRooms.push(room);
+          continue;
+        }
+
+        // Якщо помилка WuBook (-21)
+        if (root.value?.[0]?.int < 0) {
+          summary.push({
+            room: room.name,
+            status: "error",
+            reason: root.value?.[1]?.string || "WuBook error",
+          });
+          updatedRooms.push(room);
+          continue;
+        }
+
+        const priceStruct =
+          root.value?.[1]?.struct?.member?.value?.array?.data?.value;
+
+        if (!Array.isArray(priceStruct)) {
+          summary.push({
+            room: room.name,
+            status: "error",
+            reason: "No prices",
+          });
+          updatedRooms.push(room);
+          continue;
+        }
+
+        const prices = priceStruct.map((v) => Number(v.double));
+
+        summary.push({
+          room: room.name,
+          status: "ok",
+          days: prices.length,
+        });
 
         updatedRooms.push({
           ...room,
           prices,
         });
       } catch (err) {
-        console.error(`❌ Error for room: ${room.name}`, err);
+        summary.push({
+          room: room.name,
+          status: "error",
+          reason: err.message,
+        });
         updatedRooms.push(room);
       }
     }
 
+    console.log("====== 📌 WUBOOK SUMMARY ======");
+    console.table(summary);
+
     setRooms(updatedRooms);
     setLoading(false);
   };
+
+  // ============================================================
 
   return (
     <div className="bg-gray-800 p-4 rounded-xl mb-6">
@@ -119,7 +169,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
         {loading ? "Завантаження..." : "Отримати ціни"}
       </button>
 
-      {/* 🟩 Передаємо excelData далі у RoomsTable */}
       <RoomsTable rooms={rooms} dfrom={dfrom} dto={dto} excelData={excelData} />
     </div>
   );
