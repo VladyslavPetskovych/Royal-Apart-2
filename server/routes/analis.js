@@ -9,7 +9,7 @@ const { parseStringPromise } = require("xml2js");
 
 const WUBOOK_TOKEN = "wr_9fd536d9-2894-441a-85eb-4b1a670e2ff2";
 
-router.post("/prices/update", async (req, res) => {
+router.post("/tarifPrices/update", async (req, res) => {
   try {
     console.log("=== 🌍 START /prices/update ===");
 
@@ -213,7 +213,7 @@ router.post("/prices/update", async (req, res) => {
   }
 });
 
-router.get("/prices/get", async (req, res) => {
+router.get("/tarifPrices/get", async (req, res) => {
   try {
     const fs = require("fs");
     const path = require("path");
@@ -280,7 +280,7 @@ router.get("/prices/get", async (req, res) => {
   }
 });
 
-router.get("/data", (req, res) => {
+router.get("/realPrices/data", (req, res) => {
   try {
     const { dfrom, dto } = req.query;
 

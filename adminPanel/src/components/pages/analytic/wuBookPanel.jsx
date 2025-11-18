@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DateRangePicker from "./dateRangePicker";
 import RoomsTable from "./roomsTable";
-import { XMLParser } from "fast-xml-parser";
 
 export default function WuBookPanel({ rooms, setRooms }) {
   const formatDate = (d) => d.toISOString().split("T")[0];
@@ -15,25 +14,26 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [dto, setDto] = useState(formatDate(nextWeek));
   const [loading, setLoading] = useState(false);
 
-  const [excelData, setExcelData] = useState([]);
+  const [excelData, setExcelData] = useState({});
+  const [csvPrices, setCsvPrices] = useState([]);
 
-  // ============================================================
-  //  1) EXCEL DATA LOGS — Тільки ключове
-  // ============================================================
+  // =====================================================
+  //                 LOAD EXCEL (/data)
+  // =====================================================
   useEffect(() => {
     const fetchExcel = async () => {
       try {
-        console.log("====== 📊 EXCEL FETCH ======");
+        console.log("====== 📊 FETCH /data (Excel) ======");
 
         const res = await axios.get(
           "https://royalapart.online/api/analis/data",
           { params: { dfrom, dto } }
         );
 
-        const days = res.data?.days || {};
+        console.log("📁 SERVER /data →", res.data);
 
-        console.log("📅 Дати (Excel):", days);
-        //console.log("📁 Приклад першої дати:", days[Object.keys(days)[0]]);
+        const days = res.data?.days || {};
+        console.log("📅 Excel days:", days);
 
         setExcelData(days);
       } catch (err) {
@@ -44,8 +44,34 @@ export default function WuBookPanel({ rooms, setRooms }) {
     fetchExcel();
   }, [dfrom, dto]);
 
-  const fetchPrices = async () => {
+  // =====================================================
+  //                 LOAD CSV (/prices/get)
+  // =====================================================
+  const fetchCsvPrices = async () => {
+    try {
+      console.log("====== 💰 FETCH /prices/get (CSV) ======");
 
+      const res = await axios.get(
+        "https://royalapart.online/api/analis/prices/get"
+      );
+
+      console.log("📁 SERVER /prices/get →", res.data);
+
+      const prices = res.data?.prices || [];
+      console.log("💵 CSV prices:", prices);
+
+      setCsvPrices(prices);
+      return prices;
+    } catch (err) {
+      console.error("❌ CSV ERROR:", err.message);
+      return [];
+    }
+  };
+
+  // =====================================================
+  //                 MAIN FETCH — BOTH SOURCES
+  // =====================================================
+  const fetchPrices = async () => {
     const diffDays = (new Date(dto) - new Date(dfrom)) / 86400000;
     if (diffDays > 31) {
       alert("Максимальний період — 31 день");
@@ -54,102 +80,39 @@ export default function WuBookPanel({ rooms, setRooms }) {
 
     setLoading(true);
 
-    const df = new Date(dfrom).toLocaleDateString("en-GB");
-    const dt = new Date(dto).toLocaleDateString("en-GB");
+    console.log("====== 🚀 START PRICE SYNC ======");
+    const csv = await fetchCsvPrices();
 
-    const parser = new XMLParser();
     const updatedRooms = [];
-
-    // Лише ПІДСУМОК для кінця
     const summary = [];
 
     for (const room of rooms) {
-      if (!room.wdid) {
-        updatedRooms.push(room);
-        continue;
-      }
+      // фільтруємо CSV по roomId
+      const csvForRoom = csv.filter(
+        (p) => String(p.roomId) === String(room.id)
+      );
 
-      try {
-        const res = await axios.post(
-          "https://royalapart.online/api/analis/prices/get",
-          {
-            lcode: 1638349860,
-            pid: 0,
-            globalId: room.wdid,
-            dfrom: df,
-            dto: dt,
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
+      console.log(`🏠 CSV for room ${room.name} (${room.id}):`, csvForRoom);
 
-        const parsed = parser.parse(res.data);
+      updatedRooms.push({
+        ...room,
+        pricesCsv: csvForRoom,
+      });
 
-        const root = parsed?.methodResponse?.params?.param?.value?.array?.data;
-
-        if (!root) {
-          summary.push({
-            room: room.name,
-            status: "error",
-            reason: "Invalid XML",
-          });
-          updatedRooms.push(room);
-          continue;
-        }
-
-        // Якщо помилка WuBook (-21)
-        if (root.value?.[0]?.int < 0) {
-          summary.push({
-            room: room.name,
-            status: "error",
-            reason: root.value?.[1]?.string || "WuBook error",
-          });
-          updatedRooms.push(room);
-          continue;
-        }
-
-        const priceStruct =
-          root.value?.[1]?.struct?.member?.value?.array?.data?.value;
-
-        if (!Array.isArray(priceStruct)) {
-          summary.push({
-            room: room.name,
-            status: "error",
-            reason: "No prices",
-          });
-          updatedRooms.push(room);
-          continue;
-        }
-
-        const prices = priceStruct.map((v) => Number(v.double));
-
-        summary.push({
-          room: room.name,
-          status: "ok",
-          days: prices.length,
-        });
-
-        updatedRooms.push({
-          ...room,
-          prices,
-        });
-      } catch (err) {
-        summary.push({
-          room: room.name,
-          status: "error",
-          reason: err.message,
-        });
-        updatedRooms.push(room);
-      }
+      summary.push({
+        room: room.name,
+        rows: csvForRoom.length,
+      });
     }
 
-    console.log("====== 📌 WUBOOK SUMMARY ======");
+    console.log("====== 📌 SUMMARY (CSV MATCHING) ======");
     console.table(summary);
 
     setRooms(updatedRooms);
     setLoading(false);
   };
 
-  // ============================================================
+  // =====================================================
 
   return (
     <div className="bg-gray-800 p-4 rounded-xl mb-6">
