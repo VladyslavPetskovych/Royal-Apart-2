@@ -18,23 +18,22 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [csvPrices, setCsvPrices] = useState([]);
 
   // =====================================================
-  //                 LOAD EXCEL (/data)
+  //                LOAD REAL PRICES from XLSX
+  //                GET /wubook/realPrices/data
   // =====================================================
   useEffect(() => {
     const fetchExcel = async () => {
       try {
-        console.log("====== 📊 FETCH /data (Excel) ======");
+        console.log("====== 📊 FETCH /realPrices/data ======");
 
         const res = await axios.get(
-          "https://royalapart.online/api/analis/data",
+          "https://royalapart.online/api/wubook/realPrices/data",
           { params: { dfrom, dto } }
         );
 
-        console.log("📁 SERVER /data →", res.data);
+        console.log("📁 SERVER realPrices →", res.data);
 
         const days = res.data?.days || {};
-        console.log("📅 Excel days:", days);
-
         setExcelData(days);
       } catch (err) {
         console.error("❌ Excel ERROR:", err.message);
@@ -45,22 +44,22 @@ export default function WuBookPanel({ rooms, setRooms }) {
   }, [dfrom, dto]);
 
   // =====================================================
-  //                 LOAD CSV (/prices/get)
+  //               LOAD TARIF PRICES (CSV)
+  //               GET /wubook/tarifPrices/get
   // =====================================================
   const fetchCsvPrices = async () => {
     try {
-      console.log("====== 💰 FETCH /prices/get (CSV) ======");
+      console.log("====== 💰 FETCH /tarifPrices/get ======");
 
       const res = await axios.get(
-        "https://royalapart.online/api/analis/prices/get"
+        "https://royalapart.online/api/wubook/tarifPrices/get"
       );
 
-      console.log("📁 SERVER /prices/get →", res.data);
+      console.log("📁 SERVER tarifPrices CSV →", res.data);
 
       const prices = res.data?.prices || [];
-      console.log("💵 CSV prices:", prices);
-
       setCsvPrices(prices);
+
       return prices;
     } catch (err) {
       console.error("❌ CSV ERROR:", err.message);
@@ -69,7 +68,7 @@ export default function WuBookPanel({ rooms, setRooms }) {
   };
 
   // =====================================================
-  //                 MAIN FETCH — BOTH SOURCES
+  //      MATCH CSV PRICES WITH OUR ROOMS
   // =====================================================
   const fetchPrices = async () => {
     const diffDays = (new Date(dto) - new Date(dfrom)) / 86400000;
@@ -87,12 +86,9 @@ export default function WuBookPanel({ rooms, setRooms }) {
     const summary = [];
 
     for (const room of rooms) {
-      // фільтруємо CSV по roomId
       const csvForRoom = csv.filter(
         (p) => String(p.roomId) === String(room.id)
       );
-
-      console.log(`🏠 CSV for room ${room.name} (${room.id}):`, csvForRoom);
 
       updatedRooms.push({
         ...room,
