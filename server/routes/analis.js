@@ -90,7 +90,6 @@ router.post("/prices/update", async (req, res) => {
     });
     console.log("==========================================\n");
 
-
     const db = mongoose.connection.useDb("apartments");
     const allRooms = await db.collection("wodoo_aparts").find({}).toArray();
 
@@ -106,7 +105,6 @@ router.post("/prices/update", async (req, res) => {
     });
     console.log("==============================================\n");
 
- 
     const mapByWdid = {};
     const mapByGlobalId = {};
     const mapByWubid = {};
@@ -123,7 +121,6 @@ router.post("/prices/update", async (req, res) => {
     console.log("mapByWubid:", mapByWubid);
     console.log("================================\n");
 
- 
     function generateDatesDDMMYYYY(startStr, count) {
       const [day, month, year] = startStr.split("/");
       let d = new Date(`${year}-${month}-${day}T00:00:00`);
@@ -145,7 +142,6 @@ router.post("/prices/update", async (req, res) => {
     console.log("\n=== 🔍 MATCHING ROOMS (WuBook → Mongo) ===");
 
     members.forEach((m, index) => {
-
       let wubookIdRaw;
       if (typeof m.name === "object" && m.name._ !== undefined) {
         wubookIdRaw = m.name._;
@@ -220,9 +216,10 @@ router.post("/prices/update", async (req, res) => {
 router.get("/prices/get", async (req, res) => {
   try {
     const fs = require("fs");
+    const path = require("path");
+
     const csvPath = path.join(__dirname, "../data2025/tarifPrice.csv");
 
-    // перевірка наявності файлу
     if (!fs.existsSync(csvPath)) {
       return res.status(404).json({
         success: false,
@@ -230,20 +227,45 @@ router.get("/prices/get", async (req, res) => {
       });
     }
 
-    const csv = fs.readFileSync(csvPath, "utf8");
+    const csv = fs.readFileSync(csvPath, "utf8").trim();
+    const lines = csv.split("\n");
 
-    // розбиваємо CSV на рядки
-    const lines = csv.trim().split("\n");
-
-    // перший рядок — заголовки
+    // заголовки
     const headers = lines[0].split(",");
 
+    // розбір CSV з лапками
+    const parseCSVLine = (line) => {
+      const result = [];
+      let current = "";
+      let insideQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"' && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === "," && !insideQuotes) {
+          result.push(current);
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+      result.push(current);
+      return result;
+    };
+
     const items = lines.slice(1).map((line) => {
-      const cols = line.split(",");
+      const cols = parseCSVLine(line);
+
       return {
         roomId: cols[0],
-        date: cols[1],
-        price: Number(cols[2]),
+        roomName: cols[1],
+        date: cols[2],
+        price: Number(cols[3]),
       };
     });
 
