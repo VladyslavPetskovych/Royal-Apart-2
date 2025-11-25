@@ -26,7 +26,10 @@ const advertRouter = require("./routes/advert");
 const allchatIdRouter = require("./routes/getAllUsers");
 const salesRouter = require("./routes/sales")
 const wubookRouter = require("./routes/analis");
+const forecastRouter = require('./routes/forecast');
 
+
+app.use('/forecast', forecastRouter);
 app.use("/aparts", apartRouter);
 app.use("/users", userRouter);
 app.use("/freeRooms", froomsRouter);

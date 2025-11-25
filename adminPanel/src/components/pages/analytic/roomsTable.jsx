@@ -1,84 +1,10 @@
 import React, { useMemo } from "react";
 
-/* ========== Алгоритм Fuzzy Match ========== */
-
-function similarity(a, b) {
-  let longer = a,
-    shorter = b;
-  if (a.length < b.length) {
-    longer = b;
-    shorter = a;
-  }
-
-  const longerLength = longer.length;
-  if (longerLength === 0) return 1.0;
-
-  return (longerLength - editDistance(longer, shorter)) / longerLength;
-}
-
-function editDistance(a, b) {
-  a = a.toLowerCase();
-  b = b.toLowerCase();
-  const costs = [];
-
-  for (let i = 0; i <= a.length; i++) {
-    let lastValue = i;
-    for (let j = 0; j <= b.length; j++) {
-      if (i === 0) costs[j] = j;
-      else if (j > 0) {
-        let newValue = costs[j - 1];
-        if (a[i - 1] !== b[j - 1])
-          newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-        costs[j - 1] = lastValue;
-        lastValue = newValue;
-      }
-    }
-    if (i > 0) costs[b.length] = lastValue;
-  }
-
-  return costs[b.length];
-}
-
-function normalize(str) {
-  if (!str) return "";
-  return str
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]/gu, "")
-    .replace(/і/g, "i")
-    .replace(/ї/g, "i")
-    .replace(/є/g, "e");
-}
-
-function findClosestRoom(excelRooms, roomName) {
-  const target = normalize(roomName);
-
-  let best = null;
-  let bestScore = 0;
-
-  excelRooms.forEach((b) => {
-    const excelName = normalize(b["Room Name"]);
-    const score = similarity(target, excelName);
-
-    if (score > bestScore) {
-      bestScore = score;
-      best = b["Room Name"];
-    }
-  });
-
-  if (bestScore >= 0.55) return best;
-  return null;
-}
-
-/* ========== Таблиця ========== */
-
 export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
-  console.log("📌 excelData in RoomsTable:", excelData);
-
-  /* --- Генеруємо діапазон дат --- */
   const dates = useMemo(() => {
+    const arr = [];
     const start = new Date(dfrom);
     const end = new Date(dto);
-    const arr = [];
 
     while (start <= end) {
       arr.push(start.toISOString().slice(0, 10));
@@ -87,34 +13,45 @@ export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
     return arr;
   }, [dfrom, dto]);
 
-  /* --- Перетворюємо excelData.days у Map: roomName → date → booking --- */
   const bookingMap = useMemo(() => {
     const map = {};
-
-    if (!excelData || Object.keys(excelData).length === 0) {
-      console.warn("⚠️ bookingMap empty, excelData:", excelData);
-      return map;
-    }
-
-    for (const [day, bookings] of Object.entries(excelData)) {
-      bookings.forEach((b) => {
+    for (const [date, list] of Object.entries(excelData || {})) {
+      list.forEach((b) => {
         const name = b["Room Name"];
         if (!map[name]) map[name] = {};
-        map[name][day] = b;
+        map[name][date] = b;
       });
     }
-
-    console.log("🟦 bookingMap:", map);
     return map;
   }, [excelData]);
 
-  const allExcelRooms = useMemo(
-    () => Object.values(excelData).flat(),
-    [excelData]
-  );
+  const getCellPrice = (room, date) => {
+    const excelEntry = bookingMap[room.name]?.[date] || null;
+    const excelPrice = excelEntry
+      ? Math.round(excelEntry["Room daily price"])
+      : null;
+
+    const csvEntry = room.pricesCsv?.find((p) => {
+      const [d, m, y] = p.date.split("/");
+      const csvDate = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+      return csvDate === date;
+    });
+    const csvPrice = csvEntry ? Math.round(csvEntry.price) : null;
+
+    const highlight = excelPrice && csvPrice && excelPrice !== csvPrice;
+
+    return (
+      <div className="text-xs leading-tight">
+        <div className="text-blue-400">{excelPrice ?? "-"}</div>
+        <div className={`text-orange-400 ${highlight ? "font-bold" : ""}`}>
+          {csvPrice ?? "-"}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <table className="w-full bg-gray-800 rounded-lg text-sm">
+    <table className="w-full bg-gray-800 rounded-lg text-sm border-collapse">
       <thead>
         <tr className="bg-gray-700">
           <th className="px-3 py-2 text-left">Квартира</th>
@@ -127,53 +64,22 @@ export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
       </thead>
 
       <tbody>
-        {rooms.map((room) => {
-          /* 🔥 fuzzy match */
-          const matchedName = findClosestRoom(allExcelRooms, room.name);
-
-          return (
-            <tr key={room._id} className="border-b border-gray-700">
-              <td className="px-3 py-2 font-medium">
-                {room.name}
-
-                {matchedName && matchedName !== room.name && (
-                  <div className="text-xs text-gray-400">→ {matchedName}</div>
-                )}
+        {rooms.map((room, idx) => (
+          <tr
+            key={`${room.id}-${room.name}-${idx}`}
+            className="border-b border-gray-700"
+          >
+            <td className="px-3 py-2 font-medium">{room.name}</td>
+            {dates.map((day) => (
+              <td
+                key={`${room.id}-${day}`}
+                className="border px-2 py-1 text-center"
+              >
+                {getCellPrice(room, day)}
               </td>
-
-              {dates.map((day, i) => {
-                const tariff = room.prices?.[i] || null;
-
-                const book =
-                  matchedName && bookingMap[matchedName]
-                    ? bookingMap[matchedName][day]
-                    : null;
-
-                const factPrice = book ? book["Room daily price"] : null;
-
-                return (
-                  <td
-                    key={day}
-                    className="border px-2 py-1 text-center"
-                    style={{
-                      backgroundColor: factPrice ? "#22c55e55" : "transparent",
-                    }}
-                  >
-                    {/* Тариф */}
-                    <div>{tariff ? Math.round(tariff) : "—"}</div>
-
-                    {/* Фактична ціна */}
-                    {factPrice && (
-                      <div className="text-xs text-green-300">
-                        ({Math.round(factPrice)})
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        })}
+            ))}
+          </tr>
+        ))}
       </tbody>
     </table>
   );

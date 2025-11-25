@@ -11,204 +11,179 @@ const WUBOOK_TOKEN = "wr_9fd536d9-2894-441a-85eb-4b1a670e2ff2";
 
 router.post("/tarifPrices/update", async (req, res) => {
   try {
-    console.log("=== 🌍 START /prices/update ===");
+    console.log("=== 🚀 START FULL YEAR PRICE FETCH ===");
 
-    let { lcode, pid, dfrom, dto } = req.body;
-    console.log("📥 Request body:", req.body);
+    const startDate = "01/09/2024";
+    const endDate = "01/09/2025";
 
-    if (!lcode || pid === undefined || !dfrom || !dto) {
-      console.log("❌ Missing parameters");
+    let { lcode, pid } = req.body;
+
+    if (!lcode || pid === undefined) {
       return res.status(400).json({
-        error: "lcode, pid, dfrom, dto are required",
+        error: "lcode and pid are required",
       });
     }
-
-    const xml = `<?xml version="1.0"?>
-    <methodCall>
-      <methodName>fetch_plan_prices</methodName>
-      <params>
-        <param><value><string>${WUBOOK_TOKEN}</string></value></param>
-        <param><value><int>${lcode}</int></value></param>
-        <param><value><int>${pid}</int></value></param>
-        <param><value><string>${dfrom}</string></value></param>
-        <param><value><string>${dto}</string></value></param>
-      </params>
-    </methodCall>`;
-
-    console.log("\n\n==============================");
-    console.log("📤 XML SENT TO WUBOOK:");
-    console.log(xml);
-    console.log("==============================\n\n");
-
-    const response = await axios.post("https://wired.wubook.net/xrws/", xml, {
-      headers: { "Content-Type": "text/xml" },
-    });
-
-    console.log("\n\n==============================");
-    console.log("📥 RAW XML RESPONSE FROM WUBOOK:");
-    console.log(response.data);
-    console.log("==============================\n\n");
-
-    const json = await parseStringPromise(response.data, {
-      explicitArray: false,
-    });
-
-    console.log("\n\n==============================");
-    console.log("📦 PARSED JSON FROM WUBOOK:");
-    console.dir(json, { depth: 15 });
-    console.log("==============================\n\n");
-
-    const root = json?.methodResponse?.params?.param?.value?.array?.data?.value;
-
-    if (!root) {
-      console.log("❌ ERROR: root array missing in WuBook response");
-      return res.status(500).json({
-        success: false,
-        message: "Invalid WuBook structure (no root)",
-      });
-    }
-
-    const arr = Array.isArray(root) ? root : [root];
-    const struct = arr[1]?.struct;
-
-    if (!struct || !struct.member) {
-      console.log("❌ ERROR: WuBook returned no prices (empty struct)");
-      return res.json({ success: false, message: "No prices returned" });
-    }
-
-    let members = struct.member;
-    if (!Array.isArray(members)) members = [members];
-
-    console.log("\n=== 🏢 WUBOOK MEMBERS (rooms returned): ===");
-    members.forEach((m, i) => {
-      console.log(
-        `#${i + 1} → RAW m.name:`,
-        m.name,
-        "| typeof:",
-        typeof m.name
-      );
-    });
-    console.log("==========================================\n");
-
-    const db = mongoose.connection.useDb("apartments");
-    const allRooms = await db.collection("wodoo_aparts").find({}).toArray();
-
-    console.log(
-      "\n=== 🏠 ALL ROOMS FROM MONGO (count:",
-      allRooms.length,
-      ") ==="
-    );
-    allRooms.forEach((r) => {
-      console.log(
-        `Mongo: name=${r.name} | wdid=${r.wdid} | globalId=${r.globalId} | wubid=${r.wubid}`
-      );
-    });
-    console.log("==============================================\n");
-
-    const mapByWdid = {};
-    const mapByGlobalId = {};
-    const mapByWubid = {};
-
-    allRooms.forEach((r) => {
-      if (r.wdid) mapByWdid[String(r.wdid).trim()] = r.name;
-      if (r.globalId) mapByGlobalId[String(r.globalId).trim()] = r.name;
-      if (r.wubid) mapByWubid[String(r.wubid).trim()] = r.name;
-    });
-
-    console.log("\n=== 🗂️ MAPPING TABLES BUILT ===");
-    console.log("mapByWdid:", mapByWdid);
-    console.log("mapByGlobalId:", mapByGlobalId);
-    console.log("mapByWubid:", mapByWubid);
-    console.log("================================\n");
-
-    function generateDatesDDMMYYYY(startStr, count) {
-      const [day, month, year] = startStr.split("/");
-      let d = new Date(`${year}-${month}-${day}T00:00:00`);
-
-      const dates = [];
-      for (let i = 0; i < count; i++) {
-        dates.push(
-          `${String(d.getDate()).padStart(2, "0")}/${String(
-            d.getMonth() + 1
-          ).padStart(2, "0")}/${d.getFullYear()}`
-        );
-        d.setDate(d.getDate() + 1);
-      }
-      return dates;
-    }
-
-    const rows = [];
-
-    console.log("\n=== 🔍 MATCHING ROOMS (WuBook → Mongo) ===");
-
-    members.forEach((m, index) => {
-      let wubookIdRaw;
-      if (typeof m.name === "object" && m.name._ !== undefined) {
-        wubookIdRaw = m.name._;
-      } else {
-        wubookIdRaw = m.name;
-      }
-
-      const wdid = String(wubookIdRaw).trim();
-
-      console.log(`\n[ROOM ${index + 1}]`);
-      console.log("  → WuBook ID RAW:", wubookIdRaw);
-      console.log("  → Normalized WDID:", wdid);
-
-      // 🔥 Три спроби знайти назву
-      const roomName =
-        mapByWdid[wdid] || mapByGlobalId[wdid] || mapByWubid[wdid] || "";
-
-      console.log("  → MATCHED NAME:", roomName || "(EMPTY)");
-      console.log("-------------------------------------");
-
-      const values = m?.value?.array?.data?.value;
-      if (!values) return;
-
-      const priceNodes = Array.isArray(values) ? values : [values];
-      const priceNums = priceNodes.map((v) => Number(v.double));
-
-      const dates = generateDatesDDMMYYYY(dfrom, priceNums.length);
-
-      dates.forEach((date, i) => {
-        rows.push({
-          roomId: wdid,
-          roomName,
-          date,
-          price: priceNums[i] ?? null,
-        });
-      });
-    });
-
-    console.log("\n=== 📊 TOTAL ROWS TO SAVE:", rows.length, " ===");
 
     const fs = require("fs");
+    const path = require("path");
+    const mongoose = require("mongoose");
+    const { parseStringPromise } = require("xml2js");
+
     const dir = path.join(__dirname, "../data2025");
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
     const csvPath = path.join(dir, "tarifPrice.csv");
 
-    const header = "roomId,roomName,date,price\n";
-    const body = rows
-      .map((r) => `${r.roomId},"${r.roomName}",${r.date},${r.price}`)
-      .join("\n");
+    // якщо файл НЕ існує – створюємо заголовки
+    if (!fs.existsSync(csvPath)) {
+      fs.writeFileSync(csvPath, "roomId,roomName,date,price\n", "utf8");
+    }
 
-    fs.writeFileSync(csvPath, header + body, "utf8");
+    // --- функції -------------------------------------------------
 
-    console.log("\n=== ✅ CSV SAVED TO:", csvPath, " ===");
+    function toDate(str) {
+      const [d, m, y] = str.split("/");
+      return new Date(`${y}-${m}-${d}T00:00:00`);
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function format(d) {
+      return `${String(d.getDate()).padStart(2, "0")}/${String(
+        d.getMonth() + 1
+      ).padStart(2, "0")}/${d.getFullYear()}`;
+    }
+
+    // --- головний цикл -------------------------------------------
+
+    let current = toDate(startDate);
+    const finish = toDate(endDate);
+
+    let totalRows = 0;
+    let requestCount = 0;
+
+    while (current < finish) {
+      const dfrom = format(current);
+      const dto = format(addDays(current, 6)); // 7 днів
+
+      requestCount++;
+      console.log(
+        `\n===== 📅 REQUEST #${requestCount} | ${dfrom} → ${dto} =====`
+      );
+
+      // --- 🔥 XML запит до WuBook ---
+      const xml = `<?xml version="1.0"?>
+        <methodCall>
+          <methodName>fetch_plan_prices</methodName>
+          <params>
+            <param><value><string>${WUBOOK_TOKEN}</string></value></param>
+            <param><value><int>${lcode}</int></value></param>
+            <param><value><int>${pid}</int></value></param>
+            <param><value><string>${dfrom}</string></value></param>
+            <param><value><string>${dto}</string></value></param>
+          </params>
+        </methodCall>`;
+
+      const response = await axios.post("https://wired.wubook.net/xrws/", xml, {
+        headers: { "Content-Type": "text/xml" },
+      });
+
+      const json = await parseStringPromise(response.data, {
+        explicitArray: false,
+      });
+
+      const root =
+        json?.methodResponse?.params?.param?.value?.array?.data?.value;
+
+      if (!root) {
+        console.log("❌ WuBook returned empty root");
+        current = addDays(current, 7);
+        continue;
+      }
+
+      const arr = Array.isArray(root) ? root : [root];
+      const struct = arr[1]?.struct;
+
+      if (!struct || !struct.member) {
+        console.log("❌ No rooms returned this week");
+        current = addDays(current, 7);
+        continue;
+      }
+
+      let members = struct.member;
+      if (!Array.isArray(members)) members = [members];
+
+      // --- читаємо дані з Mongo один раз -------------------------
+      const db = mongoose.connection.useDb("apartments");
+      const allRooms = await db.collection("wodoo_aparts").find({}).toArray();
+
+      const mapByWdid = {};
+      allRooms.forEach((r) => {
+        if (r.wdid) mapByWdid[String(r.wdid).trim()] = r.name;
+      });
+
+      const rowsToAppend = [];
+
+      // --- парсимо ціни ------------------------------------------
+      members.forEach((m) => {
+        let raw = typeof m.name === "object" ? m.name._ : m.name;
+        const wdid = String(raw).trim();
+        const roomName = mapByWdid[wdid] || "";
+
+        const values = m?.value?.array?.data?.value;
+        if (!values) return;
+
+        const priceNodes = Array.isArray(values) ? values : [values];
+        const prices = priceNodes.map((v) => Number(v.double));
+
+        for (let i = 0; i < prices.length; i++) {
+          const date = format(addDays(current, i));
+          let price = prices[i] ?? null;
+
+          const [d, mth] = date.split("/").map(Number);
+
+          const isNewYearPeriod =
+            (mth === 12 && d >= 27) || 
+            (mth === 1 && d <= 5); 
+
+          if (price > 9000 && !isNewYearPeriod) {
+            console.log(`⚠️ Завищена ціна ${price} на ${date} → записуємо ""`);
+            price = ""; // <===== ТЕПЕР ТУТ ПУСТЕ ЗНАЧЕННЯ
+          }
+
+          rowsToAppend.push(`${wdid},"${roomName}",${date},${price}`);
+        }
+      });
+
+      // --- запис у CSV -------------------------------------------
+      fs.appendFileSync(csvPath, rowsToAppend.join("\n") + "\n", "utf8");
+
+      totalRows += rowsToAppend.length;
+
+      console.log(
+        `✓ Week saved: ${dfrom} → ${dto} | +${rowsToAppend.length} rows`
+      );
+
+      // рухаємося вперед на 7 днів
+      current = addDays(current, 7);
+    }
 
     res.json({
       success: true,
-      message: "All apartment prices saved to CSV",
+      message: "Full year price sync complete",
+      weeks: requestCount,
+      rows: totalRows,
       file: csvPath,
-      rows: rows.length,
-      apartments: members.length,
     });
   } catch (err) {
-    console.error("❌ ERROR in /prices/update:", err);
+    console.error(err);
     res.status(500).json({
-      error: "Internal error",
-      details: err.message,
+      success: false,
+      error: err.message,
     });
   }
 });

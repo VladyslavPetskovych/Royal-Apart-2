@@ -17,17 +17,13 @@ export default function WuBookPanel({ rooms, setRooms }) {
   const [excelData, setExcelData] = useState({});
   const [csvPrices, setCsvPrices] = useState([]);
 
-  // =====================================================
-  //                LOAD REAL PRICES from XLSX
-  //                GET /wubook/realPrices/data
-  // =====================================================
   useEffect(() => {
     const fetchExcel = async () => {
       try {
         console.log("====== 📊 FETCH /realPrices/data ======");
 
         const res = await axios.get(
-          "https://royalapart.online/api/wubook/realPrices/data",
+          "https://royalapart.online/api/analis/realPrices/data",
           { params: { dfrom, dto } }
         );
 
@@ -43,16 +39,12 @@ export default function WuBookPanel({ rooms, setRooms }) {
     fetchExcel();
   }, [dfrom, dto]);
 
-  // =====================================================
-  //               LOAD TARIF PRICES (CSV)
-  //               GET /wubook/tarifPrices/get
-  // =====================================================
   const fetchCsvPrices = async () => {
     try {
       console.log("====== 💰 FETCH /tarifPrices/get ======");
 
       const res = await axios.get(
-        "https://royalapart.online/api/wubook/tarifPrices/get"
+        "https://royalapart.online/api/analis/tarifPrices/get"
       );
 
       console.log("📁 SERVER tarifPrices CSV →", res.data);
@@ -67,9 +59,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
     }
   };
 
-  // =====================================================
-  //      MATCH CSV PRICES WITH OUR ROOMS
-  // =====================================================
   const fetchPrices = async () => {
     const diffDays = (new Date(dto) - new Date(dfrom)) / 86400000;
     if (diffDays > 31) {
@@ -79,7 +68,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
 
     setLoading(true);
 
-    console.log("====== 🚀 START PRICE SYNC ======");
     const csv = await fetchCsvPrices();
 
     const updatedRooms = [];
@@ -88,6 +76,11 @@ export default function WuBookPanel({ rooms, setRooms }) {
     for (const room of rooms) {
       const csvForRoom = csv.filter(
         (p) => String(p.roomId) === String(room.id)
+      );
+
+      console.log(
+        `💰 CSV prices for room "${room.name}" (id: ${room.id}):`,
+        csvForRoom
       );
 
       updatedRooms.push({
@@ -107,8 +100,6 @@ export default function WuBookPanel({ rooms, setRooms }) {
     setRooms(updatedRooms);
     setLoading(false);
   };
-
-  // =====================================================
 
   return (
     <div className="bg-gray-800 p-4 rounded-xl mb-6">
