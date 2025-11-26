@@ -13,8 +13,7 @@ export default function TermsAndConditions() {
           <span className="font-semibold text-amber-600">Royal Apart</span> —
           сервісі подобової оренди апартаментів у Львові. Використовуючи наш
           сайт і оформлюючи бронювання, ви погоджуєтесь із наведеними нижче
-          правилами. Просимо уважно ознайомитися з ними перед тим, як зробити
-          замовлення.
+          правилами.
         </p>
 
         {/* --- 1. Загальні положення --- */}
@@ -52,7 +51,6 @@ export default function TermsAndConditions() {
           </p>
           <ul className="list-decimal list-inside space-y-2 text-gray-700">
             <li>Передоплата гарантує закріплення апартаментів за клієнтом.</li>
-
           </ul>
         </section>
 
@@ -119,15 +117,32 @@ export default function TermsAndConditions() {
           <p className="text-gray-700 leading-relaxed">
             Ми залишаємо за собою право змінювати ці умови без попереднього
             повідомлення. Оновлена версія завжди доступна на цій сторінці.
-            Рекомендуємо час від часу перевіряти оновлення, щоб бути в курсі
-            актуальних правил.
           </p>
+        </section>
+
+        {/* --- 7. Надавачі послуг --- */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold text-amber-500 mb-3">
+            7. Надавачі послуг
+          </h2>
+          <p className="text-gray-700 leading-relaxed">
+            Надання послуг з розміщення здійснюється наступними суб’єктами
+            господарювання:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-700 leading-relaxed">
+            <li>ФОП Химочка С-Л. А.</li>
+            <li>ФОП Уманець Д.Б.</li>
+            <li>ФОП Семчишин Р.В.</li>
+            <li>ФОП Шев'як О.В.</li>
+            <li>ФОП Дмитрик К.В.</li>
+            <li>ФОП Шев'як М.М.</li>
+            <li>ТзОВ "Арісто ІНС"</li>
+          </ul>
         </section>
 
         {/* --- Підпис --- */}
         <div className="text-center mt-10 text-sm text-gray-600">
           Останнє оновлення: {new Date().getFullYear()}
-
         </div>
       </div>
     </div>
