@@ -25,3 +25,4 @@ if __name__ == "__main__":
     else:
         print(json.dumps({"error": "Не вдалося зробити передбачення"}))
 
+
