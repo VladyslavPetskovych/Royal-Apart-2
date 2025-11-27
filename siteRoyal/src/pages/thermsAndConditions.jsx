@@ -137,6 +137,7 @@ export default function TermsAndConditions() {
             <li>ФОП Дмитрик К.В.</li>
             <li>ФОП Шев'як М.М.</li>
             <li>ТзОВ "Арісто ІНС"</li>
+            <li>ФОП Пецкович В.І</li>
           </ul>
         </section>
 
