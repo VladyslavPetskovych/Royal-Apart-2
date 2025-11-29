@@ -2,6 +2,7 @@ import joblib
 import pandas as pd
 import sys
 import json
+import os
 
 # Перевірка аргументів
 if len(sys.argv) < 3:
@@ -12,11 +13,19 @@ room_name = sys.argv[1]
 input_price = float(sys.argv[2])
 date_input = sys.argv[3] if len(sys.argv) > 3 else None
 
-# Завантажуємо модель
-model = joblib.load('models/price_model.pkl')
+# Отримуємо директорію, де знаходиться скрипт
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Завантажуємо CSV з тарифами
-tarif_df = pd.read_csv('../data2025/tarifPrice.csv', header=None,
+# Завантажуємо модель (шлях відносно місця розташування скрипта)
+model_path = os.path.join(script_dir, 'models', 'price_model.pkl')
+model = joblib.load(model_path)
+
+    # Завантажуємо CSV з тарифами (python тепер в корені, data2025 в server/data2025)
+    # В Docker: python в /python, data2025 в /app/server/data2025
+    csv_path = os.path.join(script_dir, '..', 'server', 'data2025', 'tarifPrice.csv')
+    if not os.path.exists(csv_path):
+        csv_path = os.path.join('/app', 'server', 'data2025', 'tarifPrice.csv')
+tarif_df = pd.read_csv(csv_path, header=None,
                        names=["room_id","room","date","price_tarif"])
 tarif_df["room"] = tarif_df["room"].astype(str).str.strip()
 tarif_df["date"] = pd.to_datetime(tarif_df["date"], dayfirst=True, errors='coerce')

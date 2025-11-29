@@ -147,8 +147,7 @@ router.post("/tarifPrices/update", async (req, res) => {
           const [d, mth] = date.split("/").map(Number);
 
           const isNewYearPeriod =
-            (mth === 12 && d >= 27) || 
-            (mth === 1 && d <= 5); 
+            (mth === 12 && d >= 27) || (mth === 1 && d <= 5);
 
           if (price > 9000 && !isNewYearPeriod) {
             console.log(`⚠️ Завищена ціна ${price} на ${date} → записуємо ""`);

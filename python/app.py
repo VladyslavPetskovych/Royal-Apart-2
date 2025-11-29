@@ -5,14 +5,44 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import joblib
 import os
+import sys
 from datetime import datetime, timedelta
 import json
 
-# Шляхи до файлів
-REAL_CSV = "../data2025/realPrice.csv"
-TARIF_CSV = "../data2025/tarifPrice.csv"
-REAL_DAILY_CACHE = "../data2025/realPrice_daily.csv"  # Кеш конвертованих даних
-MODEL_DIR = "models"
+# Встановлюємо UTF-8 для stdout/stderr (для Windows сумісності)
+if sys.platform == 'win32':
+    import io
+    try:
+        if hasattr(sys.stdout, 'buffer'):
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        if hasattr(sys.stderr, 'buffer'):
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+    except:
+        pass  # Ігноруємо помилки, якщо не вдалося встановити
+
+# Шляхи до файлів (відносно місця розташування app.py)
+# python тепер в корені проекту, data2025 в server/data2025
+# В Docker: python в /python, data2025 в /app/server/data2025
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Функція для пошуку data2025: спочатку локально, потім в Docker
+def find_data_path(filename):
+    # Локальна розробка: python в корені, data2025 в server/data2025
+    local_path = os.path.join(SCRIPT_DIR, "..", "server", "data2025", filename)
+    if os.path.exists(local_path):
+        return local_path
+    # Docker: python в /python, data2025 в /app/server/data2025
+    docker_path = os.path.join("/app", "server", "data2025", filename)
+    if os.path.exists(docker_path):
+        return docker_path
+    # Якщо не знайдено, повертаємо локальний шлях (для помилок)
+    return local_path
+
+REAL_CSV = find_data_path("realPrice.csv")
+TARIF_CSV = find_data_path("tarifPrice.csv")
+REAL_DAILY_CACHE = find_data_path("realPrice_daily.csv")  # Кеш конвертованих даних
+MODEL_DIR = os.path.join(SCRIPT_DIR, "models")
 PRICE_NORMALITY_MODEL = os.path.join(MODEL_DIR, "price_normality_model.pkl")
 PRICE_PREDICTION_MODEL = os.path.join(MODEL_DIR, "price_prediction_model.pkl")
 SCALER_PATH = os.path.join(MODEL_DIR, "scaler.pkl")
@@ -452,7 +482,11 @@ def predict_price_normality(room, date, price_tarif, real_df=None):
     """
     # Завантажуємо моделі
     if not os.path.exists(PRICE_NORMALITY_MODEL):
-        print("Моделі не навчено. Запустіть train_models() спочатку.")
+        # Використовуємо sys.stderr для помилок (безпечніше для Windows)
+        try:
+            sys.stderr.write("Models not trained. Run train_models() first.\n")
+        except:
+            pass  # Ігноруємо помилки кодування
         return None
     
     clf_model = joblib.load(PRICE_NORMALITY_MODEL)

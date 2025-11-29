@@ -1,7 +1,8 @@
 import pandas as pd
 
-input_csv = "../data2025/realPrice.csv"       # твій файл з колонками Price, From, To
-output_csv = "../data2025/realPrice.csv"     # файл у форматі day-by-day
+# python тепер в корені, data2025 в server/data2025
+input_csv = "../server/data2025/realPrice.csv"       # твій файл з колонками Price, From, To
+output_csv = "../server/data2025/realPrice.csv"     # файл у форматі day-by-day
 
 df = pd.read_csv(input_csv, delimiter=';')
 
