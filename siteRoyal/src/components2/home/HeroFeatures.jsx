@@ -1,0 +1,60 @@
+import React from "react";
+import { FiCalendar, FiMapPin, FiBookOpen } from "react-icons/fi";
+
+export default function HeroFeatures() {
+  return (
+    <div className="w-full px-4 py-6 sm:px-6 sm:py-8 lg:p-12">
+      <div className="mx-auto max-w-7xl">
+        <div
+          className="
+            flex flex-col items-center gap-3
+            text-white
+            md:flex-row md:flex-wrap
+            md:items-center md:justify-center md:gap-x-10 md:gap-y-4
+            lg:flex-nowrap lg:gap-12
+          "
+        >
+          {/* ITEM 1 — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-3 opacity-90">
+            <FiCalendar className="shrink-0 text-[18px] sm:text-lg" />
+            <span
+              className="
+                uppercase tracking-[0.18em] text-[11px] leading-[1.3]
+                sm:tracking-[0.2em] sm:text-sm sm:leading-none
+              "
+            >
+              Оренда елітних приміщень
+            </span>
+          </div>
+
+          {/* ITEM 2 — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-3 opacity-90">
+            <FiMapPin className="shrink-0 text-[18px] sm:text-lg" />
+            <span
+              className="
+                uppercase tracking-[0.18em] text-[11px] leading-[1.3]
+                sm:tracking-[0.2em] sm:text-sm sm:leading-none
+              "
+            >
+              Апартаменти в самому серці Львова
+            </span>
+          </div>
+
+          {/* ITEM 3 — centered on mobile */}
+          <div className="flex items-center gap-3 opacity-90 text-center">
+            <FiBookOpen className="shrink-0 text-[18px] sm:text-lg" />
+            <span
+              className="
+                text-center
+                uppercase tracking-[0.18em] text-[11px] leading-[1.3]
+                sm:tracking-[0.2em] sm:text-sm sm:leading-none
+              "
+            >
+              Виняткові послуги та враження
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

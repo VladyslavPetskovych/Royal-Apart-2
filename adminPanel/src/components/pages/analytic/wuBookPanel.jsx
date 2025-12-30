@@ -1,125 +1,116 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import DateRangePicker from "./dateRangePicker";
 import RoomsTable from "./roomsTable";
 
 export default function WuBookPanel({ rooms, setRooms }) {
-  const formatDate = (d) => d.toISOString().split("T")[0];
-
-  const today = new Date();
-  const nextWeek = new Date();
-  nextWeek.setDate(today.getDate() + 7);
-
-  const [dfrom, setDfrom] = useState(formatDate(today));
-  const [dto, setDto] = useState(formatDate(nextWeek));
   const [loading, setLoading] = useState(false);
+  const [dateRange, setDateRange] = useState({ from: null, to: null });
 
-  const [excelData, setExcelData] = useState({});
-  const [csvPrices, setCsvPrices] = useState([]);
-
-  useEffect(() => {
-    const fetchExcel = async () => {
-      try {
-        console.log("====== 📊 FETCH /realPrices/data ======");
-
-        const res = await axios.get(
-          "https://royalapart.online/api/analis/realPrices/data",
-          { params: { dfrom, dto } }
-        );
-
-        console.log("📁 SERVER realPrices →", res.data);
-
-        const days = res.data?.days || {};
-        setExcelData(days);
-      } catch (err) {
-        console.error("❌ Excel ERROR:", err.message);
-      }
-    };
-
-    fetchExcel();
-  }, [dfrom, dto]);
-
-  const fetchCsvPrices = async () => {
-    try {
-      console.log("====== 💰 FETCH /tarifPrices/get ======");
-
-      const res = await axios.get(
-        "https://royalapart.online/api/analis/tarifPrices/get"
-      );
-
-      console.log("📁 SERVER tarifPrices CSV →", res.data);
-
-      const prices = res.data?.prices || [];
-      setCsvPrices(prices);
-
-      return prices;
-    } catch (err) {
-      console.error("❌ CSV ERROR:", err.message);
-      return [];
+  const getApiUrl = () => {
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return "http://localhost:3000/analis/tarifPrices/current";
     }
+    return "https://royalapart.online/api/analis/tarifPrices/current";
   };
 
-  const fetchPrices = async () => {
-    const diffDays = (new Date(dto) - new Date(dfrom)) / 86400000;
-    if (diffDays > 31) {
-      alert("Максимальний період — 31 день");
+  const fetchCurrentPrices = async () => {
+    if (rooms.length === 0) {
+      alert("Немає кімнат для обробки");
       return;
     }
 
     setLoading(true);
+    try {
+      console.log("📡 Запит актуальних цін з WuBook API...");
 
-    const csv = await fetchCsvPrices();
+      const apiUrl = getApiUrl();
+      const res = await axios.get(apiUrl);
 
-    const updatedRooms = [];
-    const summary = [];
+      console.log("✅ Відповідь від сервера:", {
+        success: res.data?.success,
+        rows: res.data?.rows,
+        pricesCount: res.data?.prices?.length,
+        dateRange: res.data?.dateRange,
+      });
 
-    for (const room of rooms) {
-      const csvForRoom = csv.filter(
-        (p) => String(p.roomId) === String(room.id)
+      const prices = res.data?.prices || [];
+      const range = res.data?.dateRange || {};
+
+      if (prices.length === 0) {
+        alert("Не вдалося отримати ціни з WuBook");
+        setLoading(false);
+        return;
+      }
+
+      // Зіставляємо дані з кімнатами за wdid
+      const updatedRooms = rooms.map((room) => {
+        const roomPrices = prices.filter(
+          (p) =>
+            String(p.roomId).trim() ===
+            String(room.wdid || room.wubid || "").trim()
+        );
+
+        return {
+          ...room,
+          pricesCsv: roomPrices,
+        };
+      });
+
+      const totalFound = updatedRooms.reduce(
+        (sum, r) => sum + r.pricesCsv.length,
+        0
       );
 
       console.log(
-        `💰 CSV prices for room "${room.name}" (id: ${room.id}):`,
-        csvForRoom
+        `✅ Оброблено ${updatedRooms.length} кімнат, знайдено ${totalFound} записів`
       );
 
-      updatedRooms.push({
-        ...room,
-        pricesCsv: csvForRoom,
-      });
+      setRooms(updatedRooms);
+      setDateRange(range);
 
-      summary.push({
-        room: room.name,
-        rows: csvForRoom.length,
-      });
+      if (range.from && range.to) {
+        const [d1, m1, y1] = range.from.split("/");
+        const [d2, m2, y2] = range.to.split("/");
+        setDateRange({
+          from: `${y1}-${m1.padStart(2, "0")}-${d1.padStart(2, "0")}`,
+          to: `${y2}-${m2.padStart(2, "0")}-${d2.padStart(2, "0")}`,
+        });
+      }
+    } catch (err) {
+      console.error("❌ Помилка завантаження:", err.message);
+      console.error("❌ Деталі помилки:", err.response?.data || err);
+      alert(`Помилка: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-
-    console.log("====== 📌 SUMMARY (CSV MATCHING) ======");
-    console.table(summary);
-
-    setRooms(updatedRooms);
-    setLoading(false);
   };
 
   return (
     <div className="bg-gray-800 p-4 rounded-xl mb-6">
-      <h2 className="text-lg font-semibold mb-3">WuBook Ціни</h2>
+      <h2 className="text-lg font-semibold mb-3">WuBook Актуальні Ціни</h2>
+      <p className="text-sm text-gray-400 mb-4">
+        Отримує актуальні ціни з WuBook за 2 дні до сьогодні та 4 дні вперед
+      </p>
 
-      <DateRangePicker
-        dfrom={dfrom}
-        dto={dto}
-        setDfrom={setDfrom}
-        setDto={setDto}
-      />
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={fetchCurrentPrices}
+          disabled={loading}
+          className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-600 px-6 py-2 rounded-lg font-semibold"
+        >
+          {loading ? "Завантаження..." : "Отримати актуальні ціни"}
+        </button>
+        {dateRange.from && dateRange.to && (
+          <div className="px-4 py-2 text-sm text-gray-300 flex items-center">
+            Період: {dateRange.from} → {dateRange.to}
+          </div>
+        )}
+      </div>
 
-      <button
-        onClick={fetchPrices}
-        className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg mb-4"
-      >
-        {loading ? "Завантаження..." : "Отримати ціни"}
-      </button>
-
-      <RoomsTable rooms={rooms} dfrom={dfrom} dto={dto} excelData={excelData} />
+      {dateRange.from && dateRange.to && (
+        <RoomsTable rooms={rooms} dfrom={dateRange.from} dto={dateRange.to} />
+      )}
     </div>
   );
 }

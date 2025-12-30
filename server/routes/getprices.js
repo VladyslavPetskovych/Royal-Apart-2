@@ -7,18 +7,13 @@ require("dotenv").config();
 router.get("/", async (req, res) => {
   try {
     const apiUrl = 'https://kapi.wubook.net/kp/property/fetch_products';
-    const apiKey = process.env.WUDOO_API_KEY; // Replace with your actual API key
-
-    // Make a POST request to the specified API with the x-api-key header
+    const apiKey = process.env.WUDOO_API_KEY; 
     const response = await axios.post(apiUrl, {}, {
       headers: {
         'x-api-key': apiKey,
       },
     });
-
-    // Extract the data from the response
     const responseData = response.data.data;
-
     for (const room of responseData) {
       try {
         const updateResult = await Roomsrr.updateOne(
@@ -29,7 +24,6 @@ router.get("/", async (req, res) => {
             }
           }
         );
-
         if (updateResult.nModified > 0) {
           console.log('Updated globalId in MongoDB:', updateResult);
         } else {
@@ -39,8 +33,6 @@ router.get("/", async (req, res) => {
         console.error('Error updating MongoDB:', error.message);
       }
     }
-
-    // Send the modified responseData to the client
     res.json(responseData);
   } catch (error) {
     console.error('Error fetching prices:', error.message);
@@ -52,13 +44,9 @@ router.get("/", async (req, res) => {
 router.get("/setPrice", async (req, res) => {
   try {
     const apiUrl = 'https://kapi.wubook.net/kp/inventory/fetch_rate_values';
-    const apiKey = process.env.WUDOO_API_KEY; // Replace with your actual API key
+    const apiKey = process.env.WUDOO_API_KEY; 
     let currentDate = new Date();
     let formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
-
-    // 
-
-    // Make a POST request to the specified API with the x-api-key header
     const response = await axios.post(apiUrl, null, {
       params: {
         from: formattedDate,
@@ -69,11 +57,7 @@ router.get("/setPrice", async (req, res) => {
         'x-api-key': apiKey,
       },
     });
-
-    // Extract the data from the response
     const responseData = response.data.data;
-
-    // Iterate through the response data and update Roomsrr model
     for (const roomId in responseData) {
       const priceData = responseData[roomId][0];
       const updatedRoom = await Roomsrr.findOneAndUpdate(
@@ -81,15 +65,12 @@ router.get("/setPrice", async (req, res) => {
         { $set: { price: priceData.p } },
         { new: true }
       );
-
       if (updatedRoom) {
         console.log(`Updated price for room with globalId ${roomId} to ${priceData.p}`);
       } else {
         console.log(`Room with globalId ${roomId} not found in MongoDB`);
       }
     }
-
-    // Send the response to the client
     res.json(responseData);
   } catch (error) {
     console.error('Error setting price:', error.message);

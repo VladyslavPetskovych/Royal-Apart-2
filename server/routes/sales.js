@@ -6,8 +6,8 @@ router.use(express.json());
 router.post("/", async (req, res) => {
   const { roomId, discount, tillDate } = req.body;
   let sale = {
-    roomId: Number(roomId), // Ensure roomId is a number
-    discount: Number(discount), // Ensure discount is a number
+    roomId: Number(roomId), 
+    discount: Number(discount), 
     tillDate: new Date(tillDate),
   };
   try {

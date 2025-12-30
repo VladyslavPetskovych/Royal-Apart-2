@@ -7,9 +7,8 @@ const ModalAdvert = ({ isOpen, onClose, onSubmit, children }) => {
 
   const handleSubmit = async () => {
     const text = textRef.current.value;
-    const image = imageRef.current.files[0]; // Get the first file uploaded
+    const image = imageRef.current.files[0]; 
 
-    // Create FormData object to send text and image file
     const formData = new FormData();
     formData.append("msg", text);
     formData.append("image", image);

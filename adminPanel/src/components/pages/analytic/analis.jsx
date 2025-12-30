@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import WuBookPanel from "./wuBookPanel";
-import ForecastPanel from "./forecastPanel";
-import StatsPanel from "./statsPanel";
+
 import ForecastChart from "./forecastChart";
+import PredictionTable from "./predictionTable";
 
 function Analis() {
   const [rooms, setRooms] = useState([]);
@@ -15,7 +15,9 @@ function Analis() {
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get("https://royalapart.online/api/siteRoyal/get-all-wodoo");
+      const res = await axios.get(
+        "https://royalapart.online/api/siteRoyal/get-all-wodoo"
+      );
       setRooms(res.data.data || []);
     } catch (e) {
       console.error("API Error", e);
@@ -33,20 +35,10 @@ function Analis() {
 
       <WuBookPanel rooms={rooms} setRooms={setRooms} />
 
-      <StatsPanel rooms={rooms} averagePrice={averagePrice} />
-
-      <ForecastPanel
-        rooms={rooms}
-        setRooms={setRooms}
-        averagePrice={averagePrice}
-        setAveragePrice={setAveragePrice}
-        predictedData={predictedData}
-        setPredictedData={setPredictedData}
-        isLoading={isLoading}
-        fetchRooms={fetchRooms}
-      />
-
+   
       <ForecastChart predictedData={predictedData} />
+
+      <PredictionTable />
     </div>
   );
 }

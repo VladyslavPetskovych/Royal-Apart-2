@@ -7,7 +7,7 @@ import beds from "../../assets/roomPage/double-bed.png";
 import rooms from "../../assets/roomPage/room.png";
 import user from "../../assets/roomPage/user.png";
 import floor from "../../assets/roomPage/stairs.png";
-import SliderCategories from "../../components/mainpage/home/sliderCategories";
+import SliderCategories from "../home/home/sliderCategories";
 import Googlemap from "./googlemap";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import Header from "./components/header";
-import Footer from "./components/footer";
+import Header from "./components/utils/header";
+import Footer from "./components/utils/footer";
 import Book from "./pages/book/book";
-import MainPagebody from "./components/mainpage/mainPagebody";
+import Home from "./pages/home/home";
 import Aparts from "./pages/aparts/aparts";
 import Rules from "./pages/rules/rules";
 import Contact from "./pages/contact";
@@ -33,9 +33,9 @@ function AppContent() {
         <>
           <Header />
           <Routes>
-            <Route path="/" element={<MainPagebody />} />
-            <Route path="/uk" element={<MainPagebody />} />
-            <Route path="/en" element={<MainPagebody />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/uk" element={<Home />} />
+            <Route path="/en" element={<Home />} />
             <Route path="/aparts" element={<Aparts />} />
             <Route path="/rules" element={<Rules />} />
             <Route path="/book" element={<Book />} />

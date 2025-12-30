@@ -33,7 +33,7 @@ const roomSchema = mongoose.Schema(
     beds: {
       type: Number,
     },
-    surface:{
+    surface: {
       type: Number,
     },
     guests: {
@@ -46,3 +46,11 @@ const roomSchema = mongoose.Schema(
 
 const rmModel = mongoose.model("aparts", roomSchema);
 module.exports = rmModel;
+
+
+
+
+
+
+
+

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
+export default function RoomsTable({ rooms, dfrom, dto }) {
   const dates = useMemo(() => {
     const arr = [];
     const start = new Date(dfrom);
@@ -13,42 +13,49 @@ export default function RoomsTable({ rooms, dfrom, dto, excelData }) {
     return arr;
   }, [dfrom, dto]);
 
-  const bookingMap = useMemo(() => {
-    const map = {};
-    for (const [date, list] of Object.entries(excelData || {})) {
-      list.forEach((b) => {
-        const name = b["Room Name"];
-        if (!map[name]) map[name] = {};
-        map[name][date] = b;
-      });
-    }
-    return map;
-  }, [excelData]);
-
   const getCellPrice = (room, date) => {
-    const excelEntry = bookingMap[room.name]?.[date] || null;
-    const excelPrice = excelEntry
-      ? Math.round(excelEntry["Room daily price"])
-      : null;
+    // Показуємо тільки тарифні ціни з CSV
+    if (!room.pricesCsv || room.pricesCsv.length === 0) {
+      return (
+        <div className="text-xs leading-tight">
+          <div className="text-gray-500">-</div>
+        </div>
+      );
+    }
 
-    const csvEntry = room.pricesCsv?.find((p) => {
-      const [d, m, y] = p.date.split("/");
+    const csvEntry = room.pricesCsv.find((p) => {
+      if (!p.date) return false;
+      // Формат дати в CSV: DD/MM/YYYY
+      const parts = p.date.split("/");
+      if (parts.length !== 3) return false;
+      const [d, m, y] = parts;
       const csvDate = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
       return csvDate === date;
     });
-    const csvPrice = csvEntry ? Math.round(csvEntry.price) : null;
 
-    const highlight = excelPrice && csvPrice && excelPrice !== csvPrice;
+    const csvPrice = csvEntry ? Math.round(csvEntry.price) : null;
 
     return (
       <div className="text-xs leading-tight">
-        <div className="text-blue-400">{excelPrice ?? "-"}</div>
-        <div className={`text-orange-400 ${highlight ? "font-bold" : ""}`}>
-          {csvPrice ?? "-"}
+        <div className="text-orange-400 font-semibold">
+          {csvPrice && csvPrice > 0 ? csvPrice : "-"}
         </div>
       </div>
     );
   };
+
+  // Діагностика
+  console.log("📊 RoomsTable render:", {
+    roomsCount: rooms.length,
+    datesCount: dates.length,
+    firstRoom: rooms[0]
+      ? {
+          name: rooms[0].name,
+          pricesCsvCount: rooms[0].pricesCsv?.length || 0,
+          firstPrice: rooms[0].pricesCsv?.[0],
+        }
+      : null,
+  });
 
   return (
     <table className="w-full bg-gray-800 rounded-lg text-sm border-collapse">
