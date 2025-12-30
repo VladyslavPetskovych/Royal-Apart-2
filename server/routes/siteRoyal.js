@@ -153,39 +153,54 @@ router.get("/copied-rooms", async (req, res) => {
   }
 });
 
-router.get("/copy-to-wodoo", async (req, res) => {
+router.get("/get-all-wodoo", async (req, res) => {
   try {
-    const rooms = await Room.find().lean();
+    // Get pagination parameters from query string
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
 
-    for (const room of rooms) {
-      const { _id, ...rest } = room;
-      rest.wdid = "0";
+    // Validate pagination parameters
+    const validPage = Math.max(1, page);
+    const validLimit = Math.max(1, Math.min(100, limit)); // Limit between 1 and 100
+    const skip = (validPage - 1) * validLimit;
 
-      const existing = await WodooApart.findOne({ name: rest.name });
-
-      if (!existing) {
-        await WodooApart.create(rest);
-        console.log(`➕ Created: ${rest.name}`);
-      } else {
-        const { wdid, _id, ...fieldsToUpdate } = existing.toObject();
-
-        await WodooApart.updateOne(
-          { _id: existing._id },
-          { $set: { ...rest, wdid: existing.wdid || "0" } }
-        );
-        console.log(`♻️ Updated (preserved wdid): ${rest.name}`);
-      }
+    // If no pagination params provided, return all records (backward compatibility)
+    if (!req.query.page && !req.query.limit) {
+      const allRooms = await WodooApart.find().lean();
+      return res.json({
+        success: true,
+        count: allRooms.length,
+        data: allRooms,
+      });
     }
 
-    return res.json({
+    // Get total count for pagination metadata
+    const totalCount = await WodooApart.countDocuments();
+
+    // Fetch paginated results
+    const rooms = await WodooApart.find().skip(skip).limit(validLimit).lean();
+
+    const totalPages = Math.ceil(totalCount / validLimit);
+
+    res.json({
       success: true,
-      message: "Rooms copied to wodoo_aparts with wdid successfully!",
+      count: totalCount,
+      data: rooms,
+      pagination: {
+        currentPage: validPage,
+        totalPages: totalPages,
+        itemsPerPage: validLimit,
+        totalItems: totalCount,
+        hasNextPage: validPage < totalPages,
+        hasPreviousPage: validPage > 1,
+      },
     });
   } catch (err) {
-    console.error("Error copying to wodoo_aparts:", err);
-    return res.status(500).json({
+    console.error("Error fetching all WodooApart records:", err);
+    res.status(500).json({
       success: false,
-      message: "Error copying rooms to wodoo_aparts",
+      message: "Помилка при отриманні даних",
+      error: err.message,
     });
   }
 });
@@ -224,8 +239,6 @@ router.get("/update-wodoo-images", async (req, res) => {
             headers: { "Content-Type": "text/xml" },
           }
         );
-
- 
 
         // Витягуємо всі image_link
         const matches = [
@@ -277,24 +290,6 @@ router.get("/update-wodoo-images", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Помилка при оновленні зображень",
-      error: err.message,
-    });
-  }
-});
-
-router.get("/get-all-wodoo", async (req, res) => {
-  try {
-    const allRooms = await WodooApart.find().lean();
-    res.json({
-      success: true,
-      count: allRooms.length,
-      data: allRooms,
-    });
-  } catch (err) {
-    console.error("Error fetching all WodooApart records:", err);
-    res.status(500).json({
-      success: false,
-      message: "Помилка при отриманні даних",
       error: err.message,
     });
   }
