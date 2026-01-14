@@ -43,9 +43,9 @@ function ExeptionalService() {
         </p>
 
         {/* IMAGES ROW */}
-        <div className="md:-mt-1  flex items-center justify-center gap-3  sm:gap-5 lg:gap-8">
+        <div className="md:-mt-5 lg:-mt-12  flex items-center justify-center gap-3  sm:gap-5 lg:gap-8">
           {/* LEFT STACK */}
-          <div className="mt-[140px] flex items-start gap-3 sm:mt-[220px] sm:gap-5 lg:mt-[260px] lg:gap-8">
+          <div className="mt-[180px] flex items-start gap-3 sm:mt-[220px] sm:gap-5 lg:mt-[260px] lg:gap-8">
             {/* img1: ONLY desktop (lg+) */}
             <img
               src={img1}

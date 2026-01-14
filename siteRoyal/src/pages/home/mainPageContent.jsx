@@ -26,7 +26,7 @@ function MainPageContent() {
                   ROYAL APART
                 </h2>
 
-                <p className="mt-4 text-4xl text-white font-finlandica text-shadow-hero2 text-center">
+                <p className="mt-4  text-lg md:text-4xl text-white font-finlandica text-shadow-hero2 text-center">
                   ЗНАЙДІТЬ СВОЮ ІДЕАЛЬНУ КВАРТИРУ!
                 </p>
               </div>
