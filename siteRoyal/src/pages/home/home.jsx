@@ -10,6 +10,14 @@ import "../../../src/hideScrollbar.css";
 import SEO from "../../components/utils/SEO";
 import Sale from "./home/saleButton";
 import MiniHotelButton from "../../components/buttons/miniHotelButton";
+import RecApartments from "../../components2/home/recApartments";
+import ExeptionalService from "../../components2/home/ExeptionalService";
+import ApartmentsBlock from "../../components2/home/apartmentsBlock/apartmentsBlock";
+import ReviewsBlock from "../../components2/home/reviewsBlock";
+import BlogSection from "../../components2/home/BlogSection";
+import History from "../../components2/home/History";
+import Instagram from "../../components2/home/InstagramSection";
+import FancySection from "../../components2/home/FancySection";
 
 function MainPageBody() {
   const { t } = useTranslation();
@@ -19,21 +27,16 @@ function MainPageBody() {
       <SEO />
 
       <MainPageContent />
+      <RecApartments />
+      <ExeptionalService />
+      <ApartmentsBlock />
+      <ReviewsBlock />
+      <BlogSection />
+      <History />
+      <Instagram />
+      <FancySection />
 
       <Sale />
-  
-      <Courosel />
-      <WhyRoyal />
-      <MiniHotelButton />
-      <Jaccuzzi />
-
-      <div className="w-[94vw] h-[330px] px-8 lg:h-[500px] mx-auto">
-        <SliderCategories />
-      </div>
-
-      <div className="left-0 top-0 w-full h-6 -mt-1">
-        <div className="bg-gradient-to-b from-black to-back w-full h-full transition-all duration-500"></div>
-      </div>
     </>
   );
 }

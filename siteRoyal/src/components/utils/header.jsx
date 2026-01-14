@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import logo from "../../assets/newDesign/logo/royal-apart-logo-vertical-short-white-cmyk.png";
@@ -43,6 +43,16 @@ function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // ✅ NEW: detect scroll
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 30);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const toggleMobileMenu = () => setIsMobileMenuOpen((p) => !p);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
@@ -53,9 +63,18 @@ function Header() {
     });
   };
 
+  // keep your open menu style exactly
   const headerOpenStyles = isMobileMenuOpen
     ? "bg-[#F6F0EA] text-[#1b1b1b] shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+    : scrolled
+    ? "bg-white text-[#1b1b1b] shadow-[0_6px_20px_rgba(0,0,0,0.08)]"
     : "bg-transparent text-brand-beige";
+
+  // ✅ NEW: use black theme when scrolled (and menu closed)
+  const closedText = scrolled ? "text-[#1b1b1b]" : "text-brand-beige";
+  const closedHover = scrolled
+    ? "hover:text-black/70"
+    : "hover:text-brand-bordo";
 
   return (
     <header
@@ -74,7 +93,7 @@ function Header() {
             className={[
               "lg:hidden p-2",
               "transition-colors duration-500 ease-out",
-              isMobileMenuOpen ? "text-[#1b1b1b]" : "text-brand-beige",
+              isMobileMenuOpen ? "text-[#1b1b1b]" : closedText,
             ].join(" ")}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
@@ -88,7 +107,7 @@ function Header() {
               "transition-colors duration-500 ease-out",
               isMobileMenuOpen
                 ? "text-[#1b1b1b] hover:opacity-80"
-                : "text-brand-beige hover:text-brand-bordo",
+                : `${closedText} ${closedHover}`,
             ].join(" ")}
           >
             <BurgerIcon open={isMobileMenuOpen} />
@@ -100,13 +119,14 @@ function Header() {
             className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center"
           >
             <span className="relative block h-[32px] w-[120px] lg:h-[50px] lg:w-[160px]">
+              {/* ✅ show black logo when scrolled OR menu open */}
               <img
                 src={logo}
                 alt="Royal Apart"
                 className={[
                   "absolute inset-0 h-full w-full object-contain",
                   "transition-opacity duration-500 ease-out",
-                  isMobileMenuOpen ? "opacity-0" : "opacity-100",
+                  isMobileMenuOpen || scrolled ? "opacity-0" : "opacity-100",
                 ].join(" ")}
               />
               <img
@@ -115,7 +135,7 @@ function Header() {
                 className={[
                   "absolute inset-0 h-full w-full object-contain",
                   "transition-opacity duration-500 ease-out",
-                  isMobileMenuOpen ? "opacity-100" : "opacity-0",
+                  isMobileMenuOpen || scrolled ? "opacity-100" : "opacity-0",
                 ].join(" ")}
               />
             </span>
@@ -128,7 +148,7 @@ function Header() {
                 "transition-colors duration-500 ease-out",
                 isMobileMenuOpen
                   ? "text-[#1b1b1b] hover:opacity-80"
-                  : "hover:text-brand-bordo",
+                  : `${closedHover}`,
               ].join(" ")}
             >
               ЗВ&apos;ЯЗАТИСЯ З НАМИ
@@ -143,6 +163,8 @@ function Header() {
               "transition-all duration-500 ease-out",
               isMobileMenuOpen
                 ? "bg-[#7B2D2D] text-[#F6F0EA]"
+                : scrolled
+                ? "bg-[#1b1b1b] text-white hover:opacity-90"
                 : "bg-brand-bordo text-brand-beige hover:brightness-110",
             ].join(" ")}
           >
