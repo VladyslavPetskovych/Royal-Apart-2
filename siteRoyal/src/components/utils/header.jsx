@@ -87,39 +87,42 @@ function Header() {
       ].join(" ")}
     >
       <nav className="h-full px-4 lg:px-6 py-3">
-        <div className="mx-auto max-w-screen-xl relative flex h-full items-center justify-between">
-          <button
-            onClick={toggleMobileMenu}
-            className={[
-              "lg:hidden p-2",
-              "transition-colors duration-500 ease-out",
-              isMobileMenuOpen ? "text-[#1b1b1b]" : closedText,
-            ].join(" ")}
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            <BurgerIcon open={isMobileMenuOpen} />
-          </button>
+        <div className="mx-auto max-w-screen-xl relative flex h-full items-center">
+          {/* LEFT */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleMobileMenu}
+              className={[
+                "lg:hidden p-2",
+                "transition-colors duration-500 ease-out",
+                isMobileMenuOpen ? "text-[#1b1b1b]" : closedText,
+              ].join(" ")}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              <BurgerIcon open={isMobileMenuOpen} />
+            </button>
 
-          <button
-            onClick={toggleMobileMenu}
-            className={[
-              "hidden lg:flex items-center gap-3 uppercase tracking-[0.25em] text-[15px] font-medium",
-              "transition-colors duration-500 ease-out",
-              isMobileMenuOpen
-                ? "text-[#1b1b1b] hover:opacity-80"
-                : `${closedText} ${closedHover}`,
-            ].join(" ")}
-          >
-            <BurgerIcon open={isMobileMenuOpen} />
-            <span>ЗНАЙТИ АПАРТАМЕНТИ</span>
-          </button>
+            <button
+              onClick={toggleMobileMenu}
+              className={[
+                "hidden lg:flex items-center gap-3 uppercase tracking-[0.25em] text-[15px] font-medium",
+                "transition-colors duration-500 ease-out",
+                isMobileMenuOpen
+                  ? "text-[#1b1b1b] hover:opacity-80"
+                  : `${closedText} ${closedHover}`,
+              ].join(" ")}
+            >
+              <BurgerIcon open={isMobileMenuOpen} />
+              <span>ЗНАЙТИ АПАРТАМЕНТИ</span>
+            </button>
+          </div>
 
+          {/* CENTER LOGO (always centered) */}
           <Link
             to="/"
-            className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center"
           >
             <span className="relative block h-[32px] w-[120px] lg:h-[50px] lg:w-[160px]">
-              {/* ✅ show black logo when scrolled OR menu open */}
               <img
                 src={logo}
                 alt="Royal Apart"
@@ -141,35 +144,38 @@ function Header() {
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-3 text-[15px] tracking-[0.18em] uppercase">
+          {/* RIGHT */}
+          <div className="ml-auto flex items-center">
+            <div className="hidden lg:flex items-center gap-3 text-[15px] tracking-[0.18em] uppercase">
+              <Link
+                to="/rules"
+                className={[
+                  "transition-colors duration-500 ease-out",
+                  isMobileMenuOpen
+                    ? "text-[#1b1b1b] hover:opacity-80"
+                    : `${closedHover}`,
+                ].join(" ")}
+              >
+              ЗАБрОНЮВАТИ
+              </Link>
+            </div>
+
             <Link
-              to="/rules"
+              to="/book"
               className={[
-                "transition-colors duration-500 ease-out",
+                "lg:hidden h-[35px] px-3 flex items-center justify-center",
+                "text-[11px] font-semibold uppercase tracking-[0.14em] leading-none rounded-none",
+                "transition-all duration-500 ease-out",
                 isMobileMenuOpen
-                  ? "text-[#1b1b1b] hover:opacity-80"
-                  : `${closedHover}`,
+                  ? "bg-[#7B2D2D] text-[#F6F0EA]"
+                  : scrolled
+                  ? "bg-[#1b1b1b] text-white hover:opacity-90"
+                  : "bg-brand-bordo text-brand-beige hover:brightness-110",
               ].join(" ")}
             >
-              ЗВ&apos;ЯЗАТИСЯ З НАМИ
+              ЗАБРОНЮВАТИ
             </Link>
           </div>
-
-          <Link
-            to="/rules"
-            className={[
-              "lg:hidden h-[35px] px-4 flex items-center justify-center",
-              "text-[12px] font-semibold uppercase tracking-[0.14em] leading-none rounded-none",
-              "transition-all duration-500 ease-out",
-              isMobileMenuOpen
-                ? "bg-[#7B2D2D] text-[#F6F0EA]"
-                : scrolled
-                ? "bg-[#1b1b1b] text-white hover:opacity-90"
-                : "bg-brand-bordo text-brand-beige hover:brightness-110",
-            ].join(" ")}
-          >
-            ЗВ&apos;ЯЗАТИСЯ
-          </Link>
         </div>
 
         <BurgerMenu
