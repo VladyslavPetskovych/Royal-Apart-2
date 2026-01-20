@@ -75,7 +75,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               {/* SUB */}
               <div className="mt-[44px] space-y-[10px]">
                 <Link
-                  to="/offers"
+                  to="/"
                   onClick={onClose}
                   className={[
                     "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
@@ -92,7 +92,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   onClick={onClose}
                   className={[
                     "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
-                    isActiveRoute?.("/help")
+                    isActiveRoute?.("/rules")
                       ? "text-[#1b1b1b]"
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
@@ -114,7 +114,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 </Link>
 
                 <Link
-                  to="/contacts"
+                  to="/"
                   onClick={onClose}
                   className={[
                     "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
