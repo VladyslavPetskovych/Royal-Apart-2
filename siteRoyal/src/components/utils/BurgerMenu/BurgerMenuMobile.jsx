@@ -24,7 +24,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 {[
                   { to: "/aparts", label: "АПАРТАМЕНТИ" },
                   { to: "/", label: "НАШІ СЕРВІСИ" },
-                  { to: "/", label: "ПРО НАС" },
+                  { to: "/rules", label: "ПРАВИЛА" },
                 ].map((item) => (
                   <Link
                     key={item.to}
@@ -45,7 +45,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               <div className="mt-5 space-y-1.5">
                 {[
                   { to: "/", label: "ВИГІДНІ ПРОПОЗИЦІЇ" },
-                  { to: "/rules", label: "ДОПОМОГА ТА ПИТАННЯ" },
+                  { to: "/rules", label: "ПРАВИЛА" },
                   { to: "/", label: "БЛОГ" },
                   { to: "/contacts", label: "КОНТАКТИ" },
                 ].map((item) => (
@@ -122,7 +122,6 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 className="inline-flex items-center justify-between gap-3 border border-[#7B2D2D]/60 px-4 py-2.5 text-[12px] font-semibold text-[#7B2D2D]"
               >
                 @RoyalApartBot{" "}
-             
               </a>
             </div>
           </div>

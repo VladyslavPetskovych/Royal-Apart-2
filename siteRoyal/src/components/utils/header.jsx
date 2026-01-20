@@ -148,7 +148,7 @@ function Header() {
           <div className="ml-auto flex items-center">
             <div className="hidden lg:flex items-center gap-3 text-[15px] tracking-[0.18em] uppercase">
               <Link
-                to="/rules"
+                to="/book"
                 className={[
                   "transition-colors duration-500 ease-out",
                   isMobileMenuOpen
