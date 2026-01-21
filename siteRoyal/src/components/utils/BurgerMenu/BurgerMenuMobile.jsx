@@ -47,7 +47,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   { to: "/", label: "ВИГІДНІ ПРОПОЗИЦІЇ" },
                   { to: "/rules", label: "ПРАВИЛА" },
                   { to: "/", label: "БЛОГ" },
-                  { to: "/contacts", label: "КОНТАКТИ" },
+                  { to: "/rules", label: "КОНТАКТИ" },
                 ].map((item) => (
                   <Link
                     key={item.to}

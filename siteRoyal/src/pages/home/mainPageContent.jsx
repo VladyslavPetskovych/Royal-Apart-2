@@ -32,7 +32,7 @@ function MainPageContent() {
               </div>
             </div>
 
-            <BookingSearchBar />
+            {/* <BookingSearchBar /> */}
 
             <HeroFeatures />
           </div>

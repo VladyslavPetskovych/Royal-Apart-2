@@ -40,7 +40,12 @@ function IconTelegram(props) {
 function IconArrow(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <path d="M5 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M5 12h12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
       <path
         d="M13 6l6 6-6 6"
         stroke="currentColor"
@@ -65,13 +70,28 @@ export default function Footer() {
             </div>
 
             <div className="mt-6 flex items-center gap-5 lg:mt-14">
-              <a href="#" aria-label="Facebook" className="text-black/85 transition-opacity hover:opacity-70">
-                <IconFacebook className="h-7 w-7" />
+              <a
+                href="https://t.me/+380676777330"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Telegram"
+                className="text-black/85 transition-opacity hover:opacity-70"
+              >
+                <IconTelegram className="h-7 w-7" />
               </a>
-              <a href="#" aria-label="Instagram" className="text-black/85 transition-opacity hover:opacity-70">
+
+              <a
+                href="https://www.instagram.com/royal.apart"
+                aria-label="Instagram"
+                className="text-black/85 transition-opacity hover:opacity-70"
+              >
                 <IconInstagram className="h-7 w-7" />
               </a>
-              <a href="#" aria-label="WhatsApp" className="text-black/85 transition-opacity hover:opacity-70">
+              <a
+                href="#"
+                aria-label="WhatsApp"
+                className="text-black/85 transition-opacity hover:opacity-70"
+              >
                 <IconWhatsApp className="h-7 w-7" />
               </a>
             </div>
@@ -107,7 +127,7 @@ export default function Footer() {
                 ІНШЕ
               </div>
               <nav className="mt-7 flex flex-col gap-4 text-[15px] text-start items-start text-black/65">
-                <Link className="hover:text-black" to="/contacts">
+                <Link className="hover:text-black" to="/rules">
                   КОНТАКТИ
                 </Link>
                 <Link className="hover:text-black" to="/">
@@ -155,7 +175,8 @@ export default function Footer() {
           {/* telegram bot */}
           <div className="font-finlandica">
             <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
-              З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ ЖИТЛО!
+              З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
+              ЖИТЛО!
             </div>
 
             <a
@@ -164,7 +185,9 @@ export default function Footer() {
               rel="noreferrer"
               className="mt-5 inline-flex items-center gap-4 border border-[#8B3A3A] px-6 py-4 text-[#8B3A3A]"
             >
-              <span className="font-finlandica text-[16px] font-semibold">@RoyalApartBot</span>
+              <span className="font-finlandica text-[16px] font-semibold">
+                @RoyalApartBot
+              </span>
               <IconTelegram className="h-6 w-6" />
             </a>
           </div>
@@ -177,7 +200,6 @@ export default function Footer() {
             >
               Booking<span className="font-normal">.com</span>
             </Link>
-
           </div>
         </div>
 
