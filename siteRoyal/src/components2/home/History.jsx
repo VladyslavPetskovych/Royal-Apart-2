@@ -1,14 +1,16 @@
 import React from "react";
 import historyImg1 from "../../assets/newDesign/home/history1.png";
 import historyImg2 from "../../assets/newDesign/home/history2.png";
+import { Link } from "react-router-dom";
 
 function Tile({ img, top, bottom }) {
   return (
-    <div
+    <Link
       className="
         group relative w-full overflow-hidden bg-[#9b8f80]
         md:w-1/2
       "
+      to="/service"
     >
       {/* ✅ mobile: tall tiles like screenshot, md+: square */}
       <div className="relative flex aspect-[9/11] items-center justify-center md:aspect-square">
@@ -37,7 +39,7 @@ function Tile({ img, top, bottom }) {
           </p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -45,7 +47,7 @@ export default function History() {
   return (
     <div className="w-full">
       <div className="flex w-full flex-col md:flex-row">
-        <Tile img={historyImg1} top="НАША" bottom="ІСТОРІЯ" />
+        <Tile img={historyImg1} top="НАШ" bottom="СЕРВІС" />
         <Tile img={historyImg2} top="НАШІ" bottom="АПАРТАМЕНТИ" />
       </div>
     </div>

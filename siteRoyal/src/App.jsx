@@ -13,6 +13,7 @@ import NotFound from "./components/utils/NotFound";
 import Loader from "./components/utils/loader";
 import TermsAndConditions from "./pages/thermsAndConditions";
 import PrivacyPolicy from "./pages/privacyPolicy";
+import Service from "./pages/Service";
 
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -57,6 +58,7 @@ function AppContent() {
             <Route path="/mini-hotel" element={<MiniHotel />} />
             <Route path="/room/:roomId" element={<RoomPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/service" element={<Service />} />
             <Route
               path="/terms-and-conditions"
               element={<TermsAndConditions />}

@@ -46,7 +46,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 </Link>
 
                 <Link
-                  to="/"
+                  to="/service"
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
