@@ -1,4 +1,7 @@
 import React, { useMemo, useState } from "react";
+import SearchBar from "../../../components2/home/apartmentsBlock/SearchBar";
+// ✅ adjust path if your structure differs
+// Option: pass a custom node instead (see note below)
 
 export default function ApartmentsHeader({
   roomsOptions = [],
@@ -6,6 +9,13 @@ export default function ApartmentsHeader({
   guestsOptions = [],
   filter,
   setFilter,
+
+  // ✅ NEW
+  showSearch = false,
+  searchValue = "",
+  onSearchChange,
+  onSearchClear,
+  searchPlaceholder = "Пошук апартаментів... ",
 }) {
   const [open, setOpen] = useState(false);
 
@@ -36,6 +46,16 @@ export default function ApartmentsHeader({
           </svg>
         </button>
       </div>
+
+      {/* ✅ optional search */}
+      {showSearch && (
+        <SearchBar
+          value={searchValue}
+          onChange={onSearchChange}
+          onClear={onSearchClear}
+          placeholder={searchPlaceholder}
+        />
+      )}
 
       {/* panel (pushes content down) */}
       {open && (

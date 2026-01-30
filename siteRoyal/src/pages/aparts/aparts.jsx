@@ -10,44 +10,29 @@ function Pagination({ page, totalPages, onPage, windowSize = 4 }) {
   const safePage = clamp(page);
 
   const pages = [];
-
-  // Case 1: small number of pages → show all
   if (totalPages <= windowSize + 2) {
     for (let i = 1; i <= totalPages; i++) pages.push(i);
   } else {
-    // Case 2: beginning
     if (safePage <= windowSize) {
       for (let i = 1; i <= windowSize; i++) pages.push(i);
       pages.push("dots-right");
       pages.push(totalPages);
-    }
-
-    // Case 3: middle
-    else if (safePage > windowSize && safePage <= totalPages - windowSize) {
+    } else if (safePage > windowSize && safePage <= totalPages - windowSize) {
       pages.push(1);
       pages.push("dots-left");
-
-      for (let i = safePage - 1; i <= safePage + 1; i++) {
-        pages.push(i);
-      }
-
+      for (let i = safePage - 1; i <= safePage + 1; i++) pages.push(i);
       pages.push("dots-right");
       pages.push(totalPages);
-    }
-
-    // Case 4: end
-    else {
+    } else {
       pages.push(1);
       pages.push("dots-left");
-      for (let i = totalPages - windowSize + 1; i <= totalPages; i++) {
+      for (let i = totalPages - windowSize + 1; i <= totalPages; i++)
         pages.push(i);
-      }
     }
   }
 
   return (
     <div className="mt-10 flex items-center justify-center gap-2">
-      {/* Prev */}
       <button
         type="button"
         onClick={() => onPage(clamp(safePage - 1))}
@@ -85,11 +70,10 @@ function Pagination({ page, totalPages, onPage, windowSize = 4 }) {
             >
               {p}
             </button>
-          )
+          ),
         )}
       </div>
 
-      {/* Next */}
       <button
         type="button"
         onClick={() => onPage(clamp(safePage + 1))}
@@ -110,33 +94,30 @@ function Pagination({ page, totalPages, onPage, windowSize = 4 }) {
 export default function Aparts() {
   const apartments = useSelector((s) => s.apartStore.apartments) || [];
 
-  // ✅ show more per page
-  const [perPage, setPerPage] = useState(18); // default
-
-  // ✅ page
+  const [perPage, setPerPage] = useState(18);
   const [page, setPage] = useState(1);
 
-  // ✅ filters
   const [filter, setFilter] = useState({
     rooms: "Усі",
     floor: "Усі",
     guests: "Усі",
   });
 
-  // responsive perPage (more than before)
+  // ✅ SEARCH STATE (this fixes "query is not defined")
+  const [query, setQuery] = useState("");
+
   useEffect(() => {
     const updatePerPage = () => {
       const w = window.innerWidth;
-      if (w < 768) setPerPage(8); // mobile
-      else if (w < 1024) setPerPage(12); // tablet
-      else setPerPage(18); // desktop
+      if (w < 768) setPerPage(10);
+      else if (w < 1024) setPerPage(14);
+      else setPerPage(16);
     };
     updatePerPage();
     window.addEventListener("resize", updatePerPage);
     return () => window.removeEventListener("resize", updatePerPage);
   }, []);
 
-  // build dropdown options
   const { roomsOptions, floorsOptions, guestsOptions } = useMemo(() => {
     const r = new Set();
     const f = new Set();
@@ -157,24 +138,31 @@ export default function Aparts() {
     };
   }, [apartments]);
 
-  // apply filters
   const filtered = useMemo(() => {
     const roomsVal = filter.rooms === "Усі" ? null : Number(filter.rooms);
     const floorVal = filter.floor === "Усі" ? null : Number(filter.floor);
     const guestsVal = filter.guests === "Усі" ? null : Number(filter.guests);
 
+    const q = query.trim().toLowerCase();
+
     return apartments.filter((a) => {
       if (roomsVal !== null && Number(a?.numrooms) !== roomsVal) return false;
       if (floorVal !== null && Number(a?.floor) !== floorVal) return false;
       if (guestsVal !== null && Number(a?.guests) < guestsVal) return false;
+
+      // ✅ search match
+      if (q) {
+        const name = String(a?.name ?? "").toLowerCase();
+        if (!name.includes(q)) return false;
+      }
+
       return true;
     });
-  }, [apartments, filter.rooms, filter.floor, filter.guests]);
+  }, [apartments, filter.rooms, filter.floor, filter.guests, query]);
 
-  // ✅ reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [filter.rooms, filter.floor, filter.guests]);
+  }, [filter.rooms, filter.floor, filter.guests, query]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, totalPages);
@@ -195,6 +183,10 @@ export default function Aparts() {
               guestsOptions={guestsOptions}
               filter={filter}
               setFilter={setFilter}
+              showSearch
+              searchValue={query}
+              onSearchChange={setQuery}
+              onSearchClear={() => setQuery("")}
             />
 
             <ApartmentsGrid apartments={visible} />
