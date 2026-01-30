@@ -50,7 +50,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/")
+                    isActiveRoute?.("/service")
                       ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
@@ -59,11 +59,11 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 </Link>
 
                 <Link
-                  to="/"
+                  to="/about-us"
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/")
+                    isActiveRoute?.("/about-us")
                       ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
@@ -75,19 +75,6 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               {/* SUB */}
               <div className="mt-[44px] space-y-[10px]">
                 <Link
-                  to="/"
-                  onClick={onClose}
-                  className={[
-                    "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
-                    isActiveRoute?.("/")
-                      ? "text-[#1b1b1b]"
-                      : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
-                  ].join(" ")}
-                >
-                  ВИГІДНІ ПРОПОЗИЦІЇ
-                </Link>
-
-                <Link
                   to="/rules"
                   onClick={onClose}
                   className={[
@@ -97,20 +84,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
                 >
-                  ДОПОМОГА ТА ПИТАННЯ
-                </Link>
-
-                <Link
-                  to="/"
-                  onClick={onClose}
-                  className={[
-                    "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
-                    isActiveRoute?.("/")
-                      ? "text-[#1b1b1b]"
-                      : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
-                  ].join(" ")}
-                >
-                  БЛОГ
+                  ПРАВИЛА
                 </Link>
 
                 <Link
@@ -124,6 +98,18 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   ].join(" ")}
                 >
                   КОНТАКТИ
+                </Link>
+                <Link
+                  to="/"
+                  onClick={onClose}
+                  className={[
+                    "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
+                    isActiveRoute?.("/")
+                      ? "text-[#1b1b1b]"
+                      : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
+                  ].join(" ")}
+                >
+                  БЛОГ
                 </Link>
               </div>
 

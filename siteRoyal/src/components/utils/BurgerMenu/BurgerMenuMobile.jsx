@@ -23,7 +23,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               <div className="space-y-1">
                 {[
                   { to: "/aparts", label: "АПАРТАМЕНТИ" },
-                  { to: "/", label: "НАШІ СЕРВІСИ" },
+                  { to: "/service", label: "НАШІ СЕРВІСИ" },
                   { to: "/rules", label: "ПРАВИЛА" },
                 ].map((item) => (
                   <Link
@@ -44,10 +44,9 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
 
               <div className="mt-5 space-y-1.5">
                 {[
-                  { to: "/service", label: "НАШІ СЕРВІСИ" },
-                  { to: "/rules", label: "ПРАВИЛА" },
+                  { to: "/about-us", label: "ПРО НАС" },
+                  { to: "/", label: "КОНТАКТИ" },
                   { to: "/", label: "БЛОГ" },
-                  { to: "/rules", label: "КОНТАКТИ" },
                 ].map((item) => (
                   <Link
                     key={item.to}
