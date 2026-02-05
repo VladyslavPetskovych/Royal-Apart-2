@@ -6,7 +6,7 @@ import Book from "./pages/book/book";
 import Home from "./pages/home/home";
 import Aparts from "./pages/aparts/aparts";
 import Rules from "./pages/rules/rules";
-import Contact from "./pages/contact";
+import Contact from "./pages/Contact";
 import RoomPage from "./pages/roomPage/roomPage";
 import MiniHotel from "./pages/mini-hotel/MiniHotel";
 import NotFound from "./components/utils/NotFound";

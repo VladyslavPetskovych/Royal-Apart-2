@@ -45,7 +45,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               <div className="mt-5 space-y-1.5">
                 {[
                   { to: "/about-us", label: "ПРО НАС" },
-                  { to: "/", label: "КОНТАКТИ" },
+                  { to: "/contact", label: "КОНТАКТИ" },
                   { to: "/", label: "БЛОГ" },
                 ].map((item) => (
                   <Link

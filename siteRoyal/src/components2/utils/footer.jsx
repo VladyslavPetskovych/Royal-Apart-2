@@ -23,8 +23,7 @@ function IconInstagram(props) {
 function IconWhatsApp(props) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
-      <path d="M12 2a9.7 9.7 0 0 0-8.4 14.6L2 22l5.6-1.5A9.8 9.8 0 1 0 12 2zm0 2a7.8 7.8 0 0 1 0 15.6c-1.3 0-2.6-.3-3.7-.9l-.4-.2-3.2.9.9-3.1-.2-.4A7.8 7.8 0 0 1 12 4z" />
-      <path d="M9.2 7.6c-.2-.5-.4-.5-.6-.5h-.5c-.2 0-.4.1-.6.3-.2.2-.7.7-.7 1.7s.7 1.9.8 2.1c.1.2 1.4 2.3 3.4 3.1 1.7.7 2 .6 2.4.5.4-.1 1.1-.5 1.2-1 .1-.5.1-1 0-1.1-.1-.1-.3-.2-.6-.3l-1.3-.6c-.2-.1-.4-.1-.5.1l-.6.8c-.1.2-.3.2-.5.1-.2-.1-.9-.3-1.6-1.1-.6-.6-.9-1.3-1-1.5-.1-.2 0-.4.1-.5l.4-.5c.1-.1.1-.3.1-.4l-.5-1.3z" />
+      <path d="M20.52 3.48A11.91 11.91 0 0 0 12 0C5.38 0 .01 5.37.01 12c0 2.11.55 4.17 1.6 6L0 24l6.2-1.62A11.94 11.94 0 0 0 12 24c6.62 0 11.99-5.37 11.99-12 0-3.2-1.25-6.2-3.47-8.52ZM12 21.82c-1.86 0-3.68-.5-5.27-1.45l-.38-.22-3.68.96.98-3.59-.25-.37A9.83 9.83 0 0 1 2.18 12C2.18 6.57 6.57 2.18 12 2.18c2.62 0 5.08 1.02 6.94 2.88A9.75 9.75 0 0 1 21.82 12c0 5.43-4.39 9.82-9.82 9.82Zm5.67-7.35c-.31-.16-1.86-.92-2.15-1.02-.29-.11-.5-.16-.71.16-.21.31-.81 1.02-.99 1.23-.18.2-.36.23-.67.08-.31-.16-1.3-.48-2.48-1.54-.92-.82-1.54-1.83-1.72-2.14-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.54-.08-.16-.71-1.72-.97-2.36-.26-.62-.52-.54-.71-.55h-.6c-.21 0-.55.08-.84.39-.29.31-1.1 1.07-1.1 2.62 0 1.54 1.13 3.03 1.29 3.24.16.21 2.21 3.38 5.35 4.74.75.33 1.34.52 1.79.66.75.24 1.45.21 1.99.13.61-.09 1.86-.76 2.12-1.49.26-.73.26-1.36.18-1.49-.08-.13-.29-.21-.6-.37Z" />
     </svg>
   );
 }
@@ -88,7 +87,9 @@ export default function Footer() {
                 <IconInstagram className="h-7 w-7" />
               </a>
               <a
-                href="#"
+                href="https://wa.me/380676777330"
+                target="_blank"
+                rel="noreferrer"
                 aria-label="WhatsApp"
                 className="text-black/85 transition-opacity hover:opacity-70"
               >
@@ -97,8 +98,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* ✅ MOBILE: 2 columns links like screenshot
-              ✅ DESKTOP: stays as before using lg:contents */}
           <div className="order-2 grid grid-cols-2 gap-x-10 gap-y-10 lg:order-none lg:contents">
             {/* links col 1 */}
             <div className="font-finlandica flex items-start flex-col">
@@ -173,7 +172,7 @@ export default function Footer() {
         {/* MIDDLE */}
         <div className="flex flex-col gap-10 pb-10 lg:flex-row lg:items-center lg:justify-between lg:pb-14">
           {/* telegram bot */}
-          <div className="font-finlandica">
+          <div className="font-finlandica flex items-start flex-col">
             <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
               З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
               ЖИТЛО!
@@ -183,7 +182,7 @@ export default function Footer() {
               href="https://t.me/RoyalApartBot"
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-4 border border-[#8B3A3A] px-6 py-4 text-[#8B3A3A]"
+              className="mt-5 inline-flex items-center justify-start gap-4 border border-[#8B3A3A] px-6 py-4 text-[#8B3A3A]"
             >
               <span className="font-finlandica text-[16px] font-semibold">
                 @RoyalApartBot

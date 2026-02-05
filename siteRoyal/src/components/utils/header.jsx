@@ -156,7 +156,7 @@ function Header() {
                     : `${closedHover}`,
                 ].join(" ")}
               >
-              ЗАБрОНЮВАТИ
+              ЗАБРОНЮВАТИ
               </Link>
             </div>
 
