@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchApartments,
@@ -11,6 +12,7 @@ import ApartHighlight from "../../components2/utils/ApartHighlight";
 import { Link } from "react-router-dom";
 
 export default function RecApartments() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const apartments = useSelector(selectApartments);
@@ -36,19 +38,19 @@ export default function RecApartments() {
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-10 sm:px-6">
         {/* TITLE */}
         <h2 className="font-finlandica flex justify-start text-[18px] font-semibold uppercase tracking-[0.8px] text-brand-black">
-          РЕКОМЕНДОВАНІ АПАРТАМЕНТИ
+          {t("recommended_apartments")}
         </h2>
 
         {/* STATES */}
         {status === "loading" && (
           <div className="mt-6 font-finlandica text-[14px] text-brand-black/60">
-            Loading…
+            {t("loading")}
           </div>
         )}
 
         {status === "failed" && (
           <div className="mt-6 font-finlandica text-[14px] text-brand-black/70">
-            Failed to load apartments{error ? `: ${String(error)}` : "."}
+            {t("failed_load_apartments")}{error ? `: ${String(error)}` : "."}
           </div>
         )}
 
@@ -90,7 +92,7 @@ export default function RecApartments() {
             to="/aparts"
             className="group inline-flex items-center justify-center gap-3 bg-brand-bordo px-8 py-4 font-finlandica text-[14px] font-medium text-brand-beige"
           >
-            Переглянути Всі Апартаменти
+            {t("view_all_apartments")}
             <span className="text-brand-beige transition-transform duration-200 group-hover:translate-x-[2px]">
               →
             </span>

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import SearchBar from "../../../components2/home/apartmentsBlock/SearchBar";
 // ✅ adjust path if your structure differs
 // Option: pass a custom node instead (see note below)
@@ -17,18 +18,19 @@ export default function ApartmentsHeader({
   onSearchClear,
   searchPlaceholder = "Пошук апартаментів... ",
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
-  const rooms = useMemo(() => ["Усі", ...roomsOptions], [roomsOptions]);
-  const floors = useMemo(() => ["Усі", ...floorsOptions], [floorsOptions]);
-  const guests = useMemo(() => ["Усі", ...guestsOptions], [guestsOptions]);
+  const rooms = useMemo(() => ["all", ...roomsOptions], [roomsOptions]);
+  const floors = useMemo(() => ["all", ...floorsOptions], [floorsOptions]);
+  const guests = useMemo(() => ["all", ...guestsOptions], [guestsOptions]);
 
   return (
     <div className="mb-10">
       {/* row */}
       <div className="flex items-center justify-between">
         <h2 className="font-finlandica flex justify-start text-[18px] font-semibold uppercase tracking-[0.8px] text-brand-black">
-          УСІ АПАРТАМЕНТИ
+          {t("all_apartments")}
         </h2>
 
         <button
@@ -36,7 +38,7 @@ export default function ApartmentsHeader({
           onClick={() => setOpen((v) => !v)}
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-black"
         >
-          <span>Фільтр</span>
+          <span>{t("filter")}</span>
           <svg width="18" height="18" fill="none">
             <path
               d="M3 5h12M6 9h6M8 13h2"
@@ -64,7 +66,7 @@ export default function ApartmentsHeader({
             {/* rooms */}
             <div>
               <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
-                Кімнати
+                {t("rooms")}
               </div>
               <select
                 value={String(filter.rooms)}
@@ -75,7 +77,7 @@ export default function ApartmentsHeader({
               >
                 {rooms.map((v) => (
                   <option key={String(v)} value={String(v)}>
-                    {v === "Усі" ? "Усі" : `${v} кімн.`}
+                    {v === "all" ? t("all") : `${v} ${t("rooms_short")}`}
                   </option>
                 ))}
               </select>
@@ -84,7 +86,7 @@ export default function ApartmentsHeader({
             {/* floor */}
             <div>
               <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
-                Поверх
+                {t("floor")}
               </div>
               <select
                 value={String(filter.floor)}
@@ -95,7 +97,7 @@ export default function ApartmentsHeader({
               >
                 {floors.map((v) => (
                   <option key={String(v)} value={String(v)}>
-                    {v === "Усі" ? "Усі" : `${v} поверх`}
+                    {v === "all" ? t("all") : `${v} ${t("floor_unit")}`}
                   </option>
                 ))}
               </select>
@@ -104,7 +106,7 @@ export default function ApartmentsHeader({
             {/* guests */}
             <div>
               <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
-                Гостей (до)
+                {t("guests_up_to")}
               </div>
               <select
                 value={String(filter.guests)}
@@ -115,7 +117,7 @@ export default function ApartmentsHeader({
               >
                 {guests.map((v) => (
                   <option key={String(v)} value={String(v)}>
-                    {v === "Усі" ? "Усі" : `${v} гостей`}
+                    {v === "all" ? t("all") : `${v} ${t("guests_unit")}`}
                   </option>
                 ))}
               </select>
@@ -126,11 +128,11 @@ export default function ApartmentsHeader({
             <button
               type="button"
               onClick={() =>
-                setFilter({ rooms: "Усі", floor: "Усі", guests: "Усі" })
+                setFilter({ rooms: "all", floor: "all", guests: "all" })
               }
               className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/60 hover:text-black"
             >
-              Скинути
+              {t("reset")}
             </button>
 
             <button
@@ -138,7 +140,7 @@ export default function ApartmentsHeader({
               onClick={() => setOpen(false)}
               className="rounded-lg bg-black px-4 py-2 font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-white hover:opacity-90"
             >
-              Готово
+              {t("done")}
             </button>
           </div>
         </div>

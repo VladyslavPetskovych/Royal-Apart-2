@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Header from "./components/utils/header";
 import Footer from "./components2/utils/footer";
 import Book from "./pages/book/book";
@@ -24,23 +24,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchApartments, selectApartStatus } from "./redux/apartSlice";
 
 function AppContent() {
-  const location = useLocation();
-  const [loading, setLoading] = useState(true);
-
   const dispatch = useDispatch();
   const status = useSelector(selectApartStatus);
 
-  // твій лоадер на зміну route
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(timer);
-  }, [location]);
-
-  // один раз тягнемо апартаменти (і не дублюємо запити)
+  // fetch apartments once on mount
   useEffect(() => {
     if (status === "idle") dispatch(fetchApartments());
   }, [dispatch, status]);
+
+  // show loader until apartments are loaded (home & aparts need this data)
+  const loading = status === "idle" || status === "loading";
 
   return (
     <>

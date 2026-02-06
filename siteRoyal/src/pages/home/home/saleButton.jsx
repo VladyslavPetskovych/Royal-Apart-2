@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Modal from "./saleModal"; // Import the Modal component
+import { useTranslation } from "react-i18next";
+import Modal from "./saleModal";
 import axios from "axios";
 
 function SaleButton() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [hasSales, setHasSales] = useState(false);
 
@@ -42,7 +44,7 @@ function SaleButton() {
           onClick={toggleModal}
         >
           <p className="font-roboto shadow-lg shadow-orange-500/50">
-            Спеціальні пропозиції🎁
+            {t("special_offers")}
           </p>
         </button>
       )}

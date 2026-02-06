@@ -12,6 +12,8 @@ const LanguageSelector = () => {
     { code: "en", name: t("English"), flag: engFlag },
   ];
 
+  const currentLang = (i18n.resolvedLanguage || i18n.language || "uk").split("-")[0];
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
@@ -29,7 +31,7 @@ const LanguageSelector = () => {
       >
         <img
           className="w-8 h-6"
-          src={languages.find((lang) => lang.code === i18n.language)?.flag}
+          src={languages.find((lang) => lang.code === currentLang)?.flag}
           alt="Language flag"
         />
       </button>

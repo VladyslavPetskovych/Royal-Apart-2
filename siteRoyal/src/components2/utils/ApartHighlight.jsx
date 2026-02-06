@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
@@ -88,6 +89,7 @@ function IconUsers(props) {
 }
 
 export default function ApartHighlight({ apartment }) {
+  const { t } = useTranslation();
   if (!apartment) return null;
 
   const { _id, name, floor, surface, beds, guests, imgurl,wubid } = apartment;
@@ -118,7 +120,7 @@ export default function ApartHighlight({ apartment }) {
           <span>вул. {name}</span>
           <span className="mx-2 text-brand-black/35">|</span>
           <span className="font-semibold text-brand-black/60">
-            {floor} поверх
+            {floor} {t("floor_unit")}
           </span>
         </div>
 
@@ -126,17 +128,17 @@ export default function ApartHighlight({ apartment }) {
         <div className="mt-2 flex flex-wrap items-center gap-x-7 gap-y-2 font-finlandica text-[14px] text-brand-black/55">
           <span className="inline-flex items-start gap-3">
             <IconCube className="h-[22px] w-[22px] text-brand-black/55" />
-            {surface} м2
+            {surface} м²
           </span>
 
           <span className="inline-flex items-start gap-3">
             <IconBed className="h-[22px] w-[22px] text-brand-black/55" />
-            {beds} Спальні
+            {beds} {t("bedrooms")}
           </span>
 
           <span className="inline-flex items-start gap-3">
             <IconUsers className="h-[22px] w-[22px] text-brand-black/55" />
-            {guests} Осіб
+            {guests} {t("persons")}
           </span>
         </div>
       </div>

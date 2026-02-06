@@ -1,9 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import menuPhoto from "../../../assets/newDesign/home/testFon.webp";
 import LanguageSelector from "../LanguageSelector";
 
-function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
+function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) {
+  const { t: tHook } = useTranslation();
+  const t = tProp || tHook;
   return (
     <div className="fixed inset-0 z-[9999] font-finlandica">
       {/* overlay (fade in) */}
@@ -23,7 +26,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label="Close menu"
+                  aria-label={t("close_menu")}
                   className="-ml-2 inline-flex h-16 w-16 items-center justify-center text-[56px] leading-none text-[#1b1b1b]/80 hover:text-[#1b1b1b]"
                 >
                   ×
@@ -42,7 +45,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
-                  АПАРТАМЕНТИ
+                  {t("nav_apartments")}
                 </Link>
 
                 <Link
@@ -55,7 +58,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
-                  НАШІ СЕРВІСИ
+                  {t("our_services")}
                 </Link>
 
                 <Link
@@ -68,7 +71,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
-                  ПРАВИЛА
+                  {t("rules")}
                 </Link>
               </div>
 
@@ -84,7 +87,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
                 >
-                  ПРО НАС
+                  {t("about_us")}
                 </Link>
 
                 <Link
@@ -97,7 +100,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
                 >
-                  КОНТАКТИ
+                  {t("nav_contact")}
                 </Link>
                 <Link
                   to="/"
@@ -109,7 +112,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
                 >
-                  БЛОГ
+                  {t("blog")}
                 </Link>
               </div>
 
@@ -119,14 +122,14 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   <LanguageSelector />
                 </div>
                 <div className="text-[12px] uppercase tracking-[0.12em] text-[#1b1b1b]/70">
-                  <div className="font-bold">АДРЕСА:</div>
+                  <div className="font-bold">{t("address_label")}</div>
                   <div className="mt-[2px] font-medium text-[#1b1b1b]/75">
-                    ВУЛ. ВЕСЕЛА 5
+                    {t("street_address")}
                   </div>
                 </div>
 
                 <div className="text-[12px] uppercase tracking-[0.12em] text-[#1b1b1b]/70">
-                  <div className="font-bold">ТЕЛЕФОН:</div>
+                  <div className="font-bold">{t("phone_label")}</div>
                   <button
                     type="button"
                     onClick={onCopy}
@@ -135,7 +138,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                     +380 67 677 73 30
                     {copied ? (
                       <span className="ml-2 text-[11px] font-semibold text-[#1b1b1b]/45">
-                        COPIED
+                        {t("copied")}
                       </span>
                     ) : null}
                   </button>
@@ -145,8 +148,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
               {/* TG */}
               <div className="mt-auto pt-[44px]">
                 <div className="mb-[18px] max-w-[320px] text-[11px] font-semibold uppercase tracking-[0.1em] leading-[1.35] text-[#1b1b1b]/70">
-                  З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
-                  ЖИТЛО!
+                  {t("telegram_promo")}
                 </div>
 
                 <a
@@ -181,7 +183,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
         type="button"
         onClick={onClose}
         className="absolute right-0 top-0 h-full w-[8vw] min-w-[60px]"
-        aria-label="Close on backdrop"
+        aria-label={t("close_menu")}
       />
     </div>
   );

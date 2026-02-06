@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import historyImg1 from "../../assets/newDesign/home/history1.png";
 import historyImg2 from "../../assets/newDesign/home/history2.png";
 import { Link } from "react-router-dom";
@@ -44,11 +45,12 @@ function Tile({ img, top, bottom }) {
 }
 
 export default function History() {
+  const { t } = useTranslation();
   return (
     <div className="w-full">
       <div className="flex w-full flex-col md:flex-row">
-        <Tile img={historyImg1} top="НАШ" bottom="СЕРВІС" />
-        <Tile img={historyImg2} top="НАШІ" bottom="АПАРТАМЕНТИ" />
+        <Tile img={historyImg1} top={t("history_our")} bottom={t("history_service")} />
+        <Tile img={historyImg2} top={t("history_our_plural")} bottom={t("history_apartments")} />
       </div>
     </div>
   );

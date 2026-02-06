@@ -97,7 +97,7 @@ function Header() {
                 "transition-colors duration-500 ease-out",
                 isMobileMenuOpen ? "text-[#1b1b1b]" : closedText,
               ].join(" ")}
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-label={isMobileMenuOpen ? t("close_menu") : t("open_menu")}
             >
               <BurgerIcon open={isMobileMenuOpen} />
             </button>
@@ -113,7 +113,7 @@ function Header() {
               ].join(" ")}
             >
               <BurgerIcon open={isMobileMenuOpen} />
-              <span>ЗНАЙТИ АПАРТАМЕНТИ</span>
+              <span>{t("find_apartments")}</span>
             </button>
           </div>
 
@@ -156,7 +156,7 @@ function Header() {
                     : `${closedHover}`,
                 ].join(" ")}
               >
-              ЗАБРОНЮВАТИ
+                {t("book")}
               </Link>
             </div>
 
@@ -173,7 +173,7 @@ function Header() {
                   : "bg-brand-bordo text-brand-beige hover:brightness-110",
               ].join(" ")}
             >
-              ЗАБРОНЮВАТИ
+              {t("book")}
             </Link>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import img1 from "../../assets/newDesign/home/imageService1.png";
 import img2 from "../../assets/newDesign/home/imageService2.png";
@@ -10,6 +11,7 @@ import flowerLeft from "../../assets/newDesign/home/flowerLeft.png";
 import flowerRight from "../../assets/newDesign/home/flowerRight.png";
 
 function ExeptionalService() {
+  const { t } = useTranslation();
   return (
     <section className="relative overflow-hidden bg-[#F4EEDF] py-10 sm:py-12 lg:py-14">
       {/* DECOR FLOWERS */}
@@ -29,17 +31,13 @@ function ExeptionalService() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-6">
         {/* TITLE */}
         <h2 className="mx-auto max-w-[700px] text-center font-oranienbaum text-[30px] leading-[1.1] tracking-wide text-brand-black sm:text-[36px] lg:text-[42px]">
-          ВИНЯТКОВИЙ СЕРВІС
-          <br />І ВІДДАНА КОМАНДА!
+          {t("exceptional_service_title")}
+          <br />{t("exceptional_service_subtitle")}
         </h2>
 
         {/* TEXT */}
         <p className="mx-auto mt-5 max-w-[820px] text-center font-finlandica text-[13px] leading-[1.7] text-brand-black/60 sm:mt-6 sm:text-[14px]">
-          Кожен наш гість унікальний, тому ми створили добірку індивідуальних
-          послуг та вражень, щоб зробити перебування по-справжньому незабутнім.
-          Наша команда, сформована з експертів у сфері розкішної гостинності,
-          забезпечує бездоганний сервіс. Ми уважно та делікатно передбачаємо
-          бажання кожного гостя, піклуючись про найдрібніші деталі.
+          {t("exceptional_service_text")}
         </p>
 
         {/* IMAGES ROW */}

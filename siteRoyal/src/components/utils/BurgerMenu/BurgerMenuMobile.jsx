@@ -1,8 +1,11 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import LanguageSelector from "../LanguageSelector";
 
-function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
+function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) {
+  const { t: tHook } = useTranslation();
+  const t = tProp || tHook;
   useEffect(() => {
     const onKeyDown = (e) => e.key === "Escape" && onClose?.();
     window.addEventListener("keydown", onKeyDown);
@@ -22,9 +25,9 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
             <div className="w-full">
               <div className="space-y-1">
                 {[
-                  { to: "/aparts", label: "АПАРТАМЕНТИ" },
-                  { to: "/service", label: "НАШІ СЕРВІСИ" },
-                  { to: "/rules", label: "ПРАВИЛА" },
+                  { to: "/aparts", labelKey: "nav_apartments" },
+                  { to: "/service", labelKey: "our_services" },
+                  { to: "/rules", labelKey: "rules" },
                 ].map((item) => (
                   <Link
                     key={item.to}
@@ -37,16 +40,16 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                         : "text-[#1b1b1b] hover:opacity-80",
                     ].join(" ")}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 ))}
               </div>
 
               <div className="mt-5 space-y-1.5">
                 {[
-                  { to: "/about-us", label: "ПРО НАС" },
-                  { to: "/contact", label: "КОНТАКТИ" },
-                  { to: "/", label: "БЛОГ" },
+                  { to: "/about-us", labelKey: "about_us" },
+                  { to: "/contact", labelKey: "nav_contact" },
+                  { to: "/", labelKey: "blog" },
                 ].map((item) => (
                   <Link
                     key={item.to}
@@ -54,7 +57,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                     onClick={onClose}
                     className="block text-left text-[12px] font-semibold uppercase tracking-[0.1em] text-[#1b1b1b]/85"
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 ))}
               </div>
@@ -62,14 +65,14 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
 
             <div className="mt-6 w-full space-y-4">
               <div className="text-left text-[11px] uppercase tracking-[0.12em] text-[#1b1b1b]/70">
-                <div className="font-bold">АДРЕСА:</div>
+                <div className="font-bold">{t("address_label")}</div>
                 <div className="mt-1 font-medium text-[#1b1b1b]/80">
-                  ВУЛ. ВЕСЕЛА 5
+                  {t("street_address")}
                 </div>
               </div>
 
               <div className="text-left text-[11px] uppercase tracking-[0.12em] text-[#1b1b1b]/70">
-                <div className="font-bold">ТЕЛЕФОН:</div>
+                <div className="font-bold">{t("phone_label")}</div>
                 <button
                   type="button"
                   onClick={onCopy}
@@ -78,7 +81,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                   +380 67 677 73 30
                   {copied ? (
                     <span className="ml-2 text-[10px] font-semibold text-[#1b1b1b]/45">
-                      COPIED
+                      {t("copied")}
                     </span>
                   ) : null}
                 </button>
@@ -110,8 +113,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
 
             <div className="mt-[80px] w-full pt-2">
               <div className="mb-3 max-w-[280px] text-left text-[10px] font-semibold uppercase tracking-[0.1em] leading-[1.35] text-[#1b1b1b]/70">
-                З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
-                ЖИТЛО!
+                {t("telegram_promo")}
               </div>
 
               <a

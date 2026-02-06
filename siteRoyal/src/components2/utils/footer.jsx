@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import blackLogo from "../../assets/newDesign/logo/royal-apart-logo-vertical-short-midnight-black-rgb-900px-w-72ppi.png";
 
@@ -57,6 +58,7 @@ function IconArrow(props) {
 }
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="bg-[#EDE6D8] text-black">
       <div className="mx-auto w-full max-w-[1320px] px-6">
@@ -102,20 +104,20 @@ export default function Footer() {
             {/* links col 1 */}
             <div className="font-finlandica flex items-start flex-col">
               <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
-                ОСНОВНЕ
+                {t("footer_main")}
               </div>
               <nav className="mt-7 flex flex-col gap-4 text-[15px] items-start text-start text-black/65">
                 <Link className="hover:text-black" to="/">
-                  ГОЛОВНА
+                  {t("footer_home")}
                 </Link>
                 <Link className="hover:text-black" to="/aparts">
-                  АПАРТАМЕНТИ
+                  {t("nav_apartments")}
+                </Link>
+                <Link className="hover:text-black" to="/service">
+                  {t("footer_our_service")}
                 </Link>
                 <Link className="hover:text-black" to="/">
-                  ВИГІДНІ ПРОПОЗИЦІЇ
-                </Link>
-                <Link className="hover:text-black" to="/">
-                  СЕРВІСИ
+                  {t("footer_services")}
                 </Link>
               </nav>
             </div>
@@ -123,17 +125,17 @@ export default function Footer() {
             {/* links col 2 */}
             <div className="font-finlandica flex items-start flex-col">
               <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
-                ІНШЕ
+                {t("footer_other")}
               </div>
               <nav className="mt-7 flex flex-col gap-4 text-[15px] text-start items-start text-black/65">
+                <Link className="hover:text-black" to="/contact">
+                  {t("nav_contact")}
+                </Link>
                 <Link className="hover:text-black" to="/rules">
-                  КОНТАКТИ
+                  {t("rules")}
                 </Link>
                 <Link className="hover:text-black" to="/">
-                  ДОПОМОГА
-                </Link>
-                <Link className="hover:text-black" to="/">
-                  БЛОГ
+                  {t("blog")}
                 </Link>
                 {/* screenshot shows contacts twice; if you need it: */}
                 {/* <Link className="hover:text-black" to="/contacts">КОНТАКТИ</Link> */}
@@ -174,8 +176,7 @@ export default function Footer() {
           {/* telegram bot */}
           <div className="font-finlandica flex items-start flex-col">
             <div className="text-[13px] font-semibold text-left uppercase tracking-[0.14em] text-black/85">
-              З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
-              ЖИТЛО!
+              {t("telegram_promo")}
             </div>
 
             <a
@@ -206,15 +207,15 @@ export default function Footer() {
         <div className="flex flex-col items-start gap-4 border-t border-black/10 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
           <div className="flex flex-col gap-2 font-finlandica text-[14px] text-left text-black/55 lg:flex-row lg:flex-wrap lg:gap-x-10 lg:gap-y-2">
             <Link className="hover:text-black" to="/privacy-policy">
-              Політика Конфіденційності
+              {t("footer_privacy_policy")}
             </Link>
             <Link className="hover:text-black" to="/terms-and-conditions">
-              Умови Користування
+              {t("footer_terms")}
             </Link>
           </div>
 
-          <div className="font-finlandica text-[14px]  text-black/45">
-            © 2025 Royal Apart. All Rights Reserved
+          <div className="font-finlandica text-[14px] text-black/45">
+            {t("footer_copyright")}
           </div>
         </div>
       </div>

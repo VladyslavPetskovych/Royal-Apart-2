@@ -1,7 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FiCalendar, FiMapPin, FiBookOpen } from "react-icons/fi";
 
 export default function HeroFeatures() {
+  const { t } = useTranslation();
   return (
     <div className="w-full px-4 py-6 sm:px-6 sm:py-8 lg:p-12">
       <div className="mx-auto max-w-7xl">
@@ -23,7 +25,7 @@ export default function HeroFeatures() {
                 sm:tracking-[0.2em] sm:text-sm sm:leading-none
               "
             >
-              Оренда елітних приміщень
+              {t("hero_feature_1")}
             </span>
           </div>
 
@@ -36,7 +38,7 @@ export default function HeroFeatures() {
                 sm:tracking-[0.2em] sm:text-sm sm:leading-none
               "
             >
-              Апартаменти в самому серці Львова
+              {t("hero_feature_2")}
             </span>
           </div>
 
@@ -50,7 +52,7 @@ export default function HeroFeatures() {
                 sm:tracking-[0.2em] sm:text-sm sm:leading-none
               "
             >
-              Виняткові послуги та враження
+              {t("hero_feature_3")}
             </span>
           </div>
         </div>

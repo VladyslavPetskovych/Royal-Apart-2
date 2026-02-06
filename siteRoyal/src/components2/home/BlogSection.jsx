@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 import blogData from "../../../blogData.json";
@@ -25,6 +26,7 @@ const slugify = (s = "") =>
     .replace(/-+/g, "-");
 
 export default function BlogSection() {
+  const { t } = useTranslation();
   const blogs = useMemo(() => {
     if (!Array.isArray(blogData)) return [];
 
@@ -45,7 +47,7 @@ export default function BlogSection() {
         {/* HEADER */}
         <div className="flex items-center justify-between">
           <h2 className="font-finlandica text-[20px] font-semibold uppercase tracking-[0.8px] text-brand-black">
-            НАШ БЛОГ
+            {t("our_blog")}
           </h2>
 
           {/* optional: link to list page if you keep it */}
@@ -53,7 +55,7 @@ export default function BlogSection() {
             to="/blog"
             className="group inline-flex items-center gap-3 font-finlandica text-[14px] font-medium text-brand-black hover:text-brand-black"
           >
-            <span className="text-brand-black/80">Усі Статті</span>
+            <span className="text-brand-black/80">{t("all_articles")}</span>
             <span className="text-[18px] transition-transform duration-200 group-hover:translate-x-[2px]">
               →
             </span>
@@ -94,7 +96,7 @@ export default function BlogSection() {
                     </h3>
 
                     <div className="mt-3 inline-flex font-finlandica text-[14px] font-semibold text-brand-black underline underline-offset-[6px] decoration-brand-black/70">
-                      Читати більше
+                      {t("read_more")}
                     </div>
                   </div>
                 </Link>
@@ -133,7 +135,7 @@ export default function BlogSection() {
                   </h3>
 
                   <div className="mt-3 inline-flex font-finlandica text-[14px] font-semibold text-brand-black underline underline-offset-[6px] decoration-brand-black/70">
-                    Читати більше
+                    {t("read_more")}
                   </div>
                 </div>
               </Link>

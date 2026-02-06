@@ -1,22 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import flowerLeft from "../../assets/newDesign/home/flowerLeft.png";
 import flowerRight from "../../assets/newDesign/home/flowerRight.png";
 
 /** ✅ Add / edit reviews here */
-const REVIEWS = [
+const REVIEW_KEYS = [
   {
-    text: "«Наше перебування у львівських апартаментах було просто чудовим! Дуже затишно, чисто і стильно — все продумано до дрібниць. Локація ідеальна: тихо, але за кілька хвилин вже в центрі. Господарі неймовірно привітні та завжди на зв’язку.»",
-    author: "Дмитрик Каріна, М. КИЇВ",
+    text: "review_1_text",
+    author: "review_1_author"
   },
   {
-    text: "«Все супер: апартаменти відповідають фото, приємний сервіс і дуже зручне заселення. Локація топ, а всередині — чисто та комфортно. Обов’язково повернемося ще.»",
-    author: "Мілянець Мар'яна, М. ДНІПРО",
+    text: "review_2_text",
+    author: "review_2_author"
   },
   {
-    text: "«Неймовірно стильний інтер’єр, спокійна атмосфера та ідеальна чистота. Було відчуття, ніби ми вдома. Дякуємо за турботу та швидкі відповіді.»",
-    author: "АНДРІЙ МЕЛЬНИК, М. ОДЕСА",
-  },
+    text: "review_3_text",
+    author: "review_3_author"
+  }
 ];
 
 function ArrowIcon({ direction = "left", className = "" }) {
@@ -46,10 +47,15 @@ function ArrowIcon({ direction = "left", className = "" }) {
 }
 
 export default function ReviewsBlock({
-  reviews = REVIEWS,
+  reviews: reviewsProp,
   autoplay = true,
   intervalMs = 6500,
 }) {
+  const { t } = useTranslation();
+  const reviews = reviewsProp ?? REVIEW_KEYS.map((r) => ({
+    text: t(r.text),
+    author: t(r.author),
+  }));
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1); // 1 next, -1 prev
   const timerRef = useRef(null);
@@ -113,7 +119,7 @@ export default function ReviewsBlock({
             to="/aparts"
             className="group inline-flex w-full max-w-[360px] items-center justify-center gap-4 bg-brand-bordo px-6 py-4 font-finlandica text-[14px] font-medium text-brand-beige sm:w-auto sm:max-w-none sm:px-10"
           >
-            Переглянути Всі Апартаменти
+            {t("view_all_apartments")}
             <span className="text-brand-beige transition-transform duration-200 group-hover:translate-x-[2px]">
               →
             </span>
@@ -146,10 +152,10 @@ export default function ReviewsBlock({
           >
             {/* titles responsive */}
             <h3 className="font-oranienbaum text-[28px] uppercase tracking-[0.6px] text-brand-black sm:text-[34px]">
-              ВІДГУКИ НАШИХ
+              {t("reviews_our")}
             </h3>
             <h4 className="mt-1 font-oranienbaum text-[22px] uppercase tracking-[0.6px] text-brand-black/80 sm:text-[28px]">
-              НАЙДОРОЖЧИХ КЛІЄНТІВ
+              {t("reviews_clients")}
             </h4>
 
             {/* SLIDER */}

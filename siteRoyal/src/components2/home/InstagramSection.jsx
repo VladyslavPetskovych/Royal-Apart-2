@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 // ✅ replace these imports with your real filenames/paths
 import v1 from "../../assets/instagram/vid1.mp4";
@@ -45,6 +46,7 @@ function IgTile({ src, href, startAt = 0 }) {
 }
 
 export default function Instagram() {
+  const { t } = useTranslation();
   const items = [
     { src: v1, href: "https://www.instagram.com/p/DOAzGxUiPzN/" },
     { src: v2, href: "https://www.instagram.com/p/DKRcNzoo0c-/" },
@@ -58,7 +60,7 @@ export default function Instagram() {
     <section className="bg-white">
       <div className="mx-auto w-full max-w-[1320px] px-6 py-12">
         <h2 className="font-finlandica text-[18px] font-semibold uppercase tracking-[0.14em] text-black">
-          Слідкуйте за нами в Instagram
+          {t("follow_instagram")}
         </h2>
 
         {/* row like on screenshot */}

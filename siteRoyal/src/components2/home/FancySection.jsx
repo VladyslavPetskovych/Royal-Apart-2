@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 // ✅ replace paths with your real icons
 import iconDesign from "../../assets/instagram/icon1.svg";
@@ -27,21 +28,22 @@ function Feature({ icon, title, text }) {
 }
 
 export default function FancySection() {
+  const { t } = useTranslation();
   const items = [
     {
       icon: iconDesign,
-      title: "ВИШУКАНИЙ ДИЗАЙН ТА ІНТЕР’ЄР",
-      text: "Кожен простір ретельно продуманий, щоб відобразити непідвладну львівську елегантність",
+      title: t("fancy_design_title"),
+      text: t("fancy_design_text"),
     },
     {
       icon: iconLocation,
-      title: "ПРЕСТИЖНІ ЛОКАЦІЇ У СЕРЦІ ЛЬВОВА",
-      text: "Наші апартаменти розташовані у найбільш ексклюзивних та бажаних районах міста",
+      title: t("fancy_location_title"),
+      text: t("fancy_location_text"),
     },
     {
       icon: iconService,
-      title: "НЕЗАБУТНІ ВРАЖЕННЯ ТА БЕЗДОГАННИЙ СЕРВІС",
-      text: "Приватне обслуговування та індивідуалізація кожного моменту Вашого перебування",
+      title: t("fancy_service_title"),
+      text: t("fancy_service_text"),
     },
   ];
 

@@ -10,9 +10,9 @@ export default function ApartmentsBlock() {
 
   // ✅ filters (strings because <select/> uses string values)
   const [filter, setFilter] = useState({
-    rooms: "Усі",
-    floor: "Усі",
-    guests: "Усі",
+    rooms: "all",
+    floor: "all",
+    guests: "all",
   });
 
   useEffect(() => {
@@ -51,9 +51,9 @@ export default function ApartmentsBlock() {
 
   // ✅ apply filters
   const filtered = useMemo(() => {
-    const roomsVal = filter.rooms === "Усі" ? null : Number(filter.rooms);
-    const floorVal = filter.floor === "Усі" ? null : Number(filter.floor);
-    const guestsVal = filter.guests === "Усі" ? null : Number(filter.guests);
+    const roomsVal = filter.rooms === "all" ? null : Number(filter.rooms);
+    const floorVal = filter.floor === "all" ? null : Number(filter.floor);
+    const guestsVal = filter.guests === "all" ? null : Number(filter.guests);
 
     return apartments.filter((a) => {
       if (roomsVal !== null && Number(a?.numrooms) !== roomsVal) return false;

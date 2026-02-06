@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import back1 from "../../assets/miniHotel/back1.jpg";
 import back2 from "../../assets/miniHotel/back2.jpg";
@@ -8,6 +9,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 function MiniHotel() {
+  const { t } = useTranslation();
   useEffect(() => {
     AOS.init({ duration: 700 });
   }, []);
@@ -16,17 +18,16 @@ function MiniHotel() {
 
   return (
     <div className="bg-back py-16 w-full">
-      {/* Заголовок та кнопка */}
       <div
         className="flex flex-col items-center text-center mb-12"
         data-aos="fade-up"
       >
         <h2 className="text-3xl md:text-4xl font-bold font-popins text-amber-900 mb-4">
-          Особлива пропозиція смарт-апартаментів
+          {t("mini_hotel_offer")}
         </h2>
         <Link to="/mini-hotel">
           <button className="px-6 py-3 bg-gradient-to-br from-amber-500 to-amber-400 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300">
-            Детальніше
+            {t("learn_more")}
           </button>
         </Link>
       </div>
