@@ -15,6 +15,7 @@ import TermsAndConditions from "./pages/thermsAndConditions";
 import PrivacyPolicy from "./pages/privacyPolicy";
 import Service from "./pages/Service";
 import AboutUs from "./pages/AboutUs";
+import BlogArticle from "./pages/BlogArticle";
 
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -61,6 +62,8 @@ function AppContent() {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/service" element={<Service />} />
             <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/blog/:id/*" element={<BlogArticle />} />
+
             <Route
               path="/terms-and-conditions"
               element={<TermsAndConditions />}

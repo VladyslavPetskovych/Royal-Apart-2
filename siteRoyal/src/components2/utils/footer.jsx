@@ -142,12 +142,12 @@ export default function Footer() {
           </div>
 
           {/* subscribe */}
-          <div className="order-3 font-finlandica lg:order-none">
-            <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
+          {/* <div className="order-3 font-finlandica lg:order-none">
+            <div className="text-[14px] font-semibold text-left uppercase tracking-[0.14em] text-black/85">
               БУДЬТЕ НА ЗВ&apos;ЯЗКУ
             </div>
 
-            <p className="mt-4 max-w-[460px] text-[15px] leading-[1.45] text-black/55">
+            <p className="mt-4 max-w-[460px] text-left text-[14px] leading-[1.45] text-black/55">
               Підпишіться, щоб бути в курсі наших останніх новин
             </p>
 
@@ -166,14 +166,14 @@ export default function Footer() {
                 </button>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* MIDDLE */}
-        <div className="flex flex-col gap-10 pb-10 lg:flex-row lg:items-center lg:justify-between lg:pb-14">
+        <div className="flex flex-col gap-8 pb-8 lg:flex-row lg:items-center lg:justify-between lg:pb-12">
           {/* telegram bot */}
           <div className="font-finlandica flex items-start flex-col">
-            <div className="text-[14px] font-semibold uppercase tracking-[0.14em] text-black/85">
+            <div className="text-[13px] font-semibold text-left uppercase tracking-[0.14em] text-black/85">
               З НАШИМ ТЕЛЕГРАМ-БОТОМ ВИ З ЛЕГКІСТЮ ЗМОЖЕТЕ ПІДІБРАТИ ОМРІЯНЕ
               ЖИТЛО!
             </div>
@@ -192,9 +192,9 @@ export default function Footer() {
           </div>
 
           {/* ✅ MOBILE: show Booking + list badge like screenshot */}
-          <div className="flex items-center gap-10 lg:gap-14">
+          <div className="flex items-center gap-6 lg:gap-8">
             <Link
-              className="font-finlandica text-[34px] font-semibold text-black/85 lg:text-[36px]"
+              className="font-finlandica text-[30px] font-semibold text-black/85 lg:text-[32px]"
               to="https://www.booking.com/hotel/ua/royal-apartament-on-voloshyna-2.uk.html?label=gog235jc-10CAso6QFCH3JveWFsLWFwYXJ0YW1lbnQtb24tdm9sb3NoeW5hLTJIM1gDaOkBiAEBmAEzuAEXyAEV2AED6AEB-AEBiAIBqAIBuALt_p3LBsACAdICJDBhMjUzNmUyLTBhNjktNDA3Zi04NWE3LWYyZmE5ZDIxN2M1N9gCAeACAQ&sid=7c9e55ff490d2548d149307e6a345d64&aid=356980&ucfs=1&arphpl=1&checkin=2026-01-14&checkout=2026-01-15&dest_id=-1045268&dest_type=city&group_adults=2&req_adults=2&no_rooms=1&group_children=0&req_children=0&hpos=1&hapos=1&sr_order=popularity&srpvid=e86f2a707a4652ecf861d6d4768885e9&srepoch=1768390518&soh=1&from=searchresults#no_availability_msg"
             >
               Booking<span className="font-normal">.com</span>
@@ -204,7 +204,7 @@ export default function Footer() {
 
         {/* BOTTOM (mobile stacked like screenshot) */}
         <div className="flex flex-col items-start gap-4 border-t border-black/10 py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-          <div className="flex flex-col gap-3 font-finlandica text-[14px] text-black/55 lg:flex-row lg:flex-wrap lg:gap-x-10 lg:gap-y-3">
+          <div className="flex flex-col gap-2 font-finlandica text-[14px] text-left text-black/55 lg:flex-row lg:flex-wrap lg:gap-x-10 lg:gap-y-2">
             <Link className="hover:text-black" to="/privacy-policy">
               Політика Конфіденційності
             </Link>
@@ -213,7 +213,7 @@ export default function Footer() {
             </Link>
           </div>
 
-          <div className="font-finlandica text-[14px] text-black/45">
+          <div className="font-finlandica text-[14px]  text-black/45">
             © 2025 Royal Apart. All Rights Reserved
           </div>
         </div>

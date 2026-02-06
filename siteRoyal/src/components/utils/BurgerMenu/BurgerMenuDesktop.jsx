@@ -59,32 +59,32 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy }) {
                 </Link>
 
                 <Link
-                  to="/about-us"
+                  to="/rules"
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/about-us")
+                    isActiveRoute?.("/rules")
                       ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
                       : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
-                  ПРО НАС
+                  ПРАВИЛА
                 </Link>
               </div>
 
               {/* SUB */}
               <div className="mt-[44px] space-y-[10px]">
                 <Link
-                  to="/rules"
+                  to="/about-us"
                   onClick={onClose}
                   className={[
                     "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",
-                    isActiveRoute?.("/rules")
+                    isActiveRoute?.("/about-us")
                       ? "text-[#1b1b1b]"
                       : "text-[#1b1b1b]/80 hover:text-[#1b1b1b]",
                   ].join(" ")}
                 >
-                  ПРАВИЛА
+                  ПРО НАС
                 </Link>
 
                 <Link

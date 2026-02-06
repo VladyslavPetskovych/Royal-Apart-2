@@ -15,7 +15,7 @@ export default function HeroFeatures() {
           "
         >
           {/* ITEM 1 — hidden on mobile */}
-          <div className="hidden md:flex items-center gap-3 opacity-90">
+          <div className="hidden md:flex items-start text-left gap-3 opacity-90">
             <FiCalendar className="shrink-0 text-[18px] sm:text-lg" />
             <span
               className="
@@ -28,7 +28,7 @@ export default function HeroFeatures() {
           </div>
 
           {/* ITEM 2 — hidden on mobile */}
-          <div className="hidden md:flex items-center gap-3 opacity-90">
+          <div className="hidden md:flex items-start text-left gap-3 opacity-90">
             <FiMapPin className="shrink-0 text-[18px] sm:text-lg" />
             <span
               className="
@@ -41,11 +41,11 @@ export default function HeroFeatures() {
           </div>
 
           {/* ITEM 3 — centered on mobile */}
-          <div className="flex items-center gap-3 opacity-90 text-center">
+          <div className="flex items-start gap-3  opacity-90 text-left">
             <FiBookOpen className="shrink-0 text-[18px] sm:text-lg" />
             <span
               className="
-                text-center
+                text-left
                 uppercase tracking-[0.18em] text-[11px] leading-[1.3]
                 sm:tracking-[0.2em] sm:text-sm sm:leading-none
               "

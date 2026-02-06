@@ -13,16 +13,30 @@ const IMAGE_MAP = {
   "imageBlog3.png": imageBlog3,
 };
 
+// optional fallback slug generator
+const slugify = (s = "") =>
+  s
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9а-яіїєґ\s-]/gi, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
 export default function BlogSection() {
   const blogs = useMemo(() => {
     if (!Array.isArray(blogData)) return [];
-    return blogData.map((item) => ({
-      ...item,
-      imageSrc: IMAGE_MAP[item.image],
-    }));
+
+    return blogData
+      .map((item) => ({
+        ...item,
+        slug: item.slug || slugify(item.title), // ✅ ensure slug exists
+        imageSrc: IMAGE_MAP[item.image],
+      }))
+      .filter((b) => b.slug); // safety
   }, []);
 
-  // screenshot look: one big card + peek next on mobile, 3 columns on md+
   const visible = blogs.slice(0, 6);
 
   return (
@@ -34,6 +48,7 @@ export default function BlogSection() {
             НАШ БЛОГ
           </h2>
 
+          {/* optional: link to list page if you keep it */}
           <Link
             to="/blog"
             className="group inline-flex items-center gap-3 font-finlandica text-[14px] font-medium text-brand-black hover:text-brand-black"
@@ -45,15 +60,15 @@ export default function BlogSection() {
           </Link>
         </div>
 
-        {/* ✅ MOBILE: horizontal swipe with peek like screenshot */}
+        {/* ✅ MOBILE: horizontal swipe with peek */}
         <div className="mt-7 md:hidden">
           <div className="-mx-4 flex gap-6 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {visible.map((blog, idx) => (
               <article
-                key={blog.id ?? idx}
+                key={blog.id ?? blog.slug ?? idx}
                 className="shrink-0 w-[82vw] max-w-[460px]"
               >
-                <Link to={blog.href} className="group block">
+                <Link to={`/blog/${idx + 1}`} className="group block">
                   {/* IMAGE */}
                   <div className="overflow-hidden rounded-[3px] bg-brand-beigeDark/20">
                     <div className="aspect-[4/5] w-full">
@@ -91,8 +106,8 @@ export default function BlogSection() {
         {/* ✅ TABLET/DESKTOP: 3 columns */}
         <div className="mt-8 hidden grid-cols-1 gap-6 md:grid md:grid-cols-3 md:gap-7">
           {visible.slice(0, 3).map((blog, idx) => (
-            <article key={blog.id ?? idx}>
-              <Link to={blog.href} className="group block">
+            <article key={blog.id ?? blog.slug ?? idx}>
+              <Link to={`/blog/${idx + 1}`} className="group block">
                 {/* IMAGE */}
                 <div className="overflow-hidden rounded-[3px] bg-brand-beigeDark/20">
                   <div className="aspect-[4/5] w-full">
