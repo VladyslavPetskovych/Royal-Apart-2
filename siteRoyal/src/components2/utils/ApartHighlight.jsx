@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { slugify } from "transliteration";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -89,22 +90,45 @@ function IconUsers(props) {
 }
 
 export default function ApartHighlight({ apartment }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   if (!apartment) return null;
 
-  const { _id, name, floor, surface, beds, guests, imgurl,wubid } = apartment;
+  const { name, floor, surface, beds, guests, imgurl, wubid } = apartment;
 
-  // ✅ first image only
+  // first image only
   const image = Array.isArray(imgurl) && imgurl.length > 0 ? imgurl[0] : null;
 
+  // current language
+  const lang = (i18n.resolvedLanguage || i18n.language || "uk").split("-")[0];
+
+  // transliterated display name ONLY for English
+  const displayName = useMemo(() => {
+    if (lang !== "en") return name || "";
+
+    const slug = slugify(name || "", { lowercase: true, separator: "-" });
+
+    return slug
+      .split("-")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }, [lang, name]);
+
+  // street prefix placement
+  const streetText =
+    lang === "en" ? `${displayName} Street` : `вул. ${displayName}`;
+
+  // route stays unchanged
+  const to = wubid ? `/room/${wubid}` : "#";
+
   return (
-    <Link to={`/room/${wubid}`} className="group block">
-      {/* IMAGE (same as screenshot: simple radius, no shadow) */}
-      <div className="aspect-[3/4] w-full overflow-hidden  bg-brand-beige">
+    <Link to={to} className="group block">
+      {/* IMAGE */}
+      <div className="aspect-[3/4] w-full overflow-hidden bg-brand-beige">
         {image ? (
           <img
             src={image}
-            alt={name}
+            alt={displayName}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             loading="lazy"
           />
@@ -115,20 +139,18 @@ export default function ApartHighlight({ apartment }) {
 
       {/* TEXT */}
       <div className="mt-4">
-        {/* TITLE LINE */}
         <div className="flex items-baseline justify-start text-left font-finlandica text-[14px] font-semibold uppercase tracking-[0.6px] text-brand-black">
-          <span>вул. {name}</span>
+          <span>{streetText}</span>
           <span className="mx-2 text-brand-black/35">|</span>
           <span className="font-semibold text-brand-black/60">
             {floor} {t("floor_unit")}
           </span>
         </div>
 
-        {/* META (icon + text exactly like screenshot spacing) */}
         <div className="mt-2 flex flex-wrap items-center gap-x-7 gap-y-2 font-finlandica text-[14px] text-brand-black/55">
           <span className="inline-flex items-start gap-3">
             <IconCube className="h-[22px] w-[22px] text-brand-black/55" />
-            {surface} м²
+            {surface} {lang === "en" ? "m²" : "м²"}
           </span>
 
           <span className="inline-flex items-start gap-3">
