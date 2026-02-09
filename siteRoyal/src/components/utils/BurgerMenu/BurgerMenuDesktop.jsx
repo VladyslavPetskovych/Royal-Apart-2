@@ -103,7 +103,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp })
                   {t("nav_contact")}
                 </Link>
                 <Link
-                  to="/"
+                  to="/blog/1"
                   onClick={onClose}
                   className={[
                     "block text-[14px] font-semibold uppercase tracking-[0.08em] leading-[1.2]",

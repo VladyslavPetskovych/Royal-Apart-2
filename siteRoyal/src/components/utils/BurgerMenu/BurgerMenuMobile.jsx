@@ -49,7 +49,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) 
                 {[
                   { to: "/about-us", labelKey: "about_us" },
                   { to: "/contact", labelKey: "nav_contact" },
-                  { to: "/", labelKey: "blog" },
+                  { to: "/blog/1", labelKey: "blog" },
                 ].map((item) => (
                   <Link
                     key={item.to}

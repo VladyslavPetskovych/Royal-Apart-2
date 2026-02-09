@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import coffe from "../../assets/newDesign/Service/coffe.webp";
 
 function Coffe() {
+  const { t } = useTranslation();
+
   return (
     <section className="bg-brand-black">
       {/* ✅ FULL BLEED WRAP (no max width / no side padding) */}
@@ -38,9 +41,9 @@ function Coffe() {
                 "
               >
                 <h2 className="font-oranienbaum text-[28px] leading-[1.05] text-white sm:text-[38px] md:text-[44px]">
-                  ВІДЧУЙ ТУРБОТУ ВІД
+                  {t("service_coffee_title_line1")}
                   <br />
-                  НАШОГО СЕРВІСУ
+                  {t("service_coffee_title_line2")}
                 </h2>
 
                 <Link
@@ -62,8 +65,8 @@ function Coffe() {
                     transition-transform duration-200
                     hover:translate-y-[-1px]
                   "
-                >
-                  <span>Переглянути Всі Апартаменти</span>
+                  >
+                    <span>{t("view_all_apartments")}</span>
                   <span className="text-[18px] leading-none">→</span>
                 </Link>
               </div>

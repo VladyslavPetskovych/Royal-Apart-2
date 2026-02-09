@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import flowerLeft from "../../assets/newDesign/home/flowerLeft.png";
 import flowerRight from "../../assets/newDesign/home/flowerRight.png";
 
@@ -69,35 +70,37 @@ function ServiceCard({ img, title, desc }) {
 }
 
 export default function AdditionalService() {
+  const { t } = useTranslation();
+
   const items = useMemo(
     () => [
       {
         img: s11,
-        title: "РАНКОВИЙ ЗАТИШОК",
-        desc: "Насолоджуйтеся комфортом преміум-класу, м’якою постіллю та атмосферою повного релаксу, абсолютно не поспішаючи.",
+        title: t("service_additional_item1_title"),
+        desc: t("service_additional_item1_desc"),
       },
       {
         img: s22,
-        title: "МОМЕНТИ РЕЛАКСАЦІЇ",
-        desc: "Дозвольте собі заслужений відпочинок. Гаряча ванна з ароматною піною, келих улюбленого напою та тиша — ідеально для перезавантаження.",
+        title: t("service_additional_item2_title"),
+        desc: t("service_additional_item2_desc"),
       },
       {
         img: s33,
-        title: "ПРИВАТНИЙ Б’ЮТІ-КУТОК",
-        desc: "Зручний туалетний столик, ідеальне освітлення та стильне дзеркало створені для вашого вечірнього ритуалу краси та підготовки до виходу.",
+        title: t("service_additional_item3_title"),
+        desc: t("service_additional_item3_desc"),
       },
       {
         img: s44,
-        title: "НЕПЕРЕВЕРШЕНІ СНІДАНКИ",
-        desc: "Сніданок із видом, що надихає. Замов sніданок з ресторану Арісто зі знижкою 15% та почни свій день із насолоди! Промокод - ARISTOSITE",
+        title: t("service_additional_item4_title"),
+        desc: t("service_additional_item4_desc"),
       },
       {
         img: s55,
-        title: "НЕЗАБУТНІ МОМЕНТИ РАЗОМ",
-        desc: "Наші апартаменти — ідеальне місце для святкування важливих подій. Зберіть найближчих людей за накритим столом і створіть незабутні спогади!",
+        title: t("service_additional_item5_title"),
+        desc: t("service_additional_item5_desc"),
       },
     ],
-    [],
+    [t],
   );
 
   // kept (optional)
@@ -142,21 +145,14 @@ export default function AdditionalService() {
         {/* title */}
         <div className="text-center">
           <h2 className="font-oranienbaum text-[34px] leading-[1.05] text-[#1b1b1b] md:text-[52px]">
-            ДОДАТКОВИЙ СЕРВІС
+            {t("service_additional_title1")}
           </h2>
           <h2 className="mt-2 font-oranienbaum text-[30px] leading-[1.05] text-[#1b1b1b] md:text-[48px]">
-            ДЛЯ СТВОРЕННЯ УНІКАЛЬНИХ ВРАЖЕНЬ!
+            {t("service_additional_title2")}
           </h2>
 
           <p className="mx-auto mt-6 max-w-[860px] font-finlandica text-[12px] leading-[1.7] text-[#1b1b1b]/55 md:text-[13px]">
-            Оскільки кожне перебування має відповідати вашим очікуванням, наш
-            додатковий сервіс тут, щоб втілити ваші побажання в життя, від
-            найпростіших запитів до найбільш ексклюзивних вражень. Незалежно від
-            того, чи йдеться про бронювання столика в найпопулярніших
-            ресторанах, організацію приватних екскурсій до знакових місць,
-            надання особистого шофера чи курування справді індивідуального
-            досвіду, ми беремо на себе кожну деталь з розсудливістю та
-            досконалістю.
+            {t("service_additional_intro")}
           </p>
         </div>
 
@@ -208,7 +204,7 @@ export default function AdditionalService() {
               hover:shadow-[0_12px_28px_rgba(0,0,0,0.25)]
             "
           >
-            ЗАБРОНЮВАТИ
+            {t("service_additional_button")}
             <span className="text-brand-beige text-2xl transition-transform duration-200 group-hover:translate-x-[3px]">
               →
             </span>

@@ -2,8 +2,11 @@
   {
     "id": "lviv-hidden",
     "category": "МІСТО ЛЕВА",
+    "category_en": "CITY OF LIONS",
     "title": "ЛЬВІВ, ЯКИЙ НЕ ВСІ БАЧАТЬ: ЗАТИШНІ ВУЛИЧКИ ПОЗА ТУРИСТИЧНИМИ МАРШРУТАМИ",
+    "title_en": "LVIV YOU DON'T ALWAYS SEE: COZY STREETS BEYOND TOURIST ROUTES",
     "excerpt": "Львів — це не лише Площа Ринок і туристичні маршрути. За рогом відомих локацій приховані вулички, де місто відкривається по-справжньому.",
+    "excerpt_en": "Lviv is not only Rynok Square and popular tourist routes. Just around the corner, hidden streets reveal the city's true atmosphere.",
     "image": "imageBlog1.png",
     "content": [
       {
@@ -12,12 +15,21 @@
       },
       {
         "type": "paragraph",
+        "text_en": "Lviv has many faces. Alongside popular tourist routes there is another Lviv — quiet, slow-paced and deeply atmospheric."
+      },
+      {
+        "type": "paragraph",
         "text": "Саме в затишних вуличках, схованих від натовпів, можна відчути справжній ритм міста та його історичну глибину."
+      },
+      {
+        "type": "paragraph",
+        "text_en": "In these hidden cozy streets you can feel the real rhythm of the city and its historical depth."
       },
       {
         "type": "heading",
         "level": 2,
-        "text": "Вулички, які варто відвідати"
+        "text": "Вулички, які варто відвідати",
+        "text_en": "Streets Worth Visiting"
       },
       {
         "type": "list",
@@ -25,33 +37,45 @@
           "Вулиця Лесі Українки — спокійна альтернатива Площі Ринок",
           "Краківська — історія серед кам’яниць",
           "Вірменський провулок — атмосфера старого Львова"
+        ],
+        "items_en": [
+          "Lesya Ukrainka Street — a calm alternative to Rynok Square",
+          "Krakivska Street — history among old buildings",
+          "Armenian Alley — the atmosphere of old Lviv"
         ]
       },
       {
         "type": "paragraph",
-        "text": "Прогулянка цими місцями відкриє Львів з нового боку — без поспіху, але з глибокими враженнями."
+        "text": "Прогулянка цими місцями відкриє Львів з нового боку — без поспіху, але з глибокими враженнями.",
+        "text_en": "Walking through these places reveals a different side of Lviv — unhurried, yet deeply memorable."
       }
     ]
   },
   {
     "id": "coffee-capital",
     "category": "ЦІКАВІ ФАКТИ",
+    "category_en": "INTERESTING FACTS",
     "title": "КАВОВА СТОЛИЦЯ УКРАЇНИ: ЯК ЛЬВІВ ЗБЕРІГАЄ СВОЇ ГАСТРОНОМІЧНІ ТРАДИЦІЇ",
+    "title_en": "THE COFFEE CAPITAL OF UKRAINE: HOW LVIV PRESERVES ITS GASTRONOMIC TRADITIONS",
     "excerpt": "Кава у Львові — це більше, ніж напій. Це частина міської культури, історії та щоденного життя.",
+    "excerpt_en": "Coffee in Lviv is more than a drink. It is part of the city's culture, history, and everyday life.",
     "image": "imageBlog2.png",
     "content": [
       {
         "type": "paragraph",
-        "text": "Львів заслужено називають кавовою столицею України. Кава тут — не просто традиція, а справжній ритуал. Особливо хорошою кавою відзначається ресторан Арісто у центрі міста, який зберігає автентичні рецепти та атмосферу старовинних львівських кав’ярень. А щоб кава смакувала з гарним сніданком, даруємо знижку 15% з промокодом ARISTOSITE26."
+        "text": "Львів заслужено називають кавовою столицею України. Кава тут — не просто традиція, а справжній ритуал.",
+        "text_en": "Lviv is rightfully called the coffee capital of Ukraine. Here, coffee is not just a tradition but a true ritual."
       },
       {
         "type": "paragraph",
-        "text": "Ще з австрійських часів львів’яни плекали культуру кав’ярень як місць для зустрічей, розмов і натхнення."
+        "text": "Ще з австрійських часів львів’яни плекали культуру кав’ярень як місць для зустрічей, розмов і натхнення.",
+        "text_en": "Since Austrian times, Lviv residents have nurtured the culture of cafés as places for meetings, conversations, and inspiration."
       },
       {
         "type": "heading",
         "level": 2,
-        "text": "Чим особлива львівська кава"
+        "text": "Чим особлива львівська кава",
+        "text_en": "What Makes Lviv Coffee Special"
       },
       {
         "type": "list",
@@ -59,33 +83,45 @@
           "Авторські обсмаження зерна",
           "Старовинні рецепти приготування",
           "Атмосферні кав’ярні з історією"
+        ],
+        "items_en": [
+          "Signature bean roasting",
+          "Traditional brewing recipes",
+          "Historic and atmospheric cafés"
         ]
       },
       {
         "type": "paragraph",
-        "text": "Сьогодні львівські кав’ярні поєднують традиції та сучасні підходи, створюючи унікальний гастрономічний досвід."
+        "text": "Сьогодні львівські кав’ярні поєднують традиції та сучасні підходи, створюючи унікальний гастрономічний досвід.",
+        "text_en": "Today Lviv cafés combine tradition with modern approaches, creating a unique gastronomic experience."
       }
     ]
   },
   {
     "id": "yards-magic",
     "category": "ЕКСКУРСІЇ",
+    "category_en": "EXCURSIONS",
     "title": "МАГІЯ ЛЬВІВСЬКИХ ДВОРИКІВ: ІСТОРІЇ, ЩО ОЖИВАЮТЬ ЗА СТАРИМИ БРАМАМИ",
+    "title_en": "THE MAGIC OF LVIV COURTYARDS: STORIES THAT COME ALIVE BEHIND OLD GATES",
     "excerpt": "Львівські дворики — це приховані світи, де кожен камінь має свою історію.",
+    "excerpt_en": "Lviv courtyards are hidden worlds where every stone has its own story.",
     "image": "imageBlog3.png",
     "content": [
       {
         "type": "paragraph",
-        "text": "За старими брамами Львова ховаються дворики, які зберігають пам’ять про минулі століття."
+        "text": "За старими брамами Львова ховаються дворики, які зберігають пам’ять про минулі століття.",
+        "text_en": "Behind the old gates of Lviv lie courtyards that preserve memories of past centuries."
       },
       {
         "type": "paragraph",
-        "text": "Тут можна побачити залишки ренесансної архітектури, старі сходи та балкони з кованими перилами."
+        "text": "Тут можна побачити залишки ренесансної архітектури, старі сходи та балкони з кованими перилами.",
+        "text_en": "Here you can see remnants of Renaissance architecture, old staircases, and balconies with wrought-iron railings."
       },
       {
         "type": "heading",
         "level": 2,
-        "text": "Чому варто піти на екскурсію двориками"
+        "text": "Чому варто піти на екскурсію двориками",
+        "text_en": "Why You Should Take a Courtyard Tour"
       },
       {
         "type": "list",
@@ -93,11 +129,17 @@
           "Незвичні фотолокації",
           "Живі історії мешканців",
           "Відчуття справжнього Львова"
+        ],
+        "items_en": [
+          "Unique photo locations",
+          "Real stories of residents",
+          "The feeling of authentic Lviv"
         ]
       },
       {
         "type": "paragraph",
-        "text": "Екскурсії двориками дозволяють відчути місто не як турист, а як його частину."
+        "text": "Екскурсії двориками дозволяють відчути місто не як турист, а як його частину.",
+        "text_en": "Courtyard tours let you experience the city not as a tourist, but as a part of it."
       }
     ]
   }

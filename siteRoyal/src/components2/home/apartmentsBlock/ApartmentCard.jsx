@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { slugify } from "transliteration";
 import ApartmentGallery from "./ApartmentGallery";
+
+import { selectLanguage } from "../../../redux/languageSlice";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -89,6 +93,9 @@ function IconUsers(props) {
 }
 
 export default function ApartmentCard({ apartment }) {
+  const lang = useSelector(selectLanguage);
+  const isEn = lang === "en";
+
   if (!apartment) return null;
 
   const title = apartment?.name || "Апартаменти";
@@ -99,47 +106,58 @@ export default function ApartmentCard({ apartment }) {
   const images = apartment?.imgurl || [];
   const wubid = apartment?.wubid;
 
-  // keep your own logic (example)
   const isTopPick = apartment?.category === "business";
+
+  // Транслітерація назви тільки для EN
+  const displayName = useMemo(() => {
+    if (!isEn) return title;
+
+    const slug = slugify(title, { lowercase: true, separator: "-" });
+
+    return slug
+      .split("-")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }, [isEn, title]);
+
+  const streetText = isEn ? `${displayName} Street` : `вул. ${displayName}`;
 
   return (
     <Link to={wubid ? `/room/${wubid}` : "#"} className="group block">
-      {/* IMAGE wrapper: copy your ApartHighlight styles (no radius, no shadow) */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-brand-beige">
         {isTopPick && (
           <span className="absolute left-3 top-3 z-10 bg-brand-beigeDark px-3 py-1 font-finlandica text-[12px] font-semibold uppercase tracking-[0.6px] text-white">
-            ТОП ВИБІР
+            {isEn ? "TOP PICK" : "ТОП ВИБІР"}
           </span>
         )}
 
-        {/* Slider (your current functionality) */}
         <ApartmentGallery images={images} />
       </div>
 
-      {/* TEXT: copy your ApartHighlight styles */}
       <div className="mt-4">
         <div className="flex items-baseline justify-start text-left font-finlandica text-[14px] font-semibold uppercase tracking-[0.6px] text-brand-black">
-          <span>вул. {title}</span>
+          <span>{streetText}</span>
           <span className="mx-2 text-brand-black/35">|</span>
           <span className="font-semibold text-brand-black/60">
-            {floor} поверх
+            {floor} {isEn ? "floor" : "поверх"}
           </span>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-7 gap-y-2 font-finlandica text-[14px] text-brand-black/55">
           <span className="inline-flex items-start gap-3">
             <IconCube className="h-[22px] w-[22px] text-brand-black/55" />
-            {area} м2
+            {area} {isEn ? "m²" : "м²"}
           </span>
 
           <span className="inline-flex items-start gap-3">
             <IconBed className="h-[22px] w-[22px] text-brand-black/55" />
-            {bedrooms} Спальні
+            {bedrooms} {isEn ? "Bedrooms" : "Спальні"}
           </span>
 
           <span className="inline-flex items-start gap-3">
             <IconUsers className="h-[22px] w-[22px] text-brand-black/55" />
-            {guests} Осіб
+            {guests} {isEn ? "Persons" : "Осіб"}
           </span>
         </div>
       </div>
