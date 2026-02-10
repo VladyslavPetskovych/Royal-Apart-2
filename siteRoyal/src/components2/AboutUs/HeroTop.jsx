@@ -1,7 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import hero from "../../assets/newDesign/AboutUs/Hero.webp";
 
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { selectLanguage } from "../../redux/languageSlice";
+
 function HeroTop() {
+  const lang = useSelector(selectLanguage);
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
+    document.documentElement.lang = lang;
+  }, [lang, i18n]);
+
   return (
     <section className="bg-brand-black pt-16">
       <div className="relative w-full overflow-hidden">
@@ -9,7 +23,7 @@ function HeroTop() {
         <div className="h-[70vh] sm:h-[70vh] md:h-[75vh] lg:h-[75vh]">
           <img
             src={hero}
-            alt="Про нас"
+            alt={t("hero.alt")}
             draggable={false}
             className="h-full w-full object-cover object-top"
           />
@@ -30,8 +44,6 @@ function HeroTop() {
                 text-[35px] sm:text-[38px] md:text-[48px] lg:text-[59px]
                 tracking-[0.14em]
                 text-white
-
-                /* OUTLINE EFFECT */
                 [text-shadow:
                   -1px_-1px_0_rgba(0,0,0,0.45),
                   1px_-1px_0_rgba(0,0,0,0.45),
@@ -41,7 +53,7 @@ function HeroTop() {
                 ]
               "
             >
-              ПРО НАС
+              {t("hero.title")}
             </p>
 
             <p
@@ -51,7 +63,6 @@ function HeroTop() {
                 text-[18px] sm:text-[22px] md:text-[28px] lg:text-[34px]
                 tracking-[0.16em]
                 text-white
-
                 [text-shadow:
                   -1px_-1px_0_rgba(0,0,0,0.45),
                   1px_-1px_0_rgba(0,0,0,0.45),
@@ -61,7 +72,7 @@ function HeroTop() {
                 ]
               "
             >
-              ТА НАШ ОСОБЛИВИЙ ДОСВІД!
+              {t("hero.subtitle")}
             </p>
           </div>
         </div>

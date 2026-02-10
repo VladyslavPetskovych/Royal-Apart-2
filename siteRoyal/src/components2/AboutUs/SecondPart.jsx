@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import SecondPartImg from "../../assets/newDesign/AboutUs/SecondPart.webp";
 
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { selectLanguage } from "../../redux/languageSlice";
+
 function SecondPart() {
+  const lang = useSelector(selectLanguage);
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
+    document.documentElement.lang = lang;
+  }, [lang, i18n]);
+
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-[1320px] px-6 py-16 lg:py-24">
@@ -11,42 +25,25 @@ function SecondPart() {
           <div className="overflow-hidden">
             <img
               src={SecondPartImg}
-              alt="Апартаменти Royal Apart"
+              alt={t("second_part.img_alt")}
               draggable={false}
               className="w-full object-cover"
             />
           </div>
 
           {/* TEXT */}
-          <div>
-            <h2 className="font-oranienbaum text-[32px] leading-[1.15] text-[#1b1b1b] md:text-[40px]">
-              ВИНЯТКОВІ КВАРТИРИ
+          <div className="text-left">
+            <h2 className="font-oranienbaum text-[32px]  leading-[1.15] text-[#1b1b1b] md:text-[40px]">
+              {t("second_part.title1")}
             </h2>
             <h2 className="mt-1 font-oranienbaum text-[30px] leading-[1.15] text-[#1b1b1b] md:text-[38px]">
-              ДЛЯ ВАШИХ ЗРУЧНОСТЕЙ!
+              {t("second_part.title2")}
             </h2>
 
             <div className="mt-6 space-y-4 text-left font-finlandica text-[13px] leading-[1.8] text-[#1b1b1b]/60">
-              <p>
-                Ми просто обожнюємо Львів — його історію та неймовірну
-                архітектуру!
-              </p>
-
-              <p>
-                Команда Royal Apart створила ці апартаменти для мандрівників,
-                які цінують розкіш та приватність, щоб досліджувати місто
-                по-новому. Пропонуємо особисті, стильно оформлені квартири та
-                прикріплюємо до вас особистого менеджера, який допоможе з усім.
-              </p>
-
-              <p>
-                Royal Apart — це не просто апартаменти. Це ваш особистий простір
-                у серці Львова, де затишок домашнього відпочинку гармонійно
-                поєднується з персоналізованим сервісом елітного готелю. Ми
-                створили ідеальне місце, щоб ви могли насолоджуватися
-                неперевершеною атмосферою старовинного міста, не відмовляючись
-                від максимального комфорту та уваги.
-              </p>
+              <p>{t("second_part.p1")}</p>
+              <p>{t("second_part.p2")}</p>
+              <p>{t("second_part.p3")}</p>
             </div>
 
             {/* BUTTON */}
@@ -62,7 +59,7 @@ function SecondPart() {
                   hover:translate-y-[-1px]
                 "
               >
-                Переглянути Всі Апартаменти
+                {t("second_part.view_all")}
                 <span className="text-[18px] leading-none">→</span>
               </Link>
             </div>

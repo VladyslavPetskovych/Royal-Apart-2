@@ -16,6 +16,7 @@ import PrivacyPolicy from "./pages/privacyPolicy";
 import Service from "./pages/Service";
 import AboutUs from "./pages/AboutUs";
 import BlogArticle from "./pages/BlogArticle";
+import ScrollToTop from "./components2/utils/ScrollToTop";
 
 import { Provider } from "react-redux";
 import store from "./redux/store";
@@ -42,6 +43,7 @@ function AppContent() {
       ) : (
         <>
           <Header />
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/uk" element={<Home />} />

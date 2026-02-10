@@ -1,15 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+
+import { selectLanguage } from "../../redux/languageSlice";
+
 import exp from "../../assets/newDesign/AboutUs/Exp.jpg";
 import flower from "../../assets/newDesign/home/flowerRight2.png";
 import simple from "../../assets/newDesign/AboutUs/Simple.jpg";
 
 function Expirience() {
+  const lang = useSelector(selectLanguage);
+
+  // ✅ get i18n from hook (no separate import needed)
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    // ✅ avoid extra calls if already correct
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+    }
+    document.documentElement.lang = lang;
+  }, [lang, i18n]);
+
   return (
     <>
-      {/* ✅ BLOCK 1: ДОСВІД КОМПАНІЇ (mobile like screenshot: text -> button -> image) */}
+      {/* ✅ BLOCK 1 */}
       <section className="relative overflow-hidden bg-[#F4EEDF]">
-        {/* flower (right-top) */}
         <img
           src={flower}
           alt=""
@@ -25,37 +42,20 @@ function Expirience() {
 
         <div className="mx-auto w-full max-w-[1320px] px-6 py-14 sm:py-16 lg:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
-            {/* TEXT */}
             <div className="order-1">
               <h2 className="font-oranienbaum text-[28px] leading-[1.15] text-[#1b1b1b] sm:text-[32px] md:text-[40px]">
-                ДОСВІД КОМПАНІЇ
+                {t("experience.company_experience")}
               </h2>
               <h2 className="mt-1 font-oranienbaum text-[26px] leading-[1.15] text-[#1b1b1b] sm:text-[30px] md:text-[38px]">
-                ВІДЧУЙ СЕБЕ ЯК ВДОМА!
+                {t("experience.feel_home")}
               </h2>
 
               <div className="mt-5 space-y-4 text-left font-finlandica text-[12px] leading-[1.75] text-[#1b1b1b]/60 sm:text-[13px] sm:leading-[1.85]">
-                <p>
-                  Royal Apart пропонує вам затишні та якісні квартири у
-                  найкращих будинках Львова. Це ваш приватний, спокійний куточок
-                  у серці старовинного міста.
-                </p>
-
-                <p>
-                  Кожна квартира повністю обладнана і має свій характер. Ми
-                  дбаємо, щоб дизайн був не лише сучасним, але й поважав
-                  львівську архітектуру, гармонійно з духом нашого міста.
-                </p>
-
-                <p>
-                  Наші квартири ми ремонтуємо самі, співпрацюючи з місцевими
-                  майстрами та дизайнерами. Ми продумуємо кожну дрібницю, щоб
-                  ваше перебування було максимально комфортним, затишним і
-                  справжнім.
-                </p>
+                <p>{t("experience.p1")}</p>
+                <p>{t("experience.p2")}</p>
+                <p>{t("experience.p3")}</p>
               </div>
 
-              {/* BUTTON (on mobile aligns left like screenshot) */}
               <div className="mt-7 flex justify-start">
                 <Link
                   to="/aparts"
@@ -68,7 +68,7 @@ function Expirience() {
                     hover:translate-y-[-1px]
                   "
                 >
-                  Переглянути Всі Апартаменти
+                  {t("experience.view_all")}
                   <span className="text-[18px] leading-none transition-transform duration-200 group-hover:translate-x-[2px]">
                     →
                   </span>
@@ -76,12 +76,11 @@ function Expirience() {
               </div>
             </div>
 
-            {/* IMAGE (below on mobile, right on desktop) */}
             <div className="order-2 lg:order-2">
               <div className="overflow-hidden bg-black/5">
                 <img
                   src={exp}
-                  alt="Досвід Royal Apart"
+                  alt={t("experience.exp_alt")}
                   draggable={false}
                   className="
                     w-full object-cover
@@ -94,9 +93,8 @@ function Expirience() {
         </div>
       </section>
 
-      {/* ✅ BLOCK 2: ПРОСТО ТА ЗРУЧНО (mobile like screenshot: title/text -> image) */}
+      {/* ✅ BLOCK 2 */}
       <section className="relative overflow-hidden bg-[#F4EEDF]">
-        {/* (optional small flower corner, like screenshot bottom-right vibe) */}
         <img
           src={flower}
           alt=""
@@ -110,43 +108,25 @@ function Expirience() {
           "
         />
 
-        <div className="mx-auto w-full max-w-[1320px] px-6 pb-14 sm:pb-16 lg:py-24">
+        <div className="mx-auto w-full max-w-[1320px]  px-6 pb-14 sm:pb-16 lg:py-24">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
-            {/* TEXT (on mobile first, on desktop right like screenshot style is fine either way) */}
             <div className="order-1 lg:order-2">
               <h2 className="font-oranienbaum text-[28px] leading-[1.15] text-[#1b1b1b] sm:text-[32px] md:text-[40px]">
-                ПРОСТО ТА ЗРУЧНО
+                {t("experience.simple_title")}
               </h2>
 
-              <div className="mt-5 space-y-4 font-finlandica text-[12px] leading-[1.75] text-[#1b1b1b]/60 sm:text-[13px] sm:leading-[1.85]">
-                <p>
-                  Royal Apart — це якість, перевірена роками, і завжди чудові
-                  локації! Наші квартири знаходяться у зручних місцях — поруч із
-                  центром, але там, де тихо і можна відпочити.
-                </p>
-
-                <p>
-                  Це наші зручні тимчасові помешкання, де можна розслабитися
-                  після прогулянки містом. Вони надійні, безпечні та ідеально
-                  підходять для відпочинку. Ми цінуємо ваш час, тому пропонуємо
-                  простий сервіс та підтримку. Наша команда завжди на зв’язку і
-                  готова допомогти з будь-яким питанням чи порадою.
-                </p>
-
-                <p>
-                  Ми поєднуємо зручність сучасних технологій (легке бронювання,
-                  швидке заселення) з людським підходом та турботою про кожного
-                  гостя.
-                </p>
+              <div className="mt-5 space-y-4 font-finlandica text-left text-[12px] leading-[1.75] text-[#1b1b1b]/60 sm:text-[13px] sm:leading-[1.85]">
+                <p>{t("experience.s1")}</p>
+                <p>{t("experience.s2")}</p>
+                <p>{t("experience.s3")}</p>
               </div>
             </div>
 
-            {/* IMAGE */}
             <div className="order-2 lg:order-1">
               <div className="overflow-hidden bg-black/5">
                 <img
                   src={simple}
-                  alt="Просто та зручно"
+                  alt={t("experience.simple_alt")}
                   draggable={false}
                   className="
                     w-full object-cover

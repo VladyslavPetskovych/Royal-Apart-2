@@ -250,5 +250,34 @@
   "quick_contact": "Quick Contact",
   "quick_contact_text": "Choose the most convenient way — we respond quickly.",
 
-  "call": "Call"
+  "call": "Call",
+  "experience": {
+    "company_experience": "COMPANY EXPERIENCE",
+    "feel_home": "FEEL AT HOME!",
+    "p1": "Royal Apart offers cozy, high-quality apartments in some of Lviv’s best buildings. This is your private, peaceful corner in the heart of the historic city.",
+    "p2": "Each apartment is fully equipped and has its own character. We make sure the design is not only modern, but also respects Lviv’s architecture and matches the spirit of our city.",
+    "p3": "We renovate our apartments ourselves, working with local craftsmen and designers. We think through every detail so your stay is максимально comfortable, cozy, and truly authentic.",
+    "view_all": "View All Apartments",
+    "exp_alt": "Royal Apart experience",
+
+    "simple_title": "SIMPLE AND CONVENIENT",
+    "s1": "Royal Apart is quality proven over the years and always great locations! Our apartments are in convenient places—close to the center, yet quiet enough to relax.",
+    "s2": "These are comfortable temporary homes where you can unwind after exploring the city. They are reliable, safe, and ideal for rest. We value your time, so we provide simple service and support. Our team is always available and ready to help with any question or advice.",
+    "s3": "We combine modern convenience (easy booking, fast check-in) with a human approach and genuine care for every guest.",
+    "simple_alt": "Simple and convenient"
+  },
+  "hero": {
+    "title": "ABOUT US",
+    "subtitle": "AND OUR UNIQUE EXPERIENCE",
+    "alt": "About us"
+  },
+  "second_part": {
+    "img_alt": "Royal Apart apartments",
+    "title1": "EXCEPTIONAL APARTMENTS",
+    "title2": "FOR YOUR COMFORT!",
+    "p1": "We truly love Lviv — its history and its incredible architecture!",
+    "p2": "The Royal Apart team created these apartments for travelers who value luxury and privacy, to experience the city in a new way. We offer stylish, thoughtfully designed apartments and assign you a personal manager who will help with everything you need.",
+    "p3": "Royal Apart is more than just apartments. It’s your private space in the heart of Lviv, where the cozy feeling of home blends with the personalized service of an upscale hotel. We created the perfect place for you to enjoy the unique atmosphere of the old city without giving up maximum comfort and attention to detail.",
+    "view_all": "View all apartments"
+  }
 }
