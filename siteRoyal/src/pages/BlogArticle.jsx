@@ -1,7 +1,11 @@
-import React, { useMemo } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import blogData from "../../blogData.json";
+import { selectLanguage } from "../redux/languageSlice";
 
 import imageBlog1 from "../assets/blog/imageBlog1.png";
 import imageBlog2 from "../assets/blog/imageBlog2.png";
@@ -16,7 +20,11 @@ const IMAGE_MAP = {
   "imageBlog3.png": imageBlog3,
 };
 
-function BlogContent({ content }) {
+// ✅ supports mixed json format:
+// - heading: text / text_en
+// - paragraph: text / text_en (also works if only text_en exists)
+// - list: items / items_en
+function BlogContent({ content, isEn }) {
   if (!Array.isArray(content) || content.length === 0) return null;
 
   return (
@@ -26,7 +34,11 @@ function BlogContent({ content }) {
 
         if (block.type === "heading") {
           const level = Number(block.level) || 2;
-          const text = block.text || "";
+          const text =
+            (isEn ? block.text_en : block.text) ||
+            block.text ||
+            block.text_en ||
+            "";
 
           if (!text) return null;
 
@@ -41,7 +53,6 @@ function BlogContent({ content }) {
             );
           }
 
-          // default h2
           return (
             <div key={i} className="pt-3">
               <h2 className="font-finlandica text-[20px] sm:text-[22px] font-semibold uppercase tracking-[0.6px] text-brand-black/85">
@@ -53,20 +64,32 @@ function BlogContent({ content }) {
         }
 
         if (block.type === "paragraph") {
-          if (!block.text) return null;
+          const text =
+            (isEn ? block.text_en : block.text) ||
+            block.text ||
+            block.text_en ||
+            "";
+
+          if (!text) return null;
+
           return (
             <p
               key={i}
               className="font-finlandica text-[16px] sm:text-[17px] leading-[1.85] text-brand-black/70"
             >
-              {block.text}
+              {text}
             </p>
           );
         }
 
         if (block.type === "list") {
-          const items = Array.isArray(block.items) ? block.items : [];
-          if (items.length === 0) return null;
+          const items =
+            (isEn ? block.items_en : block.items) ||
+            block.items ||
+            block.items_en ||
+            [];
+
+          if (!Array.isArray(items) || items.length === 0) return null;
 
           return (
             <ul
@@ -89,27 +112,83 @@ function BlogContent({ content }) {
 }
 
 export default function BlogArticle() {
-  const { id } = useParams(); // /blog/:id/*
-  const index = Number(id) - 1;
+  const { id } = useParams(); // /blog/:id
+  const { i18n } = useTranslation();
 
-  const article = useMemo(() => {
+  // ✅ language from Redux only
+  const reduxLang = useSelector(selectLanguage); // "uk" | "en"
+  const lang = reduxLang === "en" ? "en" : "uk";
+  const isEn = lang === "en";
+
+  // ✅ keep i18n synced with redux
+  useEffect(() => {
+    if (i18n.language !== lang) i18n.changeLanguage(lang);
+    document.documentElement.lang = lang;
+  }, [lang, i18n]);
+
+  // ✅ find article by id (url starts from 1)
+  const articleRaw = useMemo(() => {
     if (!Array.isArray(blogData)) return null;
-    if (!Number.isInteger(index) || index < 0) return null;
-    return blogData[index] ?? null;
-  }, [index]);
+    const index = Number(id) - 1;
+    if (Number.isNaN(index) || index < 0 || index >= blogData.length)
+      return null;
+    return blogData[index];
+  }, [id]);
 
-  if (!article) return <Navigate to="*" replace />;
+  // ✅ translate top fields (content stays as original array with text/text_en)
+  const article = useMemo(() => {
+    if (!articleRaw) return null;
 
-  const imageSrc = IMAGE_MAP[article.image];
+    const title = isEn
+      ? articleRaw.title_en || articleRaw.title
+      : articleRaw.title;
+
+    const category = isEn
+      ? articleRaw.category_en || articleRaw.category
+      : articleRaw.category;
+
+    const excerpt = isEn
+      ? articleRaw.excerpt_en || articleRaw.excerpt
+      : articleRaw.excerpt;
+
+    return {
+      ...articleRaw,
+      title,
+      category,
+      excerpt,
+      content: articleRaw.content, // ✅ important: use mixed format (text_en/items_en inside)
+    };
+  }, [articleRaw, isEn]);
+
+  const imageSrc = useMemo(() => {
+    if (!articleRaw?.image) return null;
+    return IMAGE_MAP[articleRaw.image] || null;
+  }, [articleRaw]);
+
+  if (!article) {
+    return (
+      <main className="bg-brand-beige">
+        <div className="pt-16 bg-brand-black" />
+        <div className="mx-auto max-w-[980px] px-6 py-16">
+          <p className="font-finlandica text-[16px] text-brand-black/70">
+            {isEn ? "Article not found" : "Статтю не знайдено"}
+          </p>
+          <Link
+            to="/"
+            className="mt-4 inline-flex font-finlandica text-[14px] font-semibold underline underline-offset-[6px]"
+          >
+            ← {isEn ? "Back" : "Назад"}
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-brand-beige">
-      {/* Top dark strip (matches your layout) */}
-      <div className="pt-16  bg-brand-black " />
+      <div className="pt-16 bg-brand-black" />
 
-      {/* Hero with flowers */}
       <section className="relative overflow-hidden bg-brand-beige">
-        {/* Flowers */}
         <img
           src={flowerLeft}
           alt=""
@@ -124,16 +203,17 @@ export default function BlogArticle() {
         />
 
         <div className="mx-auto w-full max-w-[980px] px-4 sm:px-6">
-          {/* Card container */}
           <div className="relative -mt-1 rounded-[6px] border border-brand-black/10 bg-white/50 backdrop-blur-[2px] shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
               {/* breadcrumbs */}
               <div className="mb-5 flex items-center gap-2 font-finlandica text-[14px] text-brand-black/60">
                 <Link to="/" className="hover:underline underline-offset-4">
-                  Головна
+                  {isEn ? "Home" : "Головна"}
                 </Link>
                 <span className="opacity-60">/</span>
-                <span className="text-brand-black/80">Блог</span>
+                <span className="text-brand-black/80">
+                  {isEn ? "Blog" : "Блог"}
+                </span>
               </div>
 
               {/* title */}
@@ -169,7 +249,7 @@ export default function BlogArticle() {
 
               {/* content */}
               <article className="mt-8 text-left">
-                <BlogContent content={article.content} />
+                <BlogContent content={article.content} isEn={isEn} />
               </article>
 
               {/* back */}
@@ -178,14 +258,13 @@ export default function BlogArticle() {
                   to="/"
                   className="inline-flex items-center gap-2 font-finlandica text-[14px] font-semibold text-brand-black underline underline-offset-[6px] decoration-brand-black/60 hover:decoration-brand-black"
                 >
-                  ← Назад
+                  ← {isEn ? "Back" : "Назад"}
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* bottom spacing */}
         <div className="h-14 sm:h-16" />
       </section>
     </main>

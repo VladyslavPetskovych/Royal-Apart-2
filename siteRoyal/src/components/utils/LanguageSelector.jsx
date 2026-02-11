@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import ukFlag from "../../assets/flags/Flag_of_Ukraine.png";
 import engFlag from "../../assets/flags/Flag_of_the_United_Kingdom.png";
@@ -10,8 +11,10 @@ import { setLanguage, selectLanguage } from "../../redux/languageSlice";
 const LanguageSelector = () => {
   const { t, i18n } = useTranslation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const reduxLang = useSelector(selectLanguage); // ✅ "uk" | "en"
+  const reduxLang = useSelector(selectLanguage); // "uk" | "en"
   const [isOpen, setIsOpen] = useState(false);
 
   const languages = useMemo(
@@ -22,31 +25,50 @@ const LanguageSelector = () => {
     [t],
   );
 
-  // ✅ Ensure i18n matches Redux on load + whenever Redux changes
   useEffect(() => {
     const current = (i18n.resolvedLanguage || i18n.language || "uk").split(
       "-",
     )[0];
-
     const next = (reduxLang || "uk").split("-")[0];
 
+    console.log("[LangSelector] reduxLang:", reduxLang, "i18n:", current);
+
     if (next && current !== next) {
+      console.log("[LangSelector] i18n.changeLanguage ->", next);
       i18n.changeLanguage(next);
     }
   }, [reduxLang, i18n]);
 
-  const currentLang = (reduxLang || "uk").split("-")[0];
+  const currentLang = reduxLang === "en" ? "en" : "uk";
   const currentFlag =
-    languages.find((lang) => lang.code === currentLang)?.flag || ukFlag;
+    languages.find((l) => l.code === currentLang)?.flag || ukFlag;
 
   const toggleDropdown = () => setIsOpen((v) => !v);
 
   const changeLanguage = (language) => {
-    // ✅ 1) update Redux (your blog uses Redux)
-    dispatch(setLanguage(language.code));
+    const next = language.code;
 
-    // ✅ 2) update i18n immediately (UI translations)
-    i18n.changeLanguage(language.code);
+    console.log("[LangSelector] CLICK change ->", next);
+    console.log("[LangSelector] current path:", location.pathname);
+
+    // 1) redux
+    dispatch(setLanguage(next));
+
+    // 2) i18n
+    i18n.changeLanguage(next);
+
+    // 3) update URL prefix if it starts with /uk or /en
+    const newPath = location.pathname.replace(/^\/(uk|en)(\/|$)/, `/${next}$2`);
+
+    // If user is on a non-prefixed route like "/aparts", you can optionally
+    // navigate to "/en" or "/uk" home:
+    const finalPath =
+      newPath === location.pathname
+        ? `/${next}` // fallback
+        : newPath + location.search + location.hash;
+
+    console.log("[LangSelector] navigate ->", finalPath);
+    navigate(finalPath);
 
     setIsOpen(false);
   };
@@ -62,10 +84,7 @@ const LanguageSelector = () => {
       </button>
 
       {isOpen && (
-        <ul
-          // ✅ add right padding so it doesn't stick to the screen edge
-          className="absolute pr-8 right-0 z-10 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg outline-none translate-x-3"
-        >
+        <ul className="absolute pr-8 right-0 z-10 mt-2 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg outline-none translate-x-3">
           {languages.map((language) => (
             <li
               key={language.code}

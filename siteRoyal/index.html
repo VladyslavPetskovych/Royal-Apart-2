@@ -3,25 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/ico" href="/favicon.ico" />
-    <link
-      rel="icon"
-      type="image/png"
-      href="/favicon-96x96.png"
-      sizes="96x96"
-    />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/favicon.svg"
-    />
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/apple-touch-icon.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="RoyalApart" />
     <link rel="manifest" href="/site.webmanifest" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <meta
+      name="googlebot"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <link rel="canonical" href="https://royalapart.online/" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,7 +31,7 @@
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Royal Apart | Бронюй квартиру у Львові</title>
+    <title>Оренда квартир у Львові подобово | Royal Apart</title>
     <meta
       name="description"
       content="Бронюй квартиру у Львові за доступними цінами. Зручне розташування, комфортні умови."
@@ -44,8 +40,65 @@
       name="keywords"
       content="квартира, оренда, житло, Львів, зняти квартиру у Львові, оренда квартир у Львові"
     />
+    <meta
+      property="og:title"
+      content="Оренда квартир у Львові подобово | Royal Apart"
+    />
+    <meta
+      property="og:description"
+      content="Бронюй квартиру у Львові за доступними цінами. Зручне розташування, комфортні умови."
+    />
+    <meta property="og:url" content="https://royalapart.online/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://royalapart.online/og.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Royal Apart | Бронюй квартиру у Львові"
+    />
+    <meta
+      name="twitter:description"
+      content="Бронюй квартиру у Львові за доступними цінами. Зручне розташування, комфортні умови."
+    />
+    <meta name="twitter:image" content="https://royalapart.online/og.jpg" />
 
     <!-- Hotjar Tracking Code for https://royalapart.online -->
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LodgingBusiness",
+        "name": "Royal Apart",
+        "description": "Бронюй квартиру у Львові за доступними цінами.",
+        "url": "https://royalapart.online/",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Львів",
+          "addressCountry": "UA"
+        },
+        "areaServed": "Львів",
+        "sameAs": ["https://www.instagram.com/royal.apart/"]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-G1TK3SGLC4"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-G1TK3SGLC4");
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
     <script>
       (function (h, o, t, j, a, r) {
         h.hj =
@@ -71,33 +124,5 @@
       var Neb = new ZakNebIframe(target, url);
       Neb.render();
     </script>
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Royal Apart",
-        "description": "Бронюй квартиру у Львові за доступними цінами.",
-        "url": "https://royalapart.online"
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-G1TK3SGLC4"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-G1TK3SGLC4");
-    </script>
-    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

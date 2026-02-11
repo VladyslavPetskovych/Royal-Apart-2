@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -27,29 +27,12 @@ const slugifyLocal = (s = "") =>
     .replace(/-+/g, "-");
 
 export default function BlogSection() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
+  // ✅ ONLY redux decides URL language
   const reduxLang = useSelector(selectLanguage); // "uk" | "en"
-
-  // fallback if redux not ready
-  const i18nLang = (i18n.resolvedLanguage || i18n.language || "uk").split(
-    "-",
-  )[0];
-
-  const lang = reduxLang || i18nLang;
+  const lang = reduxLang === "en" ? "en" : "uk";
   const isEn = lang === "en";
-  console.log("reduxLang =", reduxLang);
-
-  // ✅ IMPORTANT: keep i18next synced with redux
-  useEffect(() => {
-    const current = (i18n.resolvedLanguage || i18n.language || "uk").split(
-      "-",
-    )[0];
-
-    if (lang && current !== lang) {
-      i18n.changeLanguage(lang);
-    }
-  }, [lang, i18n]);
 
   const blogs = useMemo(() => {
     if (!Array.isArray(blogData)) return [];
@@ -72,7 +55,7 @@ export default function BlogSection() {
         };
       })
       .filter((b) => b.slug);
-  }, [lang]); // ✅ depend on lang so it always recalculates
+  }, [isEn]);
 
   const visible = blogs.slice(0, 6);
 
@@ -85,7 +68,7 @@ export default function BlogSection() {
           </h2>
 
           <Link
-            to="/blog"
+            to={`/${lang}/blog`}
             className="group inline-flex items-center gap-3 font-finlandica text-[14px] font-medium text-brand-black hover:text-brand-black"
           >
             <span className="text-brand-black/80">{t("all_articles")}</span>
@@ -103,7 +86,7 @@ export default function BlogSection() {
                 key={blog.id ?? blog.slug ?? idx}
                 className="shrink-0 w-[82vw] max-w-[460px]"
               >
-                <Link to={`/blog/${idx + 1}`} className="group block">
+                <Link to={`/${lang}/blog/${idx + 1}`} className="group block">
                   <div className="overflow-hidden rounded-[3px] bg-brand-beigeDark/20">
                     <div className="aspect-[4/5] w-full">
                       {blog.imageSrc && (
