@@ -23,6 +23,7 @@ import store from "./redux/store";
 
 import { useDispatch, useSelector } from "react-redux";
 import { fetchApartments, selectApartStatus } from "./redux/apartSlice";
+import { HelmetProvider } from "react-helmet-async";
 
 function AppContent() {
   const dispatch = useDispatch();
@@ -74,11 +75,13 @@ function AppContent() {
 
 function App() {
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </Provider>
+    <HelmetProvider>
+      <Provider store={store}>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </Provider>
+    </HelmetProvider>
   );
 }
 
