@@ -55,8 +55,9 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Royal Apart | Бронюй квартиру у Львові"
+      content="Оренда квартир у Львові подобово | Royal Apart"
     />
+
     <meta
       name="twitter:description"
       content="Бронюй квартиру у Львові за доступними цінами. Зручне розташування, комфортні умови."
@@ -69,16 +70,52 @@
       {
         "@context": "https://schema.org",
         "@type": "LodgingBusiness",
+        "@id": "https://royalapart.online/#lodging",
         "name": "Royal Apart",
-        "description": "Бронюй квартиру у Львові за доступними цінами.",
         "url": "https://royalapart.online/",
+        "image": "https://royalapart.online/og.jpg",
+        "description": "Бронюй квартиру у Львові за доступними цінами. Зручне розташування, комфортні умови.",
         "address": {
           "@type": "PostalAddress",
+          "streetAddress": "ВЕСЕЛА, 5",
           "addressLocality": "Львів",
+          "postalCode": "79000",
           "addressCountry": "UA"
         },
-        "areaServed": "Львів",
-        "sameAs": ["https://www.instagram.com/royal.apart/"]
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 49.8398,
+          "longitude": 24.0299
+        },
+        "telephone": "+380676777330",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+380676777330",
+            "contactType": "customer service",
+            "availableLanguage": ["uk", "en"]
+          }
+        ],
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday"
+            ],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        ],
+        "sameAs": ["https://www.instagram.com/royal.apart/"],
+        "parentOrganization": {
+          "@id": "https://royalapart.online/#organization"
+        }
       }
     </script>
   </head>
