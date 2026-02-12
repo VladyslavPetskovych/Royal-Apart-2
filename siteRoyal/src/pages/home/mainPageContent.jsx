@@ -22,9 +22,9 @@ function MainPageContent() {
           <div className="flex h-full flex-col justify-center items-center">
             <div className="text-textW h-full w-full">
               <div className="w-full h-full mt-10 flex flex-col justify-center items-center px-6">
-                <h2 className="text-4xl lg:text-6xl text-white font-oranienbaum text-shadow-hero tracking-wide text-center">
+                <h1 className="text-4xl lg:text-6xl text-white font-oranienbaum text-shadow-hero tracking-wide text-center">
                   ROYAL APART
-                </h2>
+                </h1>
 
                 <p className="mt-4  text-lg md:text-4xl text-white font-finlandica text-shadow-hero2 text-center">
                   {t("hero_tagline")}

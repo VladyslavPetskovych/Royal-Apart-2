@@ -16,15 +16,16 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
     return Array.isArray(raw) ? raw.filter(Boolean) : [];
   }, [apartment]);
 
-  if (status !== "succeeded" || !apartment || images.length === 0) {
-    return null;
-  }
-
+  // ---- hooks must be above any return ----
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
 
   const [spv, setSpv] = useState(3);
   const gap = 12;
+
+  // ✅ faster, snappier animation
+  const TRANSITION_MS = 260; // was 650
+  const EASING = "cubic-bezier(0.2, 0.9, 0.2, 1)"; // snappier than your current
 
   useEffect(() => {
     const el = viewportRef.current;
@@ -43,6 +44,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
   }, []);
 
   const clones = Math.min(Math.ceil(spv) + 1, images.length);
+
   const slides = useMemo(() => {
     if (images.length <= 1) return images;
 
@@ -54,10 +56,24 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
 
   const startIndex = images.length > 1 ? clones : 0;
   const [index, setIndex] = useState(startIndex);
-  const [animating, setAnimating] = useState(false);
+
+  // ✅ allow rapid clicks: queue directions
+  const animatingRef = useRef(false);
+  const pendingRef = useRef(0);
+
+  // ----- drag -----
+  const drag = useRef({ active: false, startX: 0, dx: 0, moved: false });
+
+  // ✅ prevent arrows from starting a drag
+  const isFromControl = (e) => {
+    const t = e?.target;
+    return t instanceof Element && t.closest("[data-slider-control='true']");
+  };
 
   useEffect(() => {
     setIndex(images.length > 1 ? clones : 0);
+    pendingRef.current = 0;
+    animatingRef.current = false;
   }, [images.length, clones]);
 
   const getSlideW = () => {
@@ -77,7 +93,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
     const offset = i * (slideW + gap);
 
     track.style.transition = withAnim
-      ? "transform 650ms cubic-bezier(0.22,1,0.36,1)"
+      ? `transform ${TRANSITION_MS}ms ${EASING}`
       : "none";
 
     track.style.transform = `translate3d(${-offset}px,0,0)`;
@@ -85,52 +101,84 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
 
   useEffect(() => {
     applyTransformPx(index, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, spv]);
 
+  const stepOnce = (dir) => {
+    if (slides.length <= 1) return;
+    animatingRef.current = true;
+    setIndex((i) => i + dir);
+  };
+
+  const go = (dir) => {
+    if (slides.length <= 1) return;
+
+    pendingRef.current += dir;
+
+    // start immediately if idle
+    if (!animatingRef.current) {
+      const nextDir = pendingRef.current > 0 ? 1 : -1;
+      pendingRef.current -= nextDir;
+      stepOnce(nextDir);
+    }
+  };
+
   const onTransitionEnd = () => {
-    if (images.length <= 1) return;
-    setAnimating(false);
+    if (images.length <= 1) {
+      animatingRef.current = false;
+      pendingRef.current = 0;
+      return;
+    }
 
     const realLen = images.length;
 
+    // infinite loop snap if needed
     if (index < clones) {
       const jumpTo = index + realLen;
       applyTransformPx(jumpTo, false);
       setIndex(jumpTo);
-      return;
-    }
-
-    if (index >= clones + realLen) {
+    } else if (index >= clones + realLen) {
       const jumpTo = index - realLen;
       applyTransformPx(jumpTo, false);
       setIndex(jumpTo);
     }
+
+    animatingRef.current = false;
+
+    // ✅ if user clicked more, run next immediately
+    if (pendingRef.current !== 0) {
+      const nextDir = pendingRef.current > 0 ? 1 : -1;
+      pendingRef.current -= nextDir;
+
+      requestAnimationFrame(() => {
+        stepOnce(nextDir);
+      });
+    }
   };
 
-  const go = (dir) => {
-    if (animating || slides.length <= 1) return;
-    setAnimating(true);
-    setIndex((i) => i + dir);
-  };
-
-  const drag = useRef({ active: false, startX: 0, dx: 0 });
-
-  const down = (x) => {
+  const down = (e, x) => {
     if (slides.length <= 1) return;
+    if (isFromControl(e)) return;
+
     drag.current.active = true;
     drag.current.startX = x;
     drag.current.dx = 0;
+    drag.current.moved = false;
+
     const track = trackRef.current;
     if (track) track.style.transition = "none";
   };
 
-  const move = (x) => {
+  const move = (e, x) => {
     if (!drag.current.active) return;
+    if (isFromControl(e)) return;
+
     const track = trackRef.current;
     if (!track) return;
 
     const dx = x - drag.current.startX;
     drag.current.dx = dx;
+    if (Math.abs(dx) > 3) drag.current.moved = true;
 
     const slideW = getSlideW();
     const offset = index * (slideW + gap);
@@ -142,51 +190,58 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
     if (!drag.current.active) return;
     drag.current.active = false;
 
+    // snap back if not dragged
+    if (!drag.current.moved) {
+      applyTransformPx(index, true);
+      return;
+    }
+
     const slideW = getSlideW();
     const absDx = Math.abs(drag.current.dx);
-
-    // threshold: 18% of a slide
-    const threshold = slideW * 0.18;
+    const threshold = slideW * 0.12; // ✅ more responsive than 0.18
 
     if (absDx > threshold) {
-      setAnimating(true);
-      setIndex((i) => (drag.current.dx < 0 ? i + 1 : i - 1));
+      go(drag.current.dx < 0 ? 1 : -1);
     } else {
       applyTransformPx(index, true);
     }
   };
 
+  // ✅ render guard after hooks
+  if (status !== "succeeded" || !apartment || images.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="bg-white ">
-      <div className="mx-auto w-full px-6 md:px-10 lg:px-20 pt-1 ">
+    <section className="bg-white">
+      <div className="mx-auto w-full px-6 md:px-10 lg:px-20 pt-1">
         <div
           ref={viewportRef}
-          className="relative overflow-hidden "
-          onMouseDown={(e) => down(e.clientX)}
-          onMouseMove={(e) => move(e.clientX)}
+          className="relative overflow-hidden touch-pan-y"
+          onMouseDown={(e) => down(e, e.clientX)}
+          onMouseMove={(e) => move(e, e.clientX)}
           onMouseUp={up}
           onMouseLeave={up}
-          onTouchStart={(e) => down(e.touches[0].clientX)}
-          onTouchMove={(e) => move(e.touches[0].clientX)}
+          onTouchStart={(e) => down(e, e.touches[0].clientX)}
+          onTouchMove={(e) => move(e, e.touches[0].clientX)}
           onTouchEnd={up}
         >
           {/* Arrows */}
           {images.length > 1 && (
             <>
               <button
+                data-slider-control="true"
                 type="button"
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   go(-1);
                 }}
                 className="absolute left-3 top-1/2 -translate-y-1/2 z-20
-    h-12 w-12 rounded-full
-    bg-white/80 backdrop-blur
-    flex items-center justify-center
-    text-black shadow hover:bg-white"
+                  h-12 w-12 rounded-full
+                  bg-white/80 backdrop-blur
+                  flex items-center justify-center
+                  text-black shadow hover:bg-white"
                 aria-label="Previous"
               >
                 <svg
@@ -204,19 +259,18 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
               </button>
 
               <button
+                data-slider-control="true"
                 type="button"
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   go(1);
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 z-20
-    h-12 w-12 rounded-full
-    bg-white/80 backdrop-blur
-    flex items-center justify-center
-    text-black shadow hover:bg-white"
+                  h-12 w-12 rounded-full
+                  bg-white/80 backdrop-blur
+                  flex items-center justify-center
+                  text-black shadow hover:bg-white"
                 aria-label="Next"
               >
                 <svg
@@ -249,13 +303,12 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
                   width: `calc((100% - ${(spv - 1) * gap}px) / ${spv})`,
                 }}
               >
-                {/* same height for all images */}
                 <div className="h-[240px] sm:h-[320px] lg:h-[420px] w-full">
                   <img
                     src={src}
                     alt=""
                     draggable={false}
-                    className="h-full w-full select-none object-cover"
+                    className="h-full w-full select-none object-cover pointer-events-none"
                   />
                 </div>
               </div>

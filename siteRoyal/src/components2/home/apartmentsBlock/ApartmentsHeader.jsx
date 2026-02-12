@@ -1,17 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SearchBar from "../../../components2/home/apartmentsBlock/SearchBar";
-// ✅ adjust path if your structure differs
-// Option: pass a custom node instead (see note below)
+import RoomsIconFilter from "../../../components2/home/apartmentsBlock/RoomsIconFilter";
 
 export default function ApartmentsHeader({
-  roomsOptions = [],
   floorsOptions = [],
   guestsOptions = [],
   filter,
   setFilter,
 
-  // ✅ NEW
   showSearch = false,
   searchValue = "",
   onSearchChange,
@@ -21,7 +18,6 @@ export default function ApartmentsHeader({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
-  const rooms = useMemo(() => ["all", ...roomsOptions], [roomsOptions]);
   const floors = useMemo(() => ["all", ...floorsOptions], [floorsOptions]);
   const guests = useMemo(() => ["all", ...guestsOptions], [guestsOptions]);
 
@@ -59,30 +55,18 @@ export default function ApartmentsHeader({
         />
       )}
 
-      {/* panel (pushes content down) */}
+      {/* ✅ ROOMS ICON FILTER (this is the “new filtering”) */}
+      <div className="mt-6">
+        <RoomsIconFilter
+          value={filter.rooms}
+          onChange={(roomsKey) => setFilter((p) => ({ ...p, rooms: roomsKey }))}
+        />
+      </div>
+
+      {/* panel: only floor + guests */}
       {open && (
         <div className="mt-6 rounded-xl border border-black/10 bg-white p-5">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* rooms */}
-            <div>
-              <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
-                {t("rooms")}
-              </div>
-              <select
-                value={String(filter.rooms)}
-                onChange={(e) =>
-                  setFilter((p) => ({ ...p, rooms: e.target.value }))
-                }
-                className="mt-2 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[14px] text-black/80 outline-none"
-              >
-                {rooms.map((v) => (
-                  <option key={String(v)} value={String(v)}>
-                    {v === "all" ? t("all") : `${v} ${t("rooms_short")}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
+          <div className="grid gap-6 sm:grid-cols-2">
             {/* floor */}
             <div>
               <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
