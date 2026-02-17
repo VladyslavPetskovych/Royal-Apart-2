@@ -3,6 +3,11 @@ import { useState } from "react";
 import edit from "../../assets/4226577.png";
 import del from "../../assets/del.png";
 import axios from "axios";
+import {
+  ADDITIONAL_PROPERTY_KEYS,
+  getAdditionalPropertiesFromRoom,
+  getLabelForKey,
+} from "../../constants/additionalProperties";
 
 function SingleRoom({ room, onDelete }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,14 +38,12 @@ function SingleRoom({ room, onDelete }) {
     imgurl: room.imgurl,
     additionalProperties: room.additionalProperties || {},
   });
-  const [additionalPropsArray, setAdditionalPropsArray] = useState(() =>
-    Object.entries(room.additionalProperties || {}).map(([key, value]) => ({ key, value }))
+  const [additionalProps, setAdditionalProps] = useState(() =>
+    getAdditionalPropertiesFromRoom(room)
   );
 
   const openModal = () => {
-    setAdditionalPropsArray(
-      Object.entries(room.additionalProperties || {}).map(([key, value]) => ({ key, value }))
-    );
+    setAdditionalProps(getAdditionalPropertiesFromRoom(room));
     setIsModalOpen(true);
   };
 
@@ -69,20 +72,6 @@ function SingleRoom({ room, onDelete }) {
         ...prevEditedRoomData,
         imgurl: [fileName],
       }));
-    } else if (name.startsWith("addprop_key_")) {
-      const idx = Number(name.replace("addprop_key_", ""));
-      setAdditionalPropsArray((prev) => {
-        const next = [...prev];
-        if (next[idx]) next[idx] = { ...next[idx], key: value };
-        return next;
-      });
-    } else if (name.startsWith("addprop_val_")) {
-      const idx = Number(name.replace("addprop_val_", ""));
-      setAdditionalPropsArray((prev) => {
-        const next = [...prev];
-        if (next[idx]) next[idx] = { ...next[idx], value };
-        return next;
-      });
     } else {
       setEditedRoomData((prevEditedRoomData) => ({
         ...prevEditedRoomData,
@@ -91,18 +80,17 @@ function SingleRoom({ room, onDelete }) {
     }
   };
 
-  const handleAddProperty = () => {
-    setAdditionalPropsArray((prev) => [...prev, { key: "", value: "" }]);
-  };
-
-  const handleRemoveProperty = (idx) => {
-    setAdditionalPropsArray((prev) => prev.filter((_, i) => i !== idx));
+  const handleAdditionalPropChange = (key, value) => {
+    setAdditionalProps((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSubmit = () => {
     const additionalPropsObj = {};
-    additionalPropsArray.forEach(({ key, value }) => {
-      if (key && key.trim()) additionalPropsObj[key.trim()] = value;
+    ADDITIONAL_PROPERTY_KEYS.forEach(({ key, default: def, type }) => {
+      let val = additionalProps[key];
+      if (val === undefined || val === "") val = def;
+      if (type === "number") val = Number(val) || 0;
+      additionalPropsObj[key] = val;
     });
 
     const formDataToSend = new FormData();
@@ -196,7 +184,7 @@ function SingleRoom({ room, onDelete }) {
             <div className="mt-1 pt-1 border-t border-gray-400">
               {Object.entries(formData.additionalProperties).map(([k, v]) => (
                 <p key={k} className="text-xs">
-                  {k}: {v}
+                  {getLabelForKey(k)}: {String(v)}
                 </p>
               ))}
             </div>
@@ -332,41 +320,26 @@ function SingleRoom({ room, onDelete }) {
               </div>
             </div>
             <div className="m-2 p-2 border border-slate-300 rounded">
-              <div className="flex justify-between items-center mb-2">
-                <label className="font-semibold">Додаткові властивості:</label>
-                <button
-                  type="button"
-                  className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
-                  onClick={handleAddProperty}
-                >
-                  + Додати
-                </button>
-              </div>
-              {additionalPropsArray.map((item, idx) => (
-                <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input
-                    className="bg-slate-200 flex-1 p-1"
-                    type="text"
-                    placeholder="Назва (напр. WiFi)"
-                    name={`addprop_key_${idx}`}
-                    value={item.key}
-                    onChange={handleInputChange}
-                  />
-                  <input
-                    className="bg-slate-200 flex-1 p-1"
-                    type="text"
-                    placeholder="Значення"
-                    name={`addprop_val_${idx}`}
-                    value={item.value}
-                    onChange={handleInputChange}
-                  />
-                  <button
-                    type="button"
-                    className="bg-red-400 text-white px-2 py-1 rounded text-sm"
-                    onClick={() => handleRemoveProperty(idx)}
-                  >
-                    Видалити
-                  </button>
+              <label className="font-semibold block mb-2">Додаткові властивості:</label>
+              {ADDITIONAL_PROPERTY_KEYS.map(({ key, label, type, placeholder, default: def }) => (
+                <div key={key} className="flex gap-2 mb-2 items-center">
+                  <label className="w-48 text-sm">{label}:</label>
+                  {type === "boolean" ? (
+                    <input
+                      type="checkbox"
+                      checked={additionalProps[key] ?? def}
+                      onChange={(e) => handleAdditionalPropChange(key, e.target.checked)}
+                      className="w-4 h-4"
+                    />
+                  ) : (
+                    <input
+                      className="bg-slate-200 flex-1 p-1"
+                      type={type}
+                      placeholder={placeholder}
+                      value={additionalProps[key] ?? ""}
+                      onChange={(e) => handleAdditionalPropChange(key, e.target.value)}
+                    />
+                  )}
                 </div>
               ))}
             </div>

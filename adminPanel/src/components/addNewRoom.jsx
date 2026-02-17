@@ -2,6 +2,10 @@ import { useState } from "react";
 import axios from "axios";
 import Wubook from "./wubook";
 import Popup from "./popup";
+import {
+  ADDITIONAL_PROPERTY_KEYS,
+  getDefaultAdditionalProperties,
+} from "../constants/additionalProperties";
 
 export default function FormComponent() {
   const [image, setImage] = useState("");
@@ -17,7 +21,7 @@ export default function FormComponent() {
   const [square, setSquare] = useState(50);
   const [wubid, setWubid] = useState(50);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [additionalPropsArray, setAdditionalPropsArray] = useState([]);
+  const [additionalProps, setAdditionalProps] = useState(() => getDefaultAdditionalProperties());
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -56,8 +60,11 @@ export default function FormComponent() {
     formData.append("floor", floor);
     formData.append("wubid", wubid);
     const additionalPropsObj = {};
-    additionalPropsArray.forEach(({ key, value }) => {
-      if (key && key.trim()) additionalPropsObj[key.trim()] = value;
+    ADDITIONAL_PROPERTY_KEYS.forEach(({ key, default: def, type }) => {
+      let val = additionalProps[key];
+      if (val === undefined || val === "") val = def;
+      if (type === "number") val = Number(val) || 0;
+      additionalPropsObj[key] = val;
     });
     formData.append("additionalProperties", JSON.stringify(additionalPropsObj));
     try {
@@ -172,47 +179,32 @@ export default function FormComponent() {
           </Wubook>
         </div>
         <div className="mt-2 p-2 border border-slate-300 rounded">
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-medium text-gray-900">Додаткові властивості:</label>
-            <button
-              type="button"
-              className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
-              onClick={() => setAdditionalPropsArray((prev) => [...prev, { key: "", value: "" }])}
-            >
-              + Додати
-            </button>
-          </div>
-          {additionalPropsArray.map((item, idx) => (
-            <div key={idx} className="flex gap-2 mb-2 items-center">
-              <input
-                className="bg-slate-200 flex-1 p-1 rounded"
-                type="text"
-                placeholder="Назва (напр. WiFi)"
-                value={item.key}
-                onChange={(e) => {
-                  const next = [...additionalPropsArray];
-                  next[idx] = { ...next[idx], key: e.target.value };
-                  setAdditionalPropsArray(next);
-                }}
-              />
-              <input
-                className="bg-slate-200 flex-1 p-1 rounded"
-                type="text"
-                placeholder="Значення"
-                value={item.value}
-                onChange={(e) => {
-                  const next = [...additionalPropsArray];
-                  next[idx] = { ...next[idx], value: e.target.value };
-                  setAdditionalPropsArray(next);
-                }}
-              />
-              <button
-                type="button"
-                className="bg-red-400 text-white px-2 py-1 rounded text-sm"
-                onClick={() => setAdditionalPropsArray((prev) => prev.filter((_, i) => i !== idx))}
-              >
-                Видалити
-              </button>
+          <label className="block text-sm font-medium text-gray-900 mb-2">
+            Додаткові властивості:
+          </label>
+          {ADDITIONAL_PROPERTY_KEYS.map(({ key, label, type, placeholder, default: def }) => (
+            <div key={key} className="flex gap-2 mb-2 items-center">
+              <label className="w-48 text-sm text-gray-900">{label}:</label>
+              {type === "boolean" ? (
+                <input
+                  type="checkbox"
+                  checked={additionalProps[key] ?? def}
+                  onChange={(e) =>
+                    setAdditionalProps((prev) => ({ ...prev, [key]: e.target.checked }))
+                  }
+                  className="w-4 h-4"
+                />
+              ) : (
+                <input
+                  className="bg-slate-200 flex-1 p-1 rounded"
+                  type={type}
+                  placeholder={placeholder}
+                  value={additionalProps[key] ?? ""}
+                  onChange={(e) =>
+                    setAdditionalProps((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
+                />
+              )}
             </div>
           ))}
         </div>
