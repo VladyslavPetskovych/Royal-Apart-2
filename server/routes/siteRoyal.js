@@ -22,8 +22,12 @@ async function createRoomFoldersAndCopyImages(rooms) {
     console.log("Rooms:", rooms); // Log the contents of the rooms array
 
     for (const room of rooms) {
+      if (room.wubid == null) {
+        console.warn(`Room '${room.name}' has no wubid, skipping image copy.`);
+        continue;
+      }
       console.log("Room:", room); // Log the current room object
-      const roomDir = path.join(imgsRoyalDir, room.wubid.toString()); // Ensure room.wubid is a string
+      const roomDir = path.join(imgsRoyalDir, String(room.wubid));
       if (!fs.existsSync(roomDir)) {
         fs.mkdirSync(roomDir, { recursive: true });
       }
@@ -54,6 +58,10 @@ async function createRoomFoldersAndCopyImages(rooms) {
 async function updateImgUrlsInCopyAparts() {
   try {
     const imgsRoyalDir = path.join(__dirname, "../imgsRoyal");
+    if (!fs.existsSync(imgsRoyalDir)) {
+      console.warn("imgsRoyal directory does not exist, skipping imgurl update.");
+      return;
+    }
 
     // Read the names of folders in imgsRoyal
     const roomFolders = fs
@@ -66,12 +74,18 @@ async function updateImgUrlsInCopyAparts() {
     const newCollection = db.collection("copy_aparts");
 
     for (const folderName of roomFolders) {
-      const imgNames = fs.readdirSync(path.join(imgsRoyalDir, folderName));
+      const folderPath = path.join(imgsRoyalDir, folderName);
+      if (!fs.existsSync(folderPath)) continue;
+      const imgNames = fs.readdirSync(folderPath);
 
-      // Update the corresponding document in the 'copy_aparts' collection
-      // Use the room ID instead of the name to identify the document
+      const wubidNum = parseInt(folderName, 10);
+      if (Number.isNaN(wubidNum)) {
+        console.warn(`Skipping non-numeric folder: ${folderName}`);
+        continue;
+      }
+
       await newCollection.updateOne(
-        { wubid: parseInt(folderName) }, // Assuming folderName is the room ID
+        { wubid: wubidNum },
         { $set: { imgurl: imgNames } }
       );
 
@@ -124,8 +138,16 @@ async function copyData() {
       }
     }
 
-    await createRoomFoldersAndCopyImages(roomsWithoutIds);
-    await updateImgUrlsInCopyAparts();
+    try {
+      await createRoomFoldersAndCopyImages(roomsWithoutIds);
+    } catch (imgErr) {
+      console.error("Error copying images (non-fatal):", imgErr);
+    }
+    try {
+      await updateImgUrlsInCopyAparts();
+    } catch (imgUrlErr) {
+      console.error("Error updating imgurls (non-fatal):", imgUrlErr);
+    }
     console.log("Data copied successfully!");
 
     return "Data copied successfully!";
@@ -148,6 +170,7 @@ router.get("/copy-db", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to copy database.",
+      error: error?.message || String(error),
     });
   }
 });
