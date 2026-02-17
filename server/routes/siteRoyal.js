@@ -99,14 +99,28 @@ async function copyData() {
     const db = connection.useDb("apartments");
     const newCollection = db.collection("copy_aparts");
 
+    const wodooCollection = db.collection("wodoo_aparts");
+
     for (const room of roomsWithoutIds) {
       const existingRoom = await newCollection.findOne({ name: room.name });
       if (!existingRoom) {
         await newCollection.insertOne(room);
-        console.log(`Room '${room.name}' copied successfully!`);
+        console.log(`Room '${room.name}' copied to copy_aparts successfully!`);
       } else {
         await newCollection.updateOne({ name: room.name }, { $set: room });
-        console.log(`Room '${room.name}' updated successfully!`);
+        console.log(`Room '${room.name}' updated in copy_aparts successfully!`);
+      }
+
+      const matchQuery = room.wubid != null
+        ? { wubid: room.wubid }
+        : { name: room.name };
+      const existingWodoo = await wodooCollection.findOne(matchQuery);
+      if (!existingWodoo) {
+        await wodooCollection.insertOne(room);
+        console.log(`Room '${room.name}' copied to wodoo_aparts successfully!`);
+      } else {
+        await wodooCollection.updateOne(matchQuery, { $set: room });
+        console.log(`Room '${room.name}' updated in wodoo_aparts successfully!`);
       }
     }
 
