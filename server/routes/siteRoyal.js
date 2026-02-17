@@ -91,7 +91,10 @@ async function copyData() {
 
     const roomsWithoutIds = rooms.map((room) => {
       const { _id, ...rest } = room;
-      return rest;
+      return {
+        ...rest,
+        additionalProperties: room.additionalProperties || {},
+      };
     });
     const db = connection.useDb("apartments");
     const newCollection = db.collection("copy_aparts");
