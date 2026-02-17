@@ -3,10 +3,10 @@
 import AddNewRoom from "./addNewRoom";
 
 const Modal = ({ isOpen, onClose, children }) => {
-  const overlayStyle = isOpen ? "fixed inset-0 overflow-y-auto" : "hidden";
+  const overlayStyle = isOpen ? "fixed inset-0 overflow-y-auto z-[9999]" : "hidden";
   const modalStyle = isOpen ? "fixed inset-0 bg-black opacity-75" : "hidden";
   const contentStyle = isOpen
-    ? "relative z-50 bg-slate-200 p-8 w-[90%] h-[970px] mx-auto"
+    ? "relative z-[10000] bg-slate-200 p-8 w-[90%] h-[970px] mx-auto"
     : "hidden";
 
   return (

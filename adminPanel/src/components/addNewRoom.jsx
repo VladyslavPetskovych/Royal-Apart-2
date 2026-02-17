@@ -122,14 +122,12 @@ export default function FormComponent() {
           </label>
           <input type="number" onChange={(e) => setRoomcount(e.target.value)} />
         </div>
-        <div className="flex flex-row mt-2">
-          <label className="block mb-2 text-sm font-medium w-[130px] text-gray-900 mr-3">
-            Категорія
-          </label>
+        <div className="hidden">
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className=" px-4 py-2 border rounded-md"
+            aria-hidden="true"
+            tabIndex={-1}
           >
             <option value="romantic">romantic</option>
             <option value="family">family</option>

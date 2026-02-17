@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const Popup = ({  content }) => {
+const Popup = ({ content }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const togglePopup = () => {
