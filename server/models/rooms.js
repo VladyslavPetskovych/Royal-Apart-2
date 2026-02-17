@@ -40,6 +40,10 @@ const roomSchema = mongoose.Schema(
       type: Number,
     },
     currentbookings: [],
+    additionalProperties: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({}),
+    },
   },
   { timestamps: true }
 );

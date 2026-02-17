@@ -19,6 +19,7 @@ function SingleRoom({ room, onDelete }) {
     guests: room.guests,
     surface: room.surface,
     imgurl: room.imgurl,
+    additionalProperties: room.additionalProperties || {},
   });
   const [formData, setFormData] = useState({
     name: room.name,
@@ -30,9 +31,16 @@ function SingleRoom({ room, onDelete }) {
     surface: room.surface,
     beds: room.beds,
     imgurl: room.imgurl,
+    additionalProperties: room.additionalProperties || {},
   });
+  const [additionalPropsArray, setAdditionalPropsArray] = useState(() =>
+    Object.entries(room.additionalProperties || {}).map(([key, value]) => ({ key, value }))
+  );
 
   const openModal = () => {
+    setAdditionalPropsArray(
+      Object.entries(room.additionalProperties || {}).map(([key, value]) => ({ key, value }))
+    );
     setIsModalOpen(true);
   };
 
@@ -61,6 +69,20 @@ function SingleRoom({ room, onDelete }) {
         ...prevEditedRoomData,
         imgurl: [fileName],
       }));
+    } else if (name.startsWith("addprop_key_")) {
+      const idx = Number(name.replace("addprop_key_", ""));
+      setAdditionalPropsArray((prev) => {
+        const next = [...prev];
+        if (next[idx]) next[idx] = { ...next[idx], key: value };
+        return next;
+      });
+    } else if (name.startsWith("addprop_val_")) {
+      const idx = Number(name.replace("addprop_val_", ""));
+      setAdditionalPropsArray((prev) => {
+        const next = [...prev];
+        if (next[idx]) next[idx] = { ...next[idx], value };
+        return next;
+      });
     } else {
       setEditedRoomData((prevEditedRoomData) => ({
         ...prevEditedRoomData,
@@ -69,23 +91,39 @@ function SingleRoom({ room, onDelete }) {
     }
   };
 
+  const handleAddProperty = () => {
+    setAdditionalPropsArray((prev) => [...prev, { key: "", value: "" }]);
+  };
+
+  const handleRemoveProperty = (idx) => {
+    setAdditionalPropsArray((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const handleSubmit = () => {
-    const formData = new FormData();
-    formData.append("name", editedRoomData.name);
-    formData.append("price", editedRoomData.price);
-    formData.append("description", editedRoomData.description);
-    formData.append("numrooms", editedRoomData.numrooms);
-    formData.append("floor", editedRoomData.floor);
-    formData.append("guests", editedRoomData.guests);
-    formData.append("surface", editedRoomData.surface);
-    formData.append("beds", editedRoomData.beds);
-    formData.append("imgurl", editedRoomData.imgurl[0]);
-    formData.append("file", fileData);
+    const additionalPropsObj = {};
+    additionalPropsArray.forEach(({ key, value }) => {
+      if (key && key.trim()) additionalPropsObj[key.trim()] = value;
+    });
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", editedRoomData.name);
+    formDataToSend.append("price", editedRoomData.price);
+    formDataToSend.append("description", editedRoomData.description);
+    formDataToSend.append("numrooms", editedRoomData.numrooms);
+    formDataToSend.append("category", editedRoomData.category);
+    formDataToSend.append("wubid", editedRoomData.wubid);
+    formDataToSend.append("floor", editedRoomData.floor);
+    formDataToSend.append("guests", editedRoomData.guests);
+    formDataToSend.append("surface", editedRoomData.surface);
+    formDataToSend.append("beds", editedRoomData.beds);
+    formDataToSend.append("imgurl", editedRoomData.imgurl[0]);
+    formDataToSend.append("additionalProperties", JSON.stringify(additionalPropsObj));
+    if (fileData) formDataToSend.append("file", fileData);
 
     axios
       .put(
         `https://royalapart.online/api/aparts/${room._id}`,
-        formData,
+        formDataToSend,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -94,6 +132,9 @@ function SingleRoom({ room, onDelete }) {
       )
       .then((response) => {
         console.log("Data successfully sent to the backend:", response.data);
+        setFormData((prev) => ({ ...prev, additionalProperties: additionalPropsObj }));
+        setEditedRoomData((prev) => ({ ...prev, additionalProperties: additionalPropsObj }));
+        closeModal();
         alert("Зміни внесено!!!");
       })
       .catch((error) => {
@@ -150,6 +191,16 @@ function SingleRoom({ room, onDelete }) {
         <p>Кількість гостей: {formData.guests}</p>
         <p>Площа: {formData.surface} м2</p>
         <p>Кількість ліжок: {formData.beds}</p>
+        {formData.additionalProperties &&
+          Object.keys(formData.additionalProperties).length > 0 && (
+            <div className="mt-1 pt-1 border-t border-gray-400">
+              {Object.entries(formData.additionalProperties).map(([k, v]) => (
+                <p key={k} className="text-xs">
+                  {k}: {v}
+                </p>
+              ))}
+            </div>
+          )}
       </div>
 
       {isModalOpen && (
@@ -279,6 +330,45 @@ function SingleRoom({ room, onDelete }) {
                   />
                 </div>
               </div>
+            </div>
+            <div className="m-2 p-2 border border-slate-300 rounded">
+              <div className="flex justify-between items-center mb-2">
+                <label className="font-semibold">Додаткові властивості:</label>
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                  onClick={handleAddProperty}
+                >
+                  + Додати
+                </button>
+              </div>
+              {additionalPropsArray.map((item, idx) => (
+                <div key={idx} className="flex gap-2 mb-2 items-center">
+                  <input
+                    className="bg-slate-200 flex-1 p-1"
+                    type="text"
+                    placeholder="Назва (напр. WiFi)"
+                    name={`addprop_key_${idx}`}
+                    value={item.key}
+                    onChange={handleInputChange}
+                  />
+                  <input
+                    className="bg-slate-200 flex-1 p-1"
+                    type="text"
+                    placeholder="Значення"
+                    name={`addprop_val_${idx}`}
+                    value={item.value}
+                    onChange={handleInputChange}
+                  />
+                  <button
+                    type="button"
+                    className="bg-red-400 text-white px-2 py-1 rounded text-sm"
+                    onClick={() => handleRemoveProperty(idx)}
+                  >
+                    Видалити
+                  </button>
+                </div>
+              ))}
             </div>
             <div className="flex  m-2">
               <label>Завантажити фото: </label>

@@ -17,6 +17,7 @@ export default function FormComponent() {
   const [square, setSquare] = useState(50);
   const [wubid, setWubid] = useState(50);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [additionalPropsArray, setAdditionalPropsArray] = useState([]);
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -54,6 +55,11 @@ export default function FormComponent() {
     formData.append("square", square);
     formData.append("floor", floor);
     formData.append("wubid", wubid);
+    const additionalPropsObj = {};
+    additionalPropsArray.forEach(({ key, value }) => {
+      if (key && key.trim()) additionalPropsObj[key.trim()] = value;
+    });
+    formData.append("additionalProperties", JSON.stringify(additionalPropsObj));
     try {
       const response = await axios.post(
         "https://royalapart.online/api/aparts/newRoom",
@@ -164,6 +170,51 @@ export default function FormComponent() {
           <Wubook isOpen={isModalOpen} onClose={handleCloseModal}>
             <div className="text-xl">Hello, World!</div>
           </Wubook>
+        </div>
+        <div className="mt-2 p-2 border border-slate-300 rounded">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-900">Додаткові властивості:</label>
+            <button
+              type="button"
+              className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+              onClick={() => setAdditionalPropsArray((prev) => [...prev, { key: "", value: "" }])}
+            >
+              + Додати
+            </button>
+          </div>
+          {additionalPropsArray.map((item, idx) => (
+            <div key={idx} className="flex gap-2 mb-2 items-center">
+              <input
+                className="bg-slate-200 flex-1 p-1 rounded"
+                type="text"
+                placeholder="Назва (напр. WiFi)"
+                value={item.key}
+                onChange={(e) => {
+                  const next = [...additionalPropsArray];
+                  next[idx] = { ...next[idx], key: e.target.value };
+                  setAdditionalPropsArray(next);
+                }}
+              />
+              <input
+                className="bg-slate-200 flex-1 p-1 rounded"
+                type="text"
+                placeholder="Значення"
+                value={item.value}
+                onChange={(e) => {
+                  const next = [...additionalPropsArray];
+                  next[idx] = { ...next[idx], value: e.target.value };
+                  setAdditionalPropsArray(next);
+                }}
+              />
+              <button
+                type="button"
+                className="bg-red-400 text-white px-2 py-1 rounded text-sm"
+                onClick={() => setAdditionalPropsArray((prev) => prev.filter((_, i) => i !== idx))}
+              >
+                Видалити
+              </button>
+            </div>
+          ))}
         </div>
       </div>
       <div className="bg-slate-600 w-[90%] md:w-[30%] flex-row text-white p-3">

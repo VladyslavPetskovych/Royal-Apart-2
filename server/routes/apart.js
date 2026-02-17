@@ -86,7 +86,7 @@ const upload = multer({
 
 router.put("/:id", upload.single("file"), async (req, res) => {
   const roomId = req.params.id;
-  const updatedData = req.body;
+  const updatedData = { ...req.body };
 
   try {
 
@@ -95,6 +95,16 @@ router.put("/:id", upload.single("file"), async (req, res) => {
     if (!room) {
 
       return res.status(404).json({ error: "Room not found" });
+    }
+
+    if (req.body.additionalProperties) {
+      try {
+        updatedData.additionalProperties = typeof req.body.additionalProperties === "string"
+          ? JSON.parse(req.body.additionalProperties)
+          : req.body.additionalProperties;
+      } catch (e) {
+        console.warn("Could not parse additionalProperties:", e.message);
+      }
     }
 
     if (req.file) {
@@ -136,9 +146,20 @@ router.post("/newRoom", upload.single("image"), async (req, res) => {
   try {
     const {
       address, body, category, roomcount, price, floor, beds, guests, square, wubid,
+      additionalProperties,
     } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "Image file is required" });
+    }
+    let parsedAdditional = {};
+    if (additionalProperties) {
+      try {
+        parsedAdditional = typeof additionalProperties === "string"
+          ? JSON.parse(additionalProperties)
+          : additionalProperties;
+      } catch (e) {
+        console.warn("Could not parse additionalProperties:", e.message);
+      }
     }
     const newRoom = new Roomsr({
       name: address, 
@@ -152,6 +173,7 @@ router.post("/newRoom", upload.single("image"), async (req, res) => {
       floor: floor,
       surface: square,
       wubid: wubid,
+      additionalProperties: parsedAdditional,
     });
     await newRoom.save();
     res.status(201).json({ message: "Room created successfully" });
