@@ -6,10 +6,15 @@ const path = require("path");
 const fs = require("fs");
 const axios = require("axios");
 
+const advertImgsDir = path.join(__dirname, "../advertImgs");
+if (!fs.existsSync(advertImgsDir)) {
+  fs.mkdirSync(advertImgsDir, { recursive: true });
+}
+
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../advertImgs"));
+    cb(null, advertImgsDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -29,8 +34,8 @@ router.post("/save", upload.single("image"), async (req, res) => {
       // Find and delete previous advert if exists
       const prevAdvert = await advertModel.findOne({});
       if (prevAdvert && prevAdvert.imgurl) {
-        // Delete the previous image file
-        fs.unlinkSync(path.join(__dirname, "../advertImgs", prevAdvert.imgurl));
+        const prevPath = path.join(advertImgsDir, prevAdvert.imgurl);
+        if (fs.existsSync(prevPath)) fs.unlinkSync(prevPath);
         // Delete the previous document from the database
         await advertModel.deleteOne({ _id: prevAdvert._id });
       }
@@ -93,7 +98,7 @@ router.get("/consume", async (req, res) => {
 
     let base64Image = "";
     if (advert.imgurl) {
-      const imgPath = path.join(__dirname, "../advertImgs", advert.imgurl);
+      const imgPath = path.join(advertImgsDir, advert.imgurl);
       if (fs.existsSync(imgPath)) {
         base64Image = fs.readFileSync(imgPath, { encoding: "base64" });
       }
