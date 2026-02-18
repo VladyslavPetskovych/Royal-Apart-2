@@ -7,7 +7,7 @@ const tempImgDir = path.join(__dirname, "tempImg");
 if (!fs.existsSync(tempImgDir)) fs.mkdirSync(tempImgDir, { recursive: true });
 
 const API_URL = "https://royalapart.online/api";
-const CHECK_INTERVAL_MS = 3 * 60 * 1000; // 3 min (change to 2-4 hours when ready)
+const CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 async function checkAndSendAdvert() {
   try {
