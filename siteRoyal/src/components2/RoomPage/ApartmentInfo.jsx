@@ -159,7 +159,7 @@ export default function ApartmentInfo({ apartment, status }) {
               />
               <FeatureRow
                 icon={<Droplet size={16} strokeWidth={2} />}
-                label="БЕЗКОШТОВНА ВОДА"
+                label="БЕЗКОШТОВНІ КОМАНУЛЬНІ ПОСЛУГИ"
               />
               <FeatureRow
                 icon={<Star size={16} strokeWidth={2} />}
