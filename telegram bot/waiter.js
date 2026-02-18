@@ -6,62 +6,69 @@ const bot = require("./bot");
 const path = require("path");
 const cors = require("cors");
 
+const tempImgDir = path.join(__dirname, "tempImg");
+if (!fs.existsSync(tempImgDir)) fs.mkdirSync(tempImgDir, { recursive: true });
+
 app.use(cors());
 app.use("/tempImg", express.static("tempImg"));
 
-app.get("/getData", async function (req, res) {
+const CHECK_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
+
+async function checkAndSendAdvert() {
   try {
-    console.log("Request received at /getData");
+    const response = await axios.get(
+      "https://royalapart.online/api/advert/consume",
+      { validateStatus: () => true }
+    );
 
+    if (response.status !== 200) return;
 
-    const response = await axios.post("https://royalapart.online/api/advert/sendData");
+    const { msg, imgData } = response.data;
+    const caption = msg || "";
 
-    const imageData = Buffer.from(response.data.imgData, "base64");
+    const chatIdsResponse = await axios.get(
+      "https://royalapart.online/api/getAllUsers/AllUsers"
+    );
+    const chatIds = chatIdsResponse.data.userIds || [];
+    if (chatIds.length === 0) return;
 
- 
-    const tempImagePath = path.join(__dirname, "tempImg", "tempImage.jpg");
+    let tempImagePath = null;
+    if (imgData) {
+      const imageBuffer = Buffer.from(imgData, "base64");
+      tempImagePath = path.join(tempImgDir, "tempImage.jpg");
+      fs.writeFileSync(tempImagePath, imageBuffer);
+    }
 
-    fs.writeFileSync(tempImagePath, imageData);
+    for (let i = 0; i < chatIds.length; i++) {
+      try {
+        if (tempImagePath && fs.existsSync(tempImagePath)) {
+          await bot.sendPhoto(chatIds[i], tempImagePath, { caption });
+        } else {
+          await bot.sendMessage(chatIds[i], caption);
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      } catch (err) {
+        console.error(`Error sending to ${chatIds[i]}:`, err.message);
+      }
+    }
 
+    if (tempImagePath && fs.existsSync(tempImagePath)) {
+      fs.unlinkSync(tempImagePath);
+    }
 
-    // Fetch chat IDs from the server
-    console.log("Making GET request to /getAllUsers/AllUsers");
-    const chatIdsResponse = await axios.get("https://royalapart.online/api/getAllUsers/AllUsers");
-    console.log("Received response from /getAllUsers/AllUsers:", chatIdsResponse.data);
-
-    const chatIds = chatIdsResponse.data.userIds;
-    console.log("Chat IDs received:", chatIds);
-
-  //   await bot.sendPhoto(938729564, tempImagePath, {
-  //       caption: ` ${response.data.msg}`,
-  //  });
-  const caption = ` ${response.data.msg}`;
-   //Send photo to each chat ID
-   for (let i = 0; i < chatIds.length; i++) {
-    const chatId = chatIds[i];
-
-    // Delay in milliseconds (e.g., 1000 ms = 1 second)
-    const delay = 500; // Adjust the delay as needed
-
-    // Use setTimeout to introduce a delay
-    await new Promise(resolve => setTimeout(resolve, delay));
-
-    try {
-      console.log(`Sending photo to chat ID: ${chatId}`);
-      await bot.sendPhoto(chatId, tempImagePath, { caption });
-      console.log(`Message sent successfully to chat ID: ${chatId}`);
-    } catch (error) {
-      console.error(`Error sending message to chat ID ${chatId}:`, error);
+    console.log("Advert sent to", chatIds.length, "users");
+  } catch (error) {
+    // 404 is expected when no advert - ignore
+    if (error.response?.status !== 404) {
+      console.error("Error in advert check:", error.message);
     }
   }
+}
 
-    res.status(200).send("Message sent");
-  } catch (error) {
-    console.error("Error receiving data:", error);
-    res.status(500).send("Internal server error");
-  }
-});
+setInterval(checkAndSendAdvert, CHECK_INTERVAL_MS);
+checkAndSendAdvert(); // Run once on startup
 
 app.listen(3001, () => {
-  console.log('Express server running on port 3001');
+  console.log("Express server running on port 3001");
+  console.log("Advert check every 2 minutes");
 });

@@ -83,4 +83,29 @@ router.post("/sendData", async (req, res) => {
   }
 });
 
+// Consume advert: return it and delete from collection (for tgbot polling)
+router.get("/consume", async (req, res) => {
+  try {
+    const advert = await advertModel.findOne().sort({ createdAt: -1 });
+    if (!advert) {
+      return res.status(404).json({ error: "No advert found" });
+    }
+
+    let base64Image = "";
+    if (advert.imgurl) {
+      const imgPath = path.join(__dirname, "../advertImgs", advert.imgurl);
+      if (fs.existsSync(imgPath)) {
+        base64Image = fs.readFileSync(imgPath, { encoding: "base64" });
+      }
+    }
+
+    await advertModel.deleteOne({ _id: advert._id });
+
+    res.status(200).json({ msg: advert.msg, imgData: base64Image });
+  } catch (error) {
+    console.error("Error consuming advert:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

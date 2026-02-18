@@ -14,24 +14,12 @@ const ModalAdvert = ({ isOpen, onClose, onSubmit, children }) => {
     formData.append("image", image);
 
     try {
-      await axios.post("https://royalapart.online/api/advert/save", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setTimeout(async () => {
-        try {
-          await axios.get("https://royalapart.online/api/server2/getData");
-          alert("Дані надіслані успішно:");
-          onClose();
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      }, 3000);
-
+      await axios.post("https://royalapart.online/api/advert/save", formData);
+      alert("Дані збережено! Реклама буде надіслана користувачам протягом 2 хвилин.");
       onClose();
     } catch (error) {
       console.error("Error saving data:", error);
+      alert("Помилка при збереженні");
     }
   };
 

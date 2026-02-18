@@ -42,19 +42,7 @@ app.use("/sales", salesRouter)
 app.use("/analis", wubookRouter);
 
 // Proxy to Telegram bot (getData - send adverts to users)
-app.get("/server2/getData", async (req, res) => {
-  try {
-    const response = await axios.get("http://tgbot:3001/getData", {
-      timeout: 60000,
-    });
-    res.status(response.status).send(response.data);
-  } catch (error) {
-    console.error("Error proxying to tgbot:", error.message);
-    res.status(error.response?.status || 500).send(
-      error.response?.data || "Internal server error"
-    );
-  }
-});
+
 
 cron.schedule("0 * * * *", async () => {
   try {
