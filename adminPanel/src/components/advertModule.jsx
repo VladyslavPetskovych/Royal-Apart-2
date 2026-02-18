@@ -14,7 +14,11 @@ const ModalAdvert = ({ isOpen, onClose, onSubmit, children }) => {
     formData.append("image", image);
 
     try {
-      await axios.post("https://royalapart.online/api/advert/save", formData);
+      await axios.post("https://royalapart.online/api/advert/save", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setTimeout(async () => {
         try {
           await axios.get("https://royalapart.online/api/server2/getData");

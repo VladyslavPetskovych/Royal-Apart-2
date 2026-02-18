@@ -6,17 +6,10 @@ const path = require("path");
 const fs = require("fs");
 const axios = require("axios");
 
-const advertImgsDir = path.join(__dirname, "../advertImgs");
-
-// Ensure advertImgs directory exists (required for Docker - dir may not exist in image)
-if (!fs.existsSync(advertImgsDir)) {
-  fs.mkdirSync(advertImgsDir, { recursive: true });
-}
-
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, advertImgsDir);
+    cb(null, path.join(__dirname, "../advertImgs"));
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -36,11 +29,9 @@ router.post("/save", upload.single("image"), async (req, res) => {
       // Find and delete previous advert if exists
       const prevAdvert = await advertModel.findOne({});
       if (prevAdvert && prevAdvert.imgurl) {
-        // Delete the previous image file (ignore if file was already removed)
-        const prevImgPath = path.join(advertImgsDir, prevAdvert.imgurl);
-        if (fs.existsSync(prevImgPath)) {
-          fs.unlinkSync(prevImgPath);
-        }
+        // Delete the previous image file
+        fs.unlinkSync(path.join(__dirname, "../advertImgs", prevAdvert.imgurl));
+        // Delete the previous document from the database
         await advertModel.deleteOne({ _id: prevAdvert._id });
       }
     }
@@ -58,10 +49,7 @@ router.post("/save", upload.single("image"), async (req, res) => {
       .json({ message: "Data saved successfully", data: savedAdvert });
   } catch (error) {
     console.error("Error saving data:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: error.message,
-    });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
