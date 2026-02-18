@@ -62,7 +62,6 @@ services:
       context: ./telegram bot
     environment:
       - token=${TG_BOT_TOKEN}
-      - API_URL=http://api:3000
     volumes:
       - ./telegram bot:/app
       - /app/node_modules
