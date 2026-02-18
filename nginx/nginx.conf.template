@@ -18,6 +18,7 @@ server {
         proxy_pass http://web:80/;
     }
 
+
     location /api/ {
         client_max_body_size 10M;
         proxy_set_header Host $host;
