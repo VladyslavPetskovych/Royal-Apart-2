@@ -6,7 +6,7 @@ import joblib
 import os
 from sklearn.metrics import confusion_matrix, classification_report
 from app import (
-    load_tarif_data, load_real_data, create_features,
+    load_tarif_data, load_real_data, build_training_data, create_features_for_training,
     PRICE_NORMALITY_MODEL, PRICE_PREDICTION_MODEL, SCALER_PATH, MODEL_DIR
 )
 
@@ -24,7 +24,7 @@ def plot_feature_importance():
     reg_model = joblib.load(PRICE_PREDICTION_MODEL)
     
     feature_names = [
-        'day_of_week', 'month', 'day_of_month', 'price_tarif',
+        'day_of_week', 'month', 'day_of_month', 'week_of_year', 'price_tarif',
         'avg_real_price', 'min_real_price', 'max_real_price', 
         'std_real_price', 'count_similar', 'min_date_diff', 'has_real_price',
         'occupancy_rate', 'total_booked_days', 'avg_booking_duration',
@@ -78,10 +78,13 @@ def plot_price_comparison():
         print("Помилка завантаження даних")
         return
     
-    # Беремо вибірку для швидкості (перші 1000 рядків)
-    sample_df = tarif_df.head(1000)
+    merged_df = build_training_data(real_df, tarif_df)
+    if len(merged_df) == 0:
+        print("Помилка: немає спільних даних для візуалізації")
+        return
+    sample_df = merged_df.head(1000)
     print("Створення ознак...")
-    features_df = create_features(sample_df, real_df)
+    features_df = create_features_for_training(sample_df, real_df)
     
     # Завантажуємо моделі
     clf_model = joblib.load(PRICE_NORMALITY_MODEL)
@@ -89,7 +92,7 @@ def plot_price_comparison():
     scaler = joblib.load(SCALER_PATH)
     
     feature_cols = [
-        'day_of_week', 'month', 'day_of_month', 'price_tarif',
+        'day_of_week', 'month', 'day_of_month', 'week_of_year', 'price_tarif',
         'avg_real_price', 'min_real_price', 'max_real_price', 
         'std_real_price', 'count_similar', 'min_date_diff', 'has_real_price',
         'occupancy_rate', 'total_booked_days', 'avg_booking_duration',
@@ -174,10 +177,13 @@ def plot_occupancy_vs_price():
         print("Помилка завантаження даних")
         return
     
-    # Беремо вибірку
-    sample_df = tarif_df.head(500)
+    merged_df = build_training_data(real_df, tarif_df)
+    if len(merged_df) == 0:
+        print("Помилка: немає спільних даних")
+        return
+    sample_df = merged_df.head(500)
     print("Створення ознак...")
-    features_df = create_features(sample_df, real_df)
+    features_df = create_features_for_training(sample_df, real_df)
     
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
     
@@ -239,10 +245,13 @@ def plot_model_performance():
         print("Помилка завантаження даних")
         return
     
-    # Беремо вибірку
-    sample_df = tarif_df.head(1000)
+    merged_df = build_training_data(real_df, tarif_df)
+    if len(merged_df) == 0:
+        print("Помилка: немає спільних даних")
+        return
+    sample_df = merged_df.head(1000)
     print("Створення ознак...")
-    features_df = create_features(sample_df, real_df)
+    features_df = create_features_for_training(sample_df, real_df)
     
     # Завантажуємо моделі
     clf_model = joblib.load(PRICE_NORMALITY_MODEL)
@@ -250,7 +259,7 @@ def plot_model_performance():
     scaler = joblib.load(SCALER_PATH)
     
     feature_cols = [
-        'day_of_week', 'month', 'day_of_month', 'price_tarif',
+        'day_of_week', 'month', 'day_of_month', 'week_of_year', 'price_tarif',
         'avg_real_price', 'min_real_price', 'max_real_price', 
         'std_real_price', 'count_similar', 'min_date_diff', 'has_real_price',
         'occupancy_rate', 'total_booked_days', 'avg_booking_duration',

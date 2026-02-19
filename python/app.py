@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import joblib
@@ -83,11 +83,11 @@ def find_room_matches(normalized_room, real_df):
     if not room_words:
         return pd.DataFrame()
     
-    mask = pd.Series([True] * len(real_df_normalized))
+    mask = np.ones(len(real_df_normalized), dtype=bool)
     for word in room_words:
-        mask = mask & real_df_normalized['room_normalized'].str.contains(word, case=False, na=False, regex=False)
+        mask = mask & real_df_normalized['room_normalized'].str.contains(word, case=False, na=False, regex=False).values
     
-    partial_matches = real_df_normalized[mask]
+    partial_matches = real_df_normalized.loc[mask]
     
     if len(partial_matches) > 0:
         return partial_matches.drop(columns=['room_normalized'])
@@ -424,6 +424,56 @@ def calculate_demand_metrics(room, real_df, date_ref, days_window=30):
     }
 
 
+def rooms_match(room_a, room_b):
+    """Перевіряє чи дві назви квартир відносяться до однієї й тієї ж"""
+    if not room_a or not room_b or pd.isna(room_a) or pd.isna(room_b):
+        return False
+    na = normalize_room_name(room_a)
+    nb = normalize_room_name(room_b)
+    if na == nb:
+        return True
+    # Часткове співпадіння: всі слова з однієї назви є в іншій
+    words_a = set(w for w in na.split() if len(w) > 1)
+    words_b = set(w for w in nb.split() if len(w) > 1)
+    return words_a == words_b or (words_a <= words_b) or (words_b <= words_a)
+
+
+def build_training_data(real_df, tarif_df):
+    """
+    Будує навчальні дані з JOIN real + tarif.
+    Використовує ТІЛЬКИ рядки де є і реальна ціна (бронювання) і тарифна ціна - ground truth.
+    """
+    tarif_clean = tarif_df.copy()
+    tarif_clean['room_norm'] = tarif_clean['room'].astype(str).str.strip().apply(normalize_room_name)
+    tarif_clean = tarif_clean[
+        (tarif_clean['room_norm'] != '') &
+        (tarif_clean['price_tarif'].notna()) &
+        (tarif_clean['price_tarif'] > 0)
+    ]
+    tarif_clean['date'] = pd.to_datetime(tarif_clean['date']).dt.normalize()
+    
+    real_clean = real_df.copy()
+    real_clean['room_norm'] = real_clean['room'].astype(str).str.strip().apply(normalize_room_name)
+    real_clean = real_clean[
+        (real_clean['room_norm'] != '') &
+        (real_clean['price_real'].notna()) &
+        (real_clean['price_real'] > 0)
+    ]
+    real_clean['date'] = pd.to_datetime(real_clean['date']).dt.normalize()
+    
+    # Векторизований merge замість циклу
+    merged = real_clean.merge(
+        tarif_clean[['room_norm', 'date', 'room', 'price_tarif']],
+        on=['room_norm', 'date'],
+        how='inner',
+        suffixes=('_real', '_tarif')
+    )
+    # Якщо є дублікати (кілька room_id на одну кімнату), беремо перший
+    merged = merged.drop_duplicates(subset=['room_norm', 'date'], keep='first')
+    merged['room'] = merged['room_tarif']  # Назва з тарифу для консистентності
+    return merged[['room', 'date', 'price_tarif', 'price_real']]
+
+
 def find_similar_bookings(tarif_row, real_df, days_window=30, price_tolerance=None):
     """
     Знаходить схожі бронювання у realPrice
@@ -477,17 +527,19 @@ def find_similar_bookings(tarif_row, real_df, days_window=30, price_tolerance=No
     return similar
 
 
-def create_features(tarif_df, real_df):
+def create_features_for_training(merged_df, real_df):
     """
-    Створює ознаки для навчання моделі
+    Створює ознаки для навчання з merged даних (real + tarif JOIN).
+    Кожен рядок має ground truth: price_real з реальних бронювань.
     """
     features_list = []
     
-    for idx, row in tarif_df.iterrows():
-        # Базові ознаки
+    for idx, row in merged_df.iterrows():
+        # Базові ознаки (включаючи seasonality)
         day_of_week = row['date'].dayofweek
         month = row['date'].month
         day_of_month = row['date'].day
+        week_of_year = row['date'].isocalendar()[1]  # 1-52
         price_tarif = row['price_tarif']
         
         # Обчислюємо метрики частоти здачі та попиту
@@ -530,17 +582,9 @@ def create_features(tarif_df, real_df):
                 count_similar = 0
                 min_date_diff = 60
         
-        # Знаходимо реальну ціну для цієї кімнати і дати
-        normalized_room = normalize_room_name(row['room'])
-        room_matches = find_room_matches(normalized_room, real_df)
-        exact_match = room_matches[room_matches['date'] == row['date']]
-        
-        if len(exact_match) > 0:
-            real_price = exact_match['price_real'].iloc[0]
-            has_real_price = 1
-        else:
-            real_price = avg_real_price
-            has_real_price = 0
+        # У merged даних завжди є ground truth price_real
+        real_price = row['price_real']
+        has_real_price = 1
         
         # Визначаємо чи ціна нормальна
         # Нормальна: ±15% від середньої реальної ціни
@@ -588,6 +632,7 @@ def create_features(tarif_df, real_df):
             'day_of_week': day_of_week,
             'month': month,
             'day_of_month': day_of_month,
+            'week_of_year': week_of_year,
             'price_tarif': price_tarif,
             'avg_real_price': avg_real_price,
             'median_real_price': median_real_price,
@@ -619,10 +664,12 @@ def create_features(tarif_df, real_df):
 
 
 def train_models():
-    """Навчає моделі машинного навчання"""
-    print("Завантаження даних...")
+    """Навчає моделі машинного навчання на всіх даних з data2025"""
+    import sys
+    print("Завантаження даних з server/data2025...", flush=True)
     tarif_df = load_tarif_data()
-    real_df = load_real_data()
+    # Використовуємо realPrice_daily.csv (або конвертуємо з realPrice.csv)
+    real_df = load_real_data(use_cache=True)
     
     if len(tarif_df) == 0 or len(real_df) == 0:
         print("Помилка: не вдалося завантажити дані")
@@ -630,15 +677,24 @@ def train_models():
     
     print(f"Завантажено {len(tarif_df)} рядків тарифів та {len(real_df)} рядків реальних бронювань")
     
-    print("Створення ознак...")
-    features_df = create_features(tarif_df, real_df)
+    # Будуємо навчальні дані тільки з рядків де є І тариф І реальна ціна (ground truth)
+    print("Об'єднання даних (JOIN real + tarif)...")
+    merged_df = build_training_data(real_df, tarif_df)
     
-    # Ознаки для моделі (додано нові фічі про частоту здачі та попит)
+    if len(merged_df) == 0:
+        print("Помилка: не знайдено спільних рядків для навчання. Перевірте збіг назв квартир.")
+        return
+    
+    print(f"Завантажено {len(merged_df)} навчальних зразків з ground truth (real + tarif)")
+    
+    print("Створення ознак...")
+    features_df = create_features_for_training(merged_df, real_df)
+    
+    # Ознаки для моделі (включаючи seasonality)
     feature_cols = [
-        'day_of_week', 'month', 'day_of_month', 'price_tarif',
+        'day_of_week', 'month', 'day_of_month', 'week_of_year', 'price_tarif',
         'avg_real_price', 'min_real_price', 'max_real_price', 
         'std_real_price', 'count_similar', 'min_date_diff', 'has_real_price',
-        # Нові фічі
         'occupancy_rate', 'total_booked_days', 'avg_booking_duration',
         'bookings_per_month', 'demand_volatility', 'demand_count',
         'demand_intensity', 'price_trend', 'recent_demand_ratio'
@@ -662,9 +718,12 @@ def train_models():
     clf_model = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=10)
     clf_model.fit(X_train, y_train_cls)
     
-    # Модель регресії (передбачення ціни)
-    print("Навчання моделі регресії...")
-    reg_model = RandomForestRegressor(n_estimators=100, random_state=42, max_depth=10)
+    # Модель регресії (передбачення ціни) - GradientBoosting для кращих прогнозів
+    print("Навчання моделі регресії (GradientBoosting)...")
+    reg_model = GradientBoostingRegressor(
+        n_estimators=200, max_depth=8, learning_rate=0.1,
+        min_samples_leaf=5, subsample=0.8, random_state=42
+    )
     reg_model.fit(X_train, y_train_reg)
     
     # Збереження моделей
@@ -673,12 +732,16 @@ def train_models():
     joblib.dump(scaler, SCALER_PATH)
     
     # Оцінка моделей
+    from sklearn.metrics import mean_absolute_error
     clf_score = clf_model.score(X_test, y_test_cls)
     reg_score = reg_model.score(X_test, y_test_reg)
+    y_pred_reg = reg_model.predict(X_test)
+    mae = mean_absolute_error(y_test_reg, y_pred_reg)
     
     print(f"\nМоделі навчено та збережено!")
     print(f"Точність класифікації: {clf_score:.2%}")
     print(f"R² регресії: {reg_score:.2%}")
+    print(f"MAE (середня помилка в грн): {mae:.2f}")
     
     return clf_model, reg_model, scaler
 
@@ -722,10 +785,11 @@ def predict_price_normality(room, date, price_tarif, real_df=None):
     # Знаходимо схожі бронювання (без фільтрації за ціною)
     similar = find_similar_bookings(tarif_row, real_df, days_window=30, price_tolerance=None)
     
-    # Створюємо ознаки
+    # Створюємо ознаки (порядок має збігатися з train_models)
     day_of_week = date_obj.dayofweek
     month = date_obj.month
     day_of_month = date_obj.day
+    week_of_year = date_obj.isocalendar()[1]
     
     if len(similar) > 0:
         avg_real_price = similar['price_real'].mean()
@@ -757,11 +821,14 @@ def predict_price_normality(room, date, price_tarif, real_df=None):
             count_similar = 0
             min_date_diff = 60
     
-    # Перевіряємо точне співпадіння
+    # Перевіряємо точне співпадіння (room_matches може бути порожнім)
     normalized_room = normalize_room_name(room)
     room_matches = find_room_matches(normalized_room, real_df)
-    exact_match = room_matches[room_matches['date'] == date_obj]
-    has_real_price = 1 if len(exact_match) > 0 else 0
+    has_real_price = 0
+    if len(room_matches) > 0 and 'date' in room_matches.columns:
+        date_norm = pd.to_datetime(date_obj).normalize()
+        exact_match = room_matches[pd.to_datetime(room_matches['date']).dt.normalize() == date_norm]
+        has_real_price = 1 if len(exact_match) > 0 else 0
     
     # Розрахунок оптимальної ціни та втрачених коштів
     if count_similar > 0:
@@ -777,9 +844,9 @@ def predict_price_normality(room, date, price_tarif, real_df=None):
         lost_revenue = 0
         lost_revenue_pct = 0
     
-    # Формуємо ознаки (включаючи нові фічі про частоту здачі та попит)
+    # Формуємо ознаки (порядок = feature_cols у train_models)
     features = np.array([[
-        day_of_week, month, day_of_month, price_tarif,
+        day_of_week, month, day_of_month, week_of_year, price_tarif,
         avg_real_price, min_real_price, max_real_price,
         std_real_price if not pd.isna(std_real_price) else 0,
         count_similar, min_date_diff, has_real_price,

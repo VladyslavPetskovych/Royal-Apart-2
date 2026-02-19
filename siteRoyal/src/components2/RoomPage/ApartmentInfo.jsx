@@ -30,6 +30,16 @@ function Chip({ children }) {
   );
 }
 
+const ADDITIONAL_PROP_LABELS = {
+  checkInTime: (v) => (v ? `Заїзд ${v}` : null),
+  airConditioning: (v) => (v ? "Кондиціонер" : null),
+  elevator: (v) => (v ? "Ліфт" : null),
+  bathroomType: (v) => (v ? String(v) : null),
+  balcony: (v) => (v ? "Балкон" : null),
+  walkingMinutesToCenter: (v) =>
+    v != null && v !== "" ? `${v} хв до центру` : null,
+};
+
 function FeatureRow({ icon, label }) {
   return (
     <div className="flex items-center gap-3">
@@ -103,22 +113,30 @@ export default function ApartmentInfo({ apartment, status }) {
               </span>
             </div>
 
-            {/* chips */}
-            <div className="mt-5 flex flex-wrap gap-2 text-brand-beigeDark">
-              <Chip>Центр Міста</Chip>
-              <Chip>Музеї поруч</Chip>
-              <Chip>Кафе та Ресторани</Chip>
-              <Chip>Інфраструктура</Chip>
-            </div>
+            {/* chips from additionalProperties */}
+            {(() => {
+              const props = apartment?.additionalProperties || {};
+              const chips = Object.entries(ADDITIONAL_PROP_LABELS)
+                .map(([key, fn]) => fn(props[key]))
+                .filter(Boolean);
+              if (chips.length === 0) return null;
+              return (
+                <div className="mt-5 flex flex-wrap gap-2 text-brand-beigeDark">
+                  {chips.map((label, i) => (
+                    <Chip key={i}>{label}</Chip>
+                  ))}
+                </div>
+              );
+            })()}
 
             {/* description */}
-            <p className="mt-10 max-w-[520px] text-start text-[12px] leading-[1.7] text-[#1b1b1b]/70">
+            <p className="mt-6 max-w-[520px] text-start text-[12px] leading-[1.7] text-[#1b1b1b]/70">
               {apartment.description}
             </p>
           </div>
 
           {/* RIGHT column (features) */}
-          <div className="flex flex-col gap-7 pt-10 lg:pt-[140px]">
+          <div className="flex flex-col gap-4 pt-10 lg:pt-[140px]">
             <FeatureRow
               icon={<Wifi size={16} strokeWidth={2} />}
               label="БЕЗКОШТОВНИЙ WI-FI"
@@ -135,12 +153,12 @@ export default function ApartmentInfo({ apartment, status }) {
         </div>
 
         {/* service section */}
-        <div className="mt-16 font-finlandica">
+        <div className="mt-12 font-finlandica">
           <h2 className=" text-[22px] text-start font-extrabold uppercase tracking-[0.10em] text-[#1b1b1b]">
             НАШ СЕРВІС
           </h2>
 
-          <div className="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-[560px_1fr]">
+          <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[560px_1fr]">
             {/* paragraph */}
             <p className="max-w-[520px] text-[12px] text-start leading-[1.75] text-[#1b1b1b]/70">
               Адаптуючи кожен візит до потреб наших гостей, наша місія полягає в
@@ -152,7 +170,7 @@ export default function ApartmentInfo({ apartment, status }) {
             </p>
 
             {/* services list (2 columns) */}
-            <div className="grid grid-cols-1 gap-y-7 sm:grid-cols-1 sm:gap-x-14">
+            <div className="grid grid-cols-1 gap-y-3 sm:grid-cols-1 sm:gap-x-14">
               <FeatureRow
                 icon={<WashingMachine size={16} strokeWidth={2} />}
                 label="ПОБУТОВА ТЕХНІКА"
