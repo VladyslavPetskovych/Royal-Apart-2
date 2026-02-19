@@ -62,30 +62,53 @@ function AnalisButton() {
   );
 }
 
+const API_BASE = "https://royalapart.online/api";
+const IMAGES_TIMEOUT = 300000; // 5 min - update-wodoo-images iterates over many rooms
+const PRICES_TIMEOUT = 90000;  // 90s for getprices/setPrice
+
 function RoomCard() {
   const [rooms, setRooms] = useState([]);
   const [cooldown, setCooldown] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   function sendAdvert() {
     setIsModalOpen(true);
   }
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   async function updtPrices() {
-    if (!cooldown) {
-      await axios.get("https://royalapart.online/api/getprices");
-      await axios.get("https://royalapart.online/api/getprices/setPrice");
-      // Show an alert
-      alert("Ціни Оновлені!");
-
-      // Set cooldown to true
-      setCooldown(true);
-
-      // Reset cooldown after 1 minute (60 seconds)
-      setTimeout(() => {
-        setCooldown(false);
-      }, 60000);
-    } else {
+    if (cooldown || isUpdating) {
       alert("Зачекайте хвилину, щоб оновити ціни ще раз!");
+      return;
+    }
+    setIsUpdating(true);
+    try {
+      await axios.get(`${API_BASE}/getprices`, { timeout: PRICES_TIMEOUT });
+      await axios.get(`${API_BASE}/getprices/setPrice`, { timeout: PRICES_TIMEOUT });
+      await delay(3000);
+
+      const imgRes = await axios.get(`${API_BASE}/siteRoyal/update-wodoo-images`, {
+        timeout: IMAGES_TIMEOUT,
+      });
+      const updated = imgRes?.data?.updatedRooms?.filter((r) => r.status === "✅ Оновлено").length ?? 0;
+      const failed = imgRes?.data?.updatedRooms?.filter((r) => r.status?.includes("❌")).length ?? 0;
+      const msg =
+        failed > 0
+          ? `Ціни та зображення оновлено. Зображень: ${updated} оновлено, ${failed} без змін.`
+          : "Ціни та зображення оновлено!";
+      alert(msg);
+    } catch (error) {
+      const isTimeout = error?.code === "ECONNABORTED" || error?.message?.includes("timeout");
+      const errMsg = isTimeout
+        ? "Час очікування вичерпано. Запит занадто довгий – спробуйте ще раз."
+        : "Помилка при оновленні. Спробуйте ще раз.";
+      console.error("[updtPrices] Error:", error?.message, error?.response?.data);
+      alert(errMsg);
+    } finally {
+      setIsUpdating(false);
+      setCooldown(true);
+      setTimeout(() => setCooldown(false), 60000);
     }
   }
   const updateRooms = () => {
@@ -115,9 +138,10 @@ function RoomCard() {
       <div className="flex flex-col md:flex-row">
         <button
           onClick={updtPrices}
-          className="bg-blue-600 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200"
+          disabled={isUpdating}
+          className="bg-blue-600 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          Оновити ціни
+          {isUpdating ? "Оновлення… (зачекайте)" : "Оновити ціни"}
         </button>
 
         <button
