@@ -177,11 +177,11 @@ export default function ApartmentInfo({ apartment, status }) {
               />
               <FeatureRow
                 icon={<Droplet size={16} strokeWidth={2} />}
-                label="БЕЗКОШТОВНІ КОМАНУЛЬНІ ПОСЛУГИ"
+                label="БЕЗКОШТОВНІ КОМУНАЛЬНІ ПОСЛУГИ"
               />
               <FeatureRow
                 icon={<Star size={16} strokeWidth={2} />}
-                label="УСІ НЕОБХІДНЕ"
+                label="УСЕ НЕОБХІДНЕ"
               />
             </div>
           </div>

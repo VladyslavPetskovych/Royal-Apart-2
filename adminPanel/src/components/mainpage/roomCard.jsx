@@ -13,7 +13,7 @@ function AnalisButton() {
   return (
     <Link
       to="/analis"
-      className="bg-orange-800 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-white flex justify-center items-center gap-2 hover:bg-orange-700 rounded-lg transition"
+      className="bg-orange-800 h-8 w-[170px] m-1 px-3 ml-4 text-sm font-semibold text-white flex justify-center items-center gap-2 hover:bg-orange-700 rounded-lg transition"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -70,45 +70,69 @@ function RoomCard() {
   const [rooms, setRooms] = useState([]);
   const [cooldown, setCooldown] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdatingImages, setIsUpdatingImages] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   function sendAdvert() {
     setIsModalOpen(true);
   }
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   async function updtPrices() {
     if (cooldown || isUpdating) {
+      console.log("[updtPrices] Blocked by cooldown or already updating");
       alert("Зачекайте хвилину, щоб оновити ціни ще раз!");
       return;
     }
     setIsUpdating(true);
+    console.log("[updtPrices] 1/2 Starting getprices...");
     try {
       await axios.get(`${API_BASE}/getprices`, { timeout: PRICES_TIMEOUT });
-      await axios.get(`${API_BASE}/getprices/setPrice`, { timeout: PRICES_TIMEOUT });
-      await delay(3000);
+      console.log("[updtPrices] 1/2 getprices done");
 
+      console.log("[updtPrices] 2/2 Starting setPrice...");
+      await axios.get(`${API_BASE}/getprices/setPrice`, { timeout: PRICES_TIMEOUT });
+      console.log("[updtPrices] 2/2 setPrice done");
+
+      alert("Ціни оновлено!");
+    } catch (error) {
+      console.error("[updtPrices] Error:", error?.message, error?.response?.status, error?.response?.data);
+      alert("Помилка при оновленні цін. Спробуйте ще раз.");
+    } finally {
+      setIsUpdating(false);
+      setCooldown(true);
+      setTimeout(() => setCooldown(false), 60000);
+    }
+  }
+
+  async function updtImages() {
+    if (isUpdatingImages) {
+      console.log("[updtImages] Already updating");
+      return;
+    }
+    setIsUpdatingImages(true);
+    console.log("[updtImages] Starting update-wodoo-images (timeout 5 min)...");
+    try {
       const imgRes = await axios.get(`${API_BASE}/siteRoyal/update-wodoo-images`, {
         timeout: IMAGES_TIMEOUT,
       });
+      console.log("[updtImages] Done:", imgRes?.data);
+
       const updated = imgRes?.data?.updatedRooms?.filter((r) => r.status === "✅ Оновлено").length ?? 0;
       const failed = imgRes?.data?.updatedRooms?.filter((r) => r.status?.includes("❌")).length ?? 0;
       const msg =
         failed > 0
-          ? `Ціни та зображення оновлено. Зображень: ${updated} оновлено, ${failed} без змін.`
-          : "Ціни та зображення оновлено!";
+          ? `Зображення: ${updated} оновлено, ${failed} без змін.`
+          : "Зображення оновлено!";
       alert(msg);
     } catch (error) {
       const isTimeout = error?.code === "ECONNABORTED" || error?.message?.includes("timeout");
       const errMsg = isTimeout
         ? "Час очікування вичерпано. Запит занадто довгий – спробуйте ще раз."
-        : "Помилка при оновленні. Спробуйте ще раз.";
-      console.error("[updtPrices] Error:", error?.message, error?.response?.data);
+        : "Помилка при оновленні зображень. Спробуйте ще раз.";
+      console.error("[updtImages] Error:", error?.message, error?.response?.data);
       alert(errMsg);
     } finally {
-      setIsUpdating(false);
-      setCooldown(true);
-      setTimeout(() => setCooldown(false), 60000);
+      setIsUpdatingImages(false);
     }
   }
   const updateRooms = () => {
@@ -139,14 +163,22 @@ function RoomCard() {
         <button
           onClick={updtPrices}
           disabled={isUpdating}
-          className="bg-blue-600 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="bg-blue-600 h-8 w-[170px] m-1 px-3 ml-4 text-sm font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isUpdating ? "Оновлення… (зачекайте)" : "Оновити ціни"}
         </button>
 
         <button
+          onClick={updtImages}
+          disabled={isUpdatingImages}
+          className="bg-emerald-600 h-8 w-[170px] m-1 px-3 ml-4 text-sm font-semibold text-zinc-50 hover:bg-emerald-700 rounded-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isUpdatingImages ? "Оновлення зображень…" : "Оновити зображення"}
+        </button>
+
+        <button
           onClick={sendAdvert}
-          className="bg-sky-600 h-9 w-[220px] m-1 px-4 ml-4 text-lg font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200"
+          className="bg-sky-600 h-8 w-[170px] m-1 px-3 ml-4 text-sm font-semibold text-zinc-50 hover:bg-sky-700 rounded-lg transition duration-200"
         >
           надіслати рекламку
         </button>
