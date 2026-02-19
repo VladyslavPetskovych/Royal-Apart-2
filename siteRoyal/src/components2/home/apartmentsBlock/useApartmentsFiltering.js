@@ -10,6 +10,10 @@ export function useApartmentsFiltering(apartments = []) {
     rooms: "all",
     floor: "all",
     guests: "all",
+    airConditioning: null,
+    elevator: null,
+    bathroomType: "all",
+    balcony: null,
   });
 
   const [query, setQuery] = useState("");
@@ -52,6 +56,10 @@ export function useApartmentsFiltering(apartments = []) {
     const roomsVal = filter.rooms === "all" ? null : Number(filter.rooms);
     const floorVal = filter.floor === "all" ? null : Number(filter.floor);
     const guestsVal = filter.guests === "all" ? null : Number(filter.guests);
+    const airCondVal = filter.airConditioning;
+    const elevatorVal = filter.elevator;
+    const bathroomVal = filter.bathroomType === "all" ? null : filter.bathroomType;
+    const balconyVal = filter.balcony;
 
     const q = query.trim().toLowerCase();
 
@@ -60,6 +68,30 @@ export function useApartmentsFiltering(apartments = []) {
       if (floorVal !== null && Number(a?.floor) !== floorVal) return false;
       if (guestsVal !== null && Number(a?.guests) < guestsVal) return false;
 
+      const props = a?.additionalProperties || {};
+      if (airCondVal !== null && airCondVal !== undefined) {
+        const aptVal = !!props.airConditioning;
+        if (aptVal !== airCondVal) return false;
+      }
+      if (elevatorVal !== null && elevatorVal !== undefined) {
+        const aptVal = !!props.elevator;
+        if (aptVal !== elevatorVal) return false;
+      }
+      if (bathroomVal) {
+        const aptVal = String(props.bathroomType ?? "").toLowerCase().trim();
+        const aliases = {
+          душ: ["душ", "shower"],
+          джакузі: ["джакузі", "jacuzzi", "джакузи"],
+          ванна: ["ванна", "bathtub"],
+        };
+        const matchList = aliases[bathroomVal.toLowerCase()] || [bathroomVal.toLowerCase()];
+        if (!matchList.some((m) => aptVal === m || aptVal.includes(m))) return false;
+      }
+      if (balconyVal !== null && balconyVal !== undefined) {
+        const aptVal = !!props.balcony;
+        if (aptVal !== balconyVal) return false;
+      }
+
       if (q) {
         const name = String(a?.name ?? "").toLowerCase();
         if (!name.includes(q)) return false;
@@ -67,12 +99,31 @@ export function useApartmentsFiltering(apartments = []) {
 
       return true;
     });
-  }, [apartments, filter.rooms, filter.floor, filter.guests, query]);
+  }, [
+    apartments,
+    filter.rooms,
+    filter.floor,
+    filter.guests,
+    filter.airConditioning,
+    filter.elevator,
+    filter.bathroomType,
+    filter.balcony,
+    query,
+  ]);
 
   // reset page when filters/search change
   useEffect(() => {
     setPage(1);
-  }, [filter.rooms, filter.floor, filter.guests, query]);
+  }, [
+    filter.rooms,
+    filter.floor,
+    filter.guests,
+    filter.airConditioning,
+    filter.elevator,
+    filter.bathroomType,
+    filter.balcony,
+    query,
+  ]);
   // scroll to top when page changes
   useEffect(() => {
     window.scrollTo({
@@ -113,6 +164,15 @@ export function useApartmentsFiltering(apartments = []) {
     query,
     setQuery,
     clearQuery: () => setQuery(""),
-    resetFilter: () => setFilter({ rooms: "all", floor: "all", guests: "all" }),
+    resetFilter: () =>
+      setFilter({
+        rooms: "all",
+        floor: "all",
+        guests: "all",
+        airConditioning: null,
+        elevator: null,
+        bathroomType: "all",
+        balcony: null,
+      }),
   };
 }

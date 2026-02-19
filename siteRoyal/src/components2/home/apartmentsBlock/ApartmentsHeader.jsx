@@ -60,13 +60,15 @@ export default function ApartmentsHeader({
         <RoomsIconFilter
           value={filter.rooms}
           onChange={(roomsKey) => setFilter((p) => ({ ...p, rooms: roomsKey }))}
+          filter={filter}
+          setFilter={setFilter}
         />
       </div>
 
-      {/* panel: only floor + guests */}
+      {/* panel: floor + guests + additional filters */}
       {open && (
         <div className="mt-6 rounded-xl border border-black/10 bg-white p-5">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* floor */}
             <div>
               <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
@@ -106,13 +108,124 @@ export default function ApartmentsHeader({
                 ))}
               </select>
             </div>
+
+            {/* bathroom type */}
+            <div>
+              <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
+                Тип ванної
+              </div>
+              <select
+                value={String(filter.bathroomType ?? "all")}
+                onChange={(e) =>
+                  setFilter((p) => ({ ...p, bathroomType: e.target.value }))
+                }
+                className="mt-2 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[14px] text-black/80 outline-none"
+              >
+                <option value="all">{t("all")}</option>
+                <option value="душ">Душ</option>
+                <option value="джакузі">Джакузі</option>
+                <option value="ванна">Ванна</option>
+              </select>
+            </div>
+
+            {/* air conditioning */}
+            <div>
+              <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
+                Кондиціонер
+              </div>
+              <select
+                value={
+                  filter.airConditioning === null || filter.airConditioning === undefined
+                    ? "all"
+                    : filter.airConditioning
+                    ? "yes"
+                    : "no"
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFilter((p) => ({
+                    ...p,
+                    airConditioning: v === "all" ? null : v === "yes",
+                  }));
+                }}
+                className="mt-2 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[14px] text-black/80 outline-none"
+              >
+                <option value="all">{t("all")}</option>
+                <option value="yes">Є</option>
+                <option value="no">Немає</option>
+              </select>
+            </div>
+
+            {/* elevator */}
+            <div>
+              <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
+                Ліфт
+              </div>
+              <select
+                value={
+                  filter.elevator === null || filter.elevator === undefined
+                    ? "all"
+                    : filter.elevator
+                    ? "yes"
+                    : "no"
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFilter((p) => ({
+                    ...p,
+                    elevator: v === "all" ? null : v === "yes",
+                  }));
+                }}
+                className="mt-2 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[14px] text-black/80 outline-none"
+              >
+                <option value="all">{t("all")}</option>
+                <option value="yes">Є</option>
+                <option value="no">Немає</option>
+              </select>
+            </div>
+
+            {/* balcony */}
+            <div>
+              <div className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/70">
+                Балкон
+              </div>
+              <select
+                value={
+                  filter.balcony === null || filter.balcony === undefined
+                    ? "all"
+                    : filter.balcony
+                    ? "yes"
+                    : "no"
+                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFilter((p) => ({
+                    ...p,
+                    balcony: v === "all" ? null : v === "yes",
+                  }));
+                }}
+                className="mt-2 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[14px] text-black/80 outline-none"
+              >
+                <option value="all">{t("all")}</option>
+                <option value="yes">Є</option>
+                <option value="no">Немає</option>
+              </select>
+            </div>
           </div>
 
           <div className="mt-6 flex items-center justify-between gap-4">
             <button
               type="button"
               onClick={() =>
-                setFilter({ rooms: "all", floor: "all", guests: "all" })
+                setFilter({
+                  rooms: "all",
+                  floor: "all",
+                  guests: "all",
+                  airConditioning: null,
+                  elevator: null,
+                  bathroomType: "all",
+                  balcony: null,
+                })
               }
               className="font-finlandica text-[12px] font-semibold uppercase tracking-[0.12em] text-black/60 hover:text-black"
             >

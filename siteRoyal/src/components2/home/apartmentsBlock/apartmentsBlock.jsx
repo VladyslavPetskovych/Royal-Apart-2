@@ -13,6 +13,10 @@ export default function ApartmentsBlock() {
     rooms: "all",
     floor: "all",
     guests: "all",
+    airConditioning: null,
+    elevator: null,
+    bathroomType: "all",
+    balcony: null,
   });
 
   useEffect(() => {
@@ -54,17 +58,49 @@ export default function ApartmentsBlock() {
     const roomsVal = filter.rooms === "all" ? null : Number(filter.rooms);
     const floorVal = filter.floor === "all" ? null : Number(filter.floor);
     const guestsVal = filter.guests === "all" ? null : Number(filter.guests);
+    const airCondVal = filter.airConditioning;
+    const elevatorVal = filter.elevator;
+    const bathroomVal = filter.bathroomType === "all" ? null : filter.bathroomType;
+    const balconyVal = filter.balcony;
 
     return apartments.filter((a) => {
       if (roomsVal !== null && Number(a?.numrooms) !== roomsVal) return false;
       if (floorVal !== null && Number(a?.floor) !== floorVal) return false;
-
-      // "Гостей (до)" means: show apartments that can host at least that many
       if (guestsVal !== null && Number(a?.guests) < guestsVal) return false;
+
+      const props = a?.additionalProperties || {};
+      if (airCondVal !== null && airCondVal !== undefined) {
+        if (!!props.airConditioning !== airCondVal) return false;
+      }
+      if (elevatorVal !== null && elevatorVal !== undefined) {
+        if (!!props.elevator !== elevatorVal) return false;
+      }
+      if (bathroomVal) {
+        const aptVal = String(props.bathroomType ?? "").toLowerCase().trim();
+        const aliases = {
+          душ: ["душ", "shower"],
+          джакузі: ["джакузі", "jacuzzi", "джакузи"],
+          ванна: ["ванна", "bathtub"],
+        };
+        const matchList = aliases[bathroomVal.toLowerCase()] || [bathroomVal.toLowerCase()];
+        if (!matchList.some((m) => aptVal === m || aptVal.includes(m))) return false;
+      }
+      if (balconyVal !== null && balconyVal !== undefined) {
+        if (!!props.balcony !== balconyVal) return false;
+      }
 
       return true;
     });
-  }, [apartments, filter.rooms, filter.floor, filter.guests]);
+  }, [
+    apartments,
+    filter.rooms,
+    filter.floor,
+    filter.guests,
+    filter.airConditioning,
+    filter.elevator,
+    filter.bathroomType,
+    filter.balcony,
+  ]);
 
   const visible = filtered.slice(0, limit);
 

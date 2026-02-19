@@ -3,36 +3,36 @@
 import AddNewRoom from "./addNewRoom";
 
 const Modal = ({ isOpen, onClose, children }) => {
-  const overlayStyle = isOpen ? "fixed inset-0 overflow-y-auto z-[9999]" : "hidden";
-  const modalStyle = isOpen ? "fixed inset-0 bg-black opacity-75" : "hidden";
-  const contentStyle = isOpen
-    ? "relative z-[10000] bg-slate-200 p-8 w-[90%] h-[970px] mx-auto"
-    : "hidden";
+  if (!isOpen) return null;
 
   return (
-    <>
-      <div className={overlayStyle}>
-        <div className="flex items-center justify-center min-h-screen mt-5">
-          <div className={modalStyle}></div>
-          <div className={contentStyle}>
-            <div className="flex flex-col h-96 m-2">
-              <div className="flex flex-row h-16 items-center mt-32 justify-between">
-                <p className="text-2xl font-bold">Додати нову квартиру</p>
-                <button
-                  className="bg-red-500  border h-12 w-40 text-lg  m-10 hover:text-gray-700 focus:outline-none"
-                  onClick={onClose}
-                >
-                  Вийти 🗙
-                </button>
-              </div>
-
-              <AddNewRoom />
-            </div>
-            <div className="mt-4">{children}</div>
-          </div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      {/* Modal content */}
+      <div className="relative z-10 bg-white rounded-xl shadow-2xl flex flex-col w-full max-w-5xl max-h-[95vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 sm:px-6 bg-slate-600 text-white shrink-0">
+          <h2 className="text-base sm:text-lg font-bold">Додати нову квартиру</h2>
+          <button
+            type="button"
+            className="px-4 py-2 rounded-lg bg-slate-500 hover:bg-slate-400 transition-colors text-sm font-medium"
+            onClick={onClose}
+          >
+            Закрити ✕
+          </button>
         </div>
+        {/* Scrollable form content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100">
+          <AddNewRoom />
+        </div>
+        {children && <div className="shrink-0 p-4">{children}</div>}
       </div>
-    </>
+    </div>
   );
 };
 

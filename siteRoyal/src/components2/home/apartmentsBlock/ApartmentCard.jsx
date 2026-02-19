@@ -145,18 +145,18 @@ export default function ApartmentCard({ apartment }) {
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-7 gap-y-2 font-finlandica text-[14px] text-brand-black/55">
-          <span className="inline-flex items-start gap-3">
-            <IconCube className="h-[22px] w-[22px] text-brand-black/55" />
+          <span className="inline-flex items-start gap-2">
+            <IconCube className="h-[18px] w-[18px] text-brand-black/55" />
             {area} {isEn ? "m²" : "м²"}
           </span>
 
-          <span className="inline-flex items-start gap-3">
-            <IconBed className="h-[22px] w-[22px] text-brand-black/55" />
+          <span className="inline-flex items-start gap-2">
+            <IconBed className="h-[18px] w-[18px] text-brand-black/55" />
             {bedrooms} {isEn ? "Bedrooms" : "Спальні"}
           </span>
 
-          <span className="inline-flex items-start gap-3">
-            <IconUsers className="h-[22px] w-[22px] text-brand-black/55" />
+          <span className="inline-flex items-start gap-2">
+            <IconUsers className="h-[18px] w-[18px] text-brand-black/55" />
             {guests} {isEn ? "Persons" : "Осіб"}
           </span>
         </div>
