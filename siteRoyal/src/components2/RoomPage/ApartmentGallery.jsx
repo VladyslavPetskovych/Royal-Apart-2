@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import ImageLightbox from "./ImageLightbox";
 
 function ArrowBtn({ onClick, disabled, children, className = "" }) {
   return (
@@ -30,7 +31,14 @@ export default function ApartmentGallery({ apartment, status }) {
   }, [apartment]);
 
   const [index, setIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const touchRef = useRef({ x: 0, y: 0, active: false });
+
+  const openLightbox = (atIndex) => {
+    setLightboxIndex(atIndex);
+    setLightboxOpen(true);
+  };
 
   const total = images.length;
   const current = images[index];
@@ -40,9 +48,9 @@ export default function ApartmentGallery({ apartment, status }) {
   const prev = () => setIndex((i) => (i - 1 + total) % total);
   const next = () => setIndex((i) => (i + 1) % total);
 
-  // keyboard support
+  // keyboard support (only when lightbox is closed)
   useEffect(() => {
-    if (total <= 1) return;
+    if (total <= 1 || lightboxOpen) return;
     const onKeyDown = (e) => {
       if (e.key === "ArrowLeft") prev();
       if (e.key === "ArrowRight") next();
@@ -50,7 +58,7 @@ export default function ApartmentGallery({ apartment, status }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [total]);
+  }, [total, lightboxOpen]);
 
   // swipe support
   const onTouchStart = (e) => {
@@ -104,9 +112,14 @@ export default function ApartmentGallery({ apartment, status }) {
 
         {/* main image */}
         <div
-          className="relative overflow-hidden rounded-[2px] bg-white"
+          className="relative cursor-pointer overflow-hidden rounded-[2px] bg-white"
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
+          onClick={() => openLightbox(index)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && openLightbox(index)}
+          aria-label="View image fullscreen"
         >
           {/* aspect like screenshot */}
           <div className="relative aspect-[16/8.6] w-full">
@@ -137,9 +150,12 @@ export default function ApartmentGallery({ apartment, status }) {
               <button
                 key={`${src}-${imgIndex}`}
                 type="button"
-                onClick={() => setIndex(imgIndex)}
+                onClick={() => {
+                  setIndex(imgIndex);
+                  openLightbox(imgIndex);
+                }}
                 className="group relative overflow-hidden rounded-[2px] bg-white"
-                aria-label="Open image"
+                aria-label="Open image fullscreen"
               >
                 {/* same height thumbnails like design */}
                 <div className="relative aspect-[16/10] w-full">
@@ -167,6 +183,15 @@ export default function ApartmentGallery({ apartment, status }) {
           </div>
         </div>
       </div>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={images}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onIndexChange={setLightboxIndex}
+        />
+      )}
     </section>
   );
 }

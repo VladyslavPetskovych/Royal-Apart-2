@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import flowerImage from "../../assets/newDesign/home/flowerRight2.png";
 import {
-  Square,
+  Box,
   BedDouble,
   Users,
   Bath,
@@ -86,7 +86,7 @@ export default function ApartmentInfo({ apartment, status }) {
             <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-brand-black/70">
               <span className="inline-flex items-center gap-2">
                 <IconWrap>
-                  <Square size={16} strokeWidth={2} />
+                  <Box size={16} strokeWidth={2} />
                 </IconWrap>
                 {surface} m2
               </span>
@@ -184,7 +184,7 @@ export default function ApartmentInfo({ apartment, status }) {
                 label="УСЕ НЕОБХІДНЕ"
               />
             </div>
-          </div>
+          </div>           
         </div>
       </div>
     </section>

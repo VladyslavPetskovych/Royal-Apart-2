@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import ImageLightbox from "./ImageLightbox";
 
 export default function ApartmentHero({ wubid, apartments = [], status }) {
   const wanted = useMemo(() => {
@@ -56,6 +57,17 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
 
   const startIndex = images.length > 1 ? clones : 0;
   const [index, setIndex] = useState(startIndex);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (slideIndex) => {
+    const realIndex =
+      images.length > 0
+        ? ((slideIndex - clones) % images.length + images.length) % images.length
+        : 0;
+    setLightboxIndex(realIndex);
+    setLightboxOpen(true);
+  };
 
   // ✅ allow rapid clicks: queue directions
   const animatingRef = useRef(false);
@@ -298,17 +310,22 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
             {slides.map((src, i) => (
               <div
                 key={`${src}-${i}`}
-                className="flex-none"
+                className="flex-none cursor-pointer"
                 style={{
                   width: `calc((100% - ${(spv - 1) * gap}px) / ${spv})`,
                 }}
+                onClick={() => !drag.current.moved && openLightbox(i)}
+                onKeyDown={(e) => e.key === "Enter" && openLightbox(i)}
+                role="button"
+                tabIndex={0}
+                aria-label="View image fullscreen"
               >
                 <div className="h-[240px] sm:h-[320px] lg:h-[420px] w-full">
                   <img
                     src={src}
                     alt=""
                     draggable={false}
-                    className="h-full w-full select-none object-cover pointer-events-none"
+                    className="h-full w-full select-none object-cover"
                   />
                 </div>
               </div>
@@ -316,6 +333,15 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
           </div>
         </div>
       </div>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={images}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onIndexChange={setLightboxIndex}
+        />
+      )}
     </section>
   );
 }
