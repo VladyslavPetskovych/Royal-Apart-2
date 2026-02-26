@@ -39,7 +39,7 @@ function AddSale() {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 h-screen w-screen flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-[9999] h-screen w-screen flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg w-[80%] h-[78%] overflow-auto">
             <div className="sticky top-0 bg-white flex flex-row items-center justify-between p-4">
               <h2 className="text-xl flex-1 font-bold">

@@ -26,12 +26,12 @@ const ModalAdvert = ({ isOpen, onClose, onSubmit, children }) => {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
             <div className="fixed inset-0 transition-opacity" onClick={onClose}>
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <div className="z-20 bg-white p-6 rounded-lg shadow-lg">
+            <div className="relative z-[10000] bg-white p-6 rounded-lg shadow-lg">
               <div className="mb-4">
                 <label
                   htmlFor="advertText"
