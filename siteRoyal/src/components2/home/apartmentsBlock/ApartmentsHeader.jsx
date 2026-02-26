@@ -22,17 +22,17 @@ export default function ApartmentsHeader({
   const guests = useMemo(() => ["all", ...guestsOptions], [guestsOptions]);
 
   return (
-    <div className="mb-10">
+    <div className="mb-10 min-w-0">
       {/* row */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-finlandica flex justify-start text-[18px] font-semibold uppercase tracking-[0.8px] text-brand-black">
+      <div className="flex min-w-0 items-center justify-between gap-4">
+        <h2 className="font-finlandica min-w-0 shrink text-[18px] font-semibold uppercase tracking-[0.8px] text-brand-black">
           {t("all_apartments")}
         </h2>
 
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-black"
+          className="flex shrink-0 items-center gap-2 text-sm text-gray-600 hover:text-black"
         >
           <span>{t("filter")}</span>
           <svg width="18" height="18" fill="none">

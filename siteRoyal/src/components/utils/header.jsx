@@ -81,7 +81,7 @@ function Header() {
       style={{ "--header-h": "64px" }}
       className={[
         "fixed inset-x-0 top-0 z-[10050] font-finlandica",
-        "h-[var(--header-h)]",
+        "h-[var(--header-h)] w-full min-w-0 overflow-x-clip",
         "transition-colors duration-500 ease-out",
         headerOpenStyles,
       ].join(" ")}
@@ -105,15 +105,17 @@ function Header() {
             <button
               onClick={toggleMobileMenu}
               className={[
-                "hidden lg:flex items-center gap-3 uppercase tracking-[0.25em] text-[15px] font-medium",
+                "hidden lg:flex items-center gap-3 uppercase tracking-[0.25em] text-[15px] font-medium leading-none",
                 "transition-colors duration-500 ease-out",
                 isMobileMenuOpen
                   ? "text-[#1b1b1b] hover:opacity-80"
                   : `${closedText} ${closedHover}`,
               ].join(" ")}
             >
-              <BurgerIcon open={isMobileMenuOpen} />
-              <span>{t("find_apartments")}</span>
+              <span className="flex shrink-0 items-center justify-center">
+                <BurgerIcon open={isMobileMenuOpen} />
+              </span>
+              <span className="translate-y-[1px]">{t("find_apartments")}</span>
             </button>
           </div>
 
@@ -164,7 +166,7 @@ function Header() {
               to="/book"
               className={[
                 "lg:hidden h-[35px] px-3 flex items-center justify-center",
-                "text-[11px] font-semibold uppercase tracking-[0.14em] leading-none rounded-none",
+                "text-[11px] font-bold uppercase tracking-[0.14em] leading-none rounded-none",
                 "transition-all duration-500 ease-out",
                 isMobileMenuOpen
                   ? "bg-[#7B2D2D] text-[#F6F0EA]"

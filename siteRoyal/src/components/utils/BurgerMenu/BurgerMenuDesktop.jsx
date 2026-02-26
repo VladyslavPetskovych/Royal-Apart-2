@@ -40,9 +40,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp })
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/aparts")
-                      ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
-                      : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
+                    "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
                   {t("nav_apartments")}
@@ -53,9 +51,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp })
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/service")
-                      ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
-                      : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
+                    "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
                   {t("our_services")}
@@ -66,9 +62,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp })
                   onClick={onClose}
                   className={[
                     "block text-[26px] font-extrabold uppercase tracking-[0.04em] leading-[1.05]",
-                    isActiveRoute?.("/rules")
-                      ? "text-[#1b1b1b] underline underline-offset-[6px] decoration-[#1b1b1b]"
-                      : "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
+                    "text-[#1b1b1b] hover:underline hover:underline-offset-[6px]",
                   ].join(" ")}
                 >
                   {t("rules")}

@@ -24,7 +24,7 @@ export default function Aparts() {
   } = useApartmentsFiltering(apartments);
 
   return (
-    <main className="bg-black text-brand-black">
+    <main className="bg-black text-brand-black overflow-x-hidden">
       <SEO
         title="Квартири у Львові | Royal Apart"
         description="Перелік квартир у Львові, доступних для оренди. Виберіть зручну квартиру для вашого відпочинку."
@@ -33,7 +33,7 @@ export default function Aparts() {
 
       <div className="pt-[68px]">
         <section className="bg-white">
-          <div className="mx-auto w-full max-w-[1320px] px-6 pb-16 pt-10">
+          <div className="mx-auto w-full max-w-[1320px] min-w-0 px-6 pb-16 pt-10">
             <ApartmentsHeader
               roomsOptions={roomsOptions}
               floorsOptions={floorsOptions}

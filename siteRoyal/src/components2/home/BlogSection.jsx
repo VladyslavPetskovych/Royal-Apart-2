@@ -67,15 +67,7 @@ export default function BlogSection() {
             {t("our_blog")}
           </h2>
 
-          <Link
-            to={`/${lang}/blog`}
-            className="group inline-flex items-center gap-3 font-finlandica text-[14px] font-medium text-brand-black hover:text-brand-black"
-          >
-            <span className="text-brand-black/80">{t("all_articles")}</span>
-            <span className="text-[18px] transition-transform duration-200 group-hover:translate-x-[2px]">
-              →
-            </span>
-          </Link>
+     
         </div>
 
         {/* MOBILE */}
@@ -86,7 +78,7 @@ export default function BlogSection() {
                 key={blog.id ?? blog.slug ?? idx}
                 className="shrink-0 w-[82vw] max-w-[460px]"
               >
-                <Link to={`/${lang}/blog/${idx + 1}`} className="group block">
+                <Link to={`/blog/${idx + 1}`} className="group block">
                   <div className="overflow-hidden rounded-[3px] bg-brand-beigeDark/20">
                     <div className="aspect-[4/5] w-full">
                       {blog.imageSrc && (
