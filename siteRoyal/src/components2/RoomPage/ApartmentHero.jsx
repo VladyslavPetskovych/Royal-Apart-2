@@ -226,7 +226,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
 
   return (
     <section className="bg-white">
-      <div className="mx-auto w-full px-6 md:px-10 lg:px-20 pt-1">
+      <div className="mx-auto w-full px-2 md:px-1 lg:px-1 pt-1">
         <div
           ref={viewportRef}
           className="relative overflow-hidden touch-pan-y"
