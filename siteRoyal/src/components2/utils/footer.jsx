@@ -215,7 +215,7 @@ export default function Footer() {
           </div>
 
           <div className="font-finlandica text-[14px] text-black/45">
-            {t("footer_copyright")}
+            © All rights reserved Royal Apart  {new Date().getFullYear()}
           </div>
         </div>
       </div>
