@@ -60,7 +60,7 @@ export default function ApartmentInfo({ apartment, status }) {
   }, [apartment]);
 
   const surface = apartment?.surface ?? 75;
-  const beds = apartment?.beds ?? 2;
+  const rooms = apartment?.rooms ?? 2;
   const guests = apartment?.guests ?? 6;
 
   return (
@@ -95,7 +95,7 @@ export default function ApartmentInfo({ apartment, status }) {
                 <IconWrap>
                   <BedDouble size={16} strokeWidth={2} />
                 </IconWrap>
-                {beds} Спальні
+                {rooms} Кімнати
               </span>
 
               <span className="inline-flex items-center gap-2">

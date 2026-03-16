@@ -93,7 +93,7 @@ export default function ApartHighlight({ apartment }) {
   const { t, i18n } = useTranslation();
   if (!apartment) return null;
 
-  const { name, floor, surface, beds, guests, imgurl, wubid } = apartment;
+  const { name, floor, surface, numrooms, guests, imgurl, wubid } = apartment;
 
   // first image only
   const image = Array.isArray(imgurl) && imgurl.length > 0 ? imgurl[0] : null;
@@ -155,7 +155,7 @@ export default function ApartHighlight({ apartment }) {
 
           <span className="inline-flex items-start gap-3">
             <IconBed className="h-[22px] w-[22px] text-brand-black/55" />
-            {beds} {t("bedrooms")}
+            {numrooms} {t("bedrooms")}
           </span>
 
           <span className="inline-flex items-start gap-3">

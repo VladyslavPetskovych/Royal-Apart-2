@@ -101,7 +101,7 @@ export default function ApartmentCard({ apartment }) {
   const title = apartment?.name || "Апартаменти";
   const floor = apartment?.floor ?? "-";
   const area = apartment?.surface ?? "-";
-  const bedrooms = apartment?.beds ?? apartment?.numrooms ?? "-";
+  const numrooms = apartment?.numrooms ?? apartment?.numrooms ?? "-";
   const guests = apartment?.guests ?? "-";
   const images = apartment?.imgurl || [];
   const wubid = apartment?.wubid;
@@ -152,7 +152,7 @@ export default function ApartmentCard({ apartment }) {
 
           <span className="inline-flex items-start gap-2">
             <IconBed className="h-[18px] w-[18px] text-brand-black/55" />
-            {bedrooms} {isEn ? "Bedrooms" : "Спальні"}
+            {numrooms} {isEn ? "Rooms" : "Кімнати"}
           </span>
 
           <span className="inline-flex items-start gap-2">
