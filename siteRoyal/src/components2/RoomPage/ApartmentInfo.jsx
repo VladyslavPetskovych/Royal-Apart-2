@@ -60,7 +60,7 @@ export default function ApartmentInfo({ apartment, status }) {
   }, [apartment]);
 
   const surface = apartment?.surface ?? 75;
-  const rooms = apartment?.rooms ?? 2;
+  const rooms = apartment?.numrooms ?? 2;
   const guests = apartment?.guests ?? 6;
 
   return (
