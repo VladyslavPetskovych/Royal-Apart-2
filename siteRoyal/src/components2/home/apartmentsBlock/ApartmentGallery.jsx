@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 function ApartmentGallery({ images }) {
   const safeImages = useMemo(
     () => (Array.isArray(images) ? images.filter(Boolean) : []),
-    [images]
+    [images],
   );
 
   const [index, setIndex] = useState(0);
@@ -49,7 +49,7 @@ function ApartmentGallery({ images }) {
       setIndex((i) =>
         direction === 1
           ? mod(i + 1, safeImages.length)
-          : mod(i - 1, safeImages.length)
+          : mod(i - 1, safeImages.length),
       );
       setAnimating(false);
       setTrackIndex(1);
@@ -101,21 +101,37 @@ function ApartmentGallery({ images }) {
           <button
             type="button"
             onClick={prev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full bg-black/40 text-white
-                       opacity-0 transition-opacity duration-200 ease-out
-                       group-hover:opacity-100"
+            className="absolute left-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white
+             opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100"
           >
-            ‹
+            <svg viewBox="0 0 24 24" className="h-4 w-4">
+              <path
+                d="M14.5 6.5L9 12l5.5 5.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
           <button
             type="button"
             onClick={next}
-            className="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full bg-black/40 text-white
-                       opacity-0 transition-opacity duration-200 ease-out
-                       group-hover:opacity-100"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white
+             opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100"
           >
-            ›
+            <svg viewBox="0 0 24 24" className="h-4 w-4">
+              <path
+                d="M9.5 6.5L15 12l-5.5 5.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
           <div
