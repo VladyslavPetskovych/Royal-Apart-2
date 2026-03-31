@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchApartments,
@@ -7,6 +8,7 @@ import {
 } from "../../redux/apartSlice";
 import { Link } from "react-router-dom";
 import { Square, BedDouble, Users } from "lucide-react";
+import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
 
 /** small helper */
 function pickRandom(arr, n) {
@@ -27,6 +29,7 @@ function IconWrap({ children }) {
 }
 
 function LikeCard({ apartment }) {
+  const { t, i18n } = useTranslation();
   const img =
     (Array.isArray(apartment?.imgurl) && apartment.imgurl.find(Boolean)) ||
     apartment?.img ||
@@ -49,7 +52,9 @@ function LikeCard({ apartment }) {
           {img ? (
             <img
               src={img}
-              alt={apartment?.name || ""}
+              alt={
+                formatApartmentNameForLang(apartment?.name, i18n.language) || ""
+              }
               draggable={false}
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
             />
@@ -61,18 +66,22 @@ function LikeCard({ apartment }) {
         {/* optional badge like "ТОП ВИБІР" if recommended */}
         {(apartment?.recommended || apartment?.isRecommended) && (
           <div className="absolute left-4 top-4 bg-[#6B5A39] px-3 py-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#F8F5EF]">
-            ТОП ВИБІР
+            {t("room_card_top_pick")}
           </div>
         )}
       </div>
 
       {/* title line */}
       <div className="mt-4 text-[14px] font-extrabold text-start uppercase tracking-[0.06em] text-[#1b1b1b]">
-        ВУЛ. {String(apartment?.name || "").toUpperCase()}
+        {t("room_street_prefix")}{" "}
+        {formatApartmentNameForLang(
+          apartment?.name,
+          i18n.language,
+        ).toUpperCase()}
         {floor != null ? (
           <span className="font-semibold text-[#1b1b1b]/55">
             {" "}
-            | {floor} ПОВЕРХ
+            | {floor} {t("room_card_floor")}
           </span>
         ) : null}
       </div>
@@ -83,21 +92,21 @@ function LikeCard({ apartment }) {
           <IconWrap>
             <Square size={16} strokeWidth={2} />
           </IconWrap>
-          {surface ? `${surface} м2` : "—"}
+          {surface ? `${surface} ${t("room_card_m2")}` : "—"}
         </span>
 
         <span className="inline-flex items-center gap-2">
           <IconWrap>
             <BedDouble size={16} strokeWidth={2} />
           </IconWrap>
-          {beds ? `${beds} Спальні` : "—"}
+          {beds ? `${beds} ${t("room_card_bedrooms")}` : "—"}
         </span>
 
         <span className="inline-flex items-center gap-2">
           <IconWrap>
             <Users size={16} strokeWidth={2} />
           </IconWrap>
-          {guests ? `${guests} Осіб` : "—"}
+          {guests ? `${guests} ${t("room_meta_guests")}` : "—"}
         </span>
       </div>
     </Link>
@@ -105,6 +114,7 @@ function LikeCard({ apartment }) {
 }
 
 export default function YouMayAlsoLike({ excludeWubid }) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const apartments = useSelector(selectApartments) || [];
   const status = useSelector(selectApartStatus);
@@ -131,13 +141,13 @@ export default function YouMayAlsoLike({ excludeWubid }) {
     <section className="bg-white px-6 md:px-10 lg:px-20">
       <div className="mx-auto w-full   pb-14 pt-12 sm:px-6">
         <h2 className="font-finlandica text-xl font-extrabold uppercase tracking-[0.18em] text-[#1b1b1b]">
-          ВАМ ТАКОЖ МОЖЕ СПОДОБАТИСЬ
+          {t("you_may_also_like")}
         </h2>
 
         {/* loading */}
         {status === "loading" && (
           <div className="mt-6 font-finlandica text-[14px] text-[#1b1b1b]/60">
-            Loading…
+            {t("loading")}
           </div>
         )}
 
@@ -173,7 +183,7 @@ export default function YouMayAlsoLike({ excludeWubid }) {
                 to="/aparts"
                 className="group inline-flex items-center justify-center gap-4 bg-brand-bordo px-10 py-4 font-finlandica text-[14px] font-medium text-brand-beige"
               >
-                Переглянути Всі Апартаменти
+                {t("view_all_apartments")}
                 <span className="transition-transform duration-200 group-hover:translate-x-[3px]">
                   →
                 </span>

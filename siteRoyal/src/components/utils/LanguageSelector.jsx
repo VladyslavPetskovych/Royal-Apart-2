@@ -31,10 +31,7 @@ const LanguageSelector = () => {
     )[0];
     const next = (reduxLang || "uk").split("-")[0];
 
-    console.log("[LangSelector] reduxLang:", reduxLang, "i18n:", current);
-
     if (next && current !== next) {
-      console.log("[LangSelector] i18n.changeLanguage ->", next);
       i18n.changeLanguage(next);
     }
   }, [reduxLang, i18n]);
@@ -48,26 +45,19 @@ const LanguageSelector = () => {
   const changeLanguage = (language) => {
     const next = language.code;
 
-    console.log("[LangSelector] CLICK change ->", next);
-    console.log("[LangSelector] current path:", location.pathname);
-
     // 1) redux
     dispatch(setLanguage(next));
 
     // 2) i18n
     i18n.changeLanguage(next);
 
-    // 3) update URL prefix if it starts with /uk or /en
+    // 3) Лише для маршрутів /uk та /en (home) міняємо префікс. Інакше лишаємось на поточній сторінці (/room/..., /aparts тощо).
     const newPath = location.pathname.replace(/^\/(uk|en)(\/|$)/, `/${next}$2`);
+    const pathChanged = newPath !== location.pathname;
+    const finalPath = pathChanged
+      ? `${newPath}${location.search}${location.hash}`
+      : `${location.pathname}${location.search}${location.hash}`;
 
-    // If user is on a non-prefixed route like "/aparts", you can optionally
-    // navigate to "/en" or "/uk" home:
-    const finalPath =
-      newPath === location.pathname
-        ? `/${next}` // fallback
-        : newPath + location.search + location.hash;
-
-    console.log("[LangSelector] navigate ->", finalPath);
     navigate(finalPath);
 
     setIsOpen(false);

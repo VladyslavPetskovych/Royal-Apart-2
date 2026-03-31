@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import ImageLightbox from "./ImageLightbox";
 
 export default function ApartmentHero({ wubid, apartments = [], status }) {
+  const { t } = useTranslation();
   const wanted = useMemo(() => {
     const n = Number(wubid);
     return Number.isFinite(n) ? n : null;
@@ -254,7 +256,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
                   bg-white/80 backdrop-blur
                   flex items-center justify-center
                   text-black shadow hover:bg-white"
-                aria-label="Previous"
+                aria-label={t("room_slider_prev")}
               >
                 <svg
                   width="24"
@@ -283,7 +285,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
                   bg-white/80 backdrop-blur
                   flex items-center justify-center
                   text-black shadow hover:bg-white"
-                aria-label="Next"
+                aria-label={t("room_slider_next")}
               >
                 <svg
                   width="24"
@@ -318,7 +320,7 @@ export default function ApartmentHero({ wubid, apartments = [], status }) {
                 onKeyDown={(e) => e.key === "Enter" && openLightbox(i)}
                 role="button"
                 tabIndex={0}
-                aria-label="View image fullscreen"
+                aria-label={t("room_lightbox_open")}
               >
                 <div className="h-[240px] sm:h-[320px] lg:h-[420px] w-full">
                   <img

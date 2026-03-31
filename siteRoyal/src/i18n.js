@@ -13,10 +13,17 @@ const loadLocaleData = async () => {
 };
 
 const STORAGE_KEY = "i18nextLng";
+const APP_LANG_KEY = "app_lang";
 
 export const i18nReady = loadLocaleData().then((resources) => {
-  const savedLng = localStorage.getItem(STORAGE_KEY);
-  const initialLng = savedLng && ["uk", "en"].includes(savedLng) ? savedLng : "uk";
+  const savedApp = localStorage.getItem(APP_LANG_KEY);
+  const savedI18n = localStorage.getItem(STORAGE_KEY);
+  const initialLng =
+    savedApp && ["uk", "en"].includes(savedApp)
+      ? savedApp
+      : savedI18n && ["uk", "en"].includes(savedI18n)
+        ? savedI18n
+        : "uk";
 
   return i18n.use(initReactI18next).init({
     resources,

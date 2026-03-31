@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ImageLightbox from "./ImageLightbox";
 
-function ArrowBtn({ onClick, disabled, children, className = "" }) {
+function ArrowBtn({ onClick, disabled, children, className = "", ariaLabel }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={ariaLabel}
       className={[
         "inline-flex h-9 w-9 items-center justify-center",
         "text-[#1b1b1b]/60 hover:text-[#1b1b1b]",
@@ -15,7 +17,6 @@ function ArrowBtn({ onClick, disabled, children, className = "" }) {
         "disabled:opacity-30 disabled:cursor-not-allowed",
         className,
       ].join(" ")}
-      aria-label="gallery navigation"
     >
       {children}
     </button>
@@ -23,7 +24,7 @@ function ArrowBtn({ onClick, disabled, children, className = "" }) {
 }
 
 export default function ApartmentGallery({ apartment, status }) {
-  if (status !== "succeeded" || !apartment) return null;
+  const { t } = useTranslation();
 
   const images = useMemo(() => {
     const arr = Array.isArray(apartment?.imgurl) ? apartment.imgurl : [];
@@ -91,20 +92,30 @@ export default function ApartmentGallery({ apartment, status }) {
     return out;
   }, [index, total]);
 
+  if (status !== "succeeded" || !apartment) return null;
+
   return (
     <section className="bg-[#F8F5EF]">
       <div className="mx-auto w-full px-6 md:px-10 lg:px-20 pb-4 pt-6">
         {/* header row */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-finlandica text-xl font-extrabold uppercase tracking-[0.18em] text-[#1b1b1b]">
-            ГАЛЕРЕЯ
+            {t("room_gallery")}
           </h3>
 
           <div className="flex items-center gap-2">
-            <ArrowBtn onClick={prev} disabled={total <= 1}>
+            <ArrowBtn
+              onClick={prev}
+              disabled={total <= 1}
+              ariaLabel={t("room_gallery_nav")}
+            >
               <ChevronLeft size={20} strokeWidth={2} />
             </ArrowBtn>
-            <ArrowBtn onClick={next} disabled={total <= 1}>
+            <ArrowBtn
+              onClick={next}
+              disabled={total <= 1}
+              ariaLabel={t("room_gallery_nav")}
+            >
               <ChevronRight size={20} strokeWidth={2} />
             </ArrowBtn>
           </div>
@@ -119,7 +130,7 @@ export default function ApartmentGallery({ apartment, status }) {
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === "Enter" && openLightbox(index)}
-          aria-label="View image fullscreen"
+          aria-label={t("room_lightbox_open")}
         >
           {/* aspect like screenshot */}
           <div className="relative aspect-[16/8.6] w-full">
@@ -155,7 +166,7 @@ export default function ApartmentGallery({ apartment, status }) {
                   openLightbox(imgIndex);
                 }}
                 className="group relative overflow-hidden rounded-[2px] bg-white"
-                aria-label="Open image fullscreen"
+                aria-label={t("room_lightbox_open")}
               >
                 {/* same height thumbnails like design */}
                 <div className="relative aspect-[16/10] w-full">
@@ -174,10 +185,18 @@ export default function ApartmentGallery({ apartment, status }) {
         {/* bottom-right arrows like design */}
         <div className="mt-6 flex justify-end">
           <div className="flex items-center gap-2">
-            <ArrowBtn onClick={prev} disabled={total <= 1}>
+            <ArrowBtn
+              onClick={prev}
+              disabled={total <= 1}
+              ariaLabel={t("room_gallery_nav")}
+            >
               <ChevronLeft size={20} strokeWidth={2} />
             </ArrowBtn>
-            <ArrowBtn onClick={next} disabled={total <= 1}>
+            <ArrowBtn
+              onClick={next}
+              disabled={total <= 1}
+              ariaLabel={t("room_gallery_nav")}
+            >
               <ChevronRight size={20} strokeWidth={2} />
             </ArrowBtn>
           </div>

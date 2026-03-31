@@ -1,13 +1,25 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
 
 export default function ApartmentMap({ apartment, status }) {
+  const { t, i18n } = useTranslation();
+
+  const addressRaw = apartment?.name || "lviv";
+  const addressDisplay = formatApartmentNameForLang(
+    apartment?.name,
+    i18n.language,
+  ).trim() || addressRaw;
+
+  const mapUrl = useMemo(
+    () =>
+      `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(
+        `lviv ${addressDisplay}`,
+      )}&key=AIzaSyAZJy8DJMQ37dLwHAw2Cnv0ADC6KNl7zpA`,
+    [addressDisplay],
+  );
+
   if (status !== "succeeded" || !apartment) return null;
-
-  const address = apartment?.name || "lviv";
-
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(
-    `lviv ${address}`,
-  )}&key=AIzaSyAZJy8DJMQ37dLwHAw2Cnv0ADC6KNl7zpA`;
 
   return (
     <section className="bg-[#F8F5EF]">
@@ -15,11 +27,11 @@ export default function ApartmentMap({ apartment, status }) {
         {/* Header row */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="font-finlandica text-xl font-extrabold uppercase tracking-[0.18em] text-[#1b1b1b]">
-            АДРЕСА
+            {t("room_address")}
           </h3>
 
           <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#1b1b1b]/60">
-            Lviv {address}
+            {t("room_map_city")} {addressDisplay}
           </div>
         </div>
 

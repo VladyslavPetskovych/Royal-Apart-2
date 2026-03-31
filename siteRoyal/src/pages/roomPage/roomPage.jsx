@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import ApartmentHero from "../../components2/RoomPage/ApartmentHero";
 import ApartmentInfo from "../../components2/RoomPage/ApartmentInfo";
@@ -11,15 +12,27 @@ import {
   selectApartments,
   selectApartStatus,
 } from "../../redux/apartSlice";
+import { selectLanguage } from "../../redux/languageSlice";
 import YouMayAlsoLike from "../../components2/utils/YouMayAlsoLike";
 
 export default function RoomPage() {
   const params = useParams();
-  const wubid = params.wubid ?? params.id ?? Object.values(params)[0];
+  const wubid =
+    params.roomId ?? params.wubid ?? params.id ?? Object.values(params)[0];
 
   const dispatch = useDispatch();
   const apartments = useSelector(selectApartments) || [];
   const status = useSelector(selectApartStatus);
+  const lang = useSelector(selectLanguage);
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    const current = (i18n.language || "uk").split("-")[0];
+    const target = (lang || "uk").split("-")[0];
+    if (target && current !== target) {
+      i18n.changeLanguage(target);
+    }
+  }, [lang, i18n]);
 
   useEffect(() => {
     if (status === "idle") dispatch(fetchApartments());
@@ -37,7 +50,7 @@ export default function RoomPage() {
       <ApartmentInfo apartment={apartment} status={status} />
       <ApartmentGallery apartment={apartment} status={status} />
       <ApartmentMap apartment={apartment} status={status} />
-      <YouMayAlsoLike/>
+      <YouMayAlsoLike excludeWubid={wubid} />
     </div>
   );
 }

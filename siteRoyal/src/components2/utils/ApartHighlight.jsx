@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { slugify } from "transliteration";
+import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -101,18 +101,10 @@ export default function ApartHighlight({ apartment }) {
   // current language
   const lang = (i18n.resolvedLanguage || i18n.language || "uk").split("-")[0];
 
-  // transliterated display name ONLY for English
-  const displayName = useMemo(() => {
-    if (lang !== "en") return name || "";
-
-    const slug = slugify(name || "", { lowercase: true, separator: "-" });
-
-    return slug
-      .split("-")
-      .filter(Boolean)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  }, [lang, name]);
+  const displayName = useMemo(
+    () => formatApartmentNameForLang(name, lang) || name || "",
+    [lang, name],
+  );
 
   // street prefix placement
   const streetText =

@@ -5,6 +5,7 @@ import SearchBar from "./searchBar";
 import { useTranslation } from "react-i18next";
 import bathData from "/bath.json";
 import { apiUrl } from "../../config/publicSite";
+import { apartmentNameSearchHaystack } from "../../utils/apartmentNameDisplay";
 
 function RoomCard({ selectedNumRoom, selectedCategory }) {
   const [rooms, setRooms] = useState([]);
@@ -60,9 +61,9 @@ function RoomCard({ selectedNumRoom, selectedCategory }) {
   // Apply filters to the current page's data
   useEffect(() => {
     const filtered = rooms.filter((room) => {
-      const matchesSearchQuery = room.name
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearchQuery =
+        !q || apartmentNameSearchHaystack(room.name).includes(q);
 
       const hasBath = bathWubids.has(room.wubid);
 

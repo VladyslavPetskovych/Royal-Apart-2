@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { apartmentNameSearchHaystack } from "../../../utils/apartmentNameDisplay";
 
 const sortNum = (arr) => arr.sort((a, b) => a - b);
 
@@ -93,8 +94,8 @@ export function useApartmentsFiltering(apartments = []) {
       }
 
       if (q) {
-        const name = String(a?.name ?? "").toLowerCase();
-        if (!name.includes(q)) return false;
+        const hay = apartmentNameSearchHaystack(a?.name);
+        if (!hay.includes(q)) return false;
       }
 
       return true;

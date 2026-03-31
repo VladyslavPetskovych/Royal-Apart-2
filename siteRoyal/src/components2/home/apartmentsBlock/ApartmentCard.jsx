@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { slugify } from "transliteration";
 import ApartmentGallery from "./ApartmentGallery";
 
 import { selectLanguage } from "../../../redux/languageSlice";
+import { formatApartmentNameForLang } from "../../../utils/apartmentNameDisplay";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -108,18 +108,10 @@ export default function ApartmentCard({ apartment }) {
 
   const isTopPick = apartment?.category === "business";
 
-  // Транслітерація назви тільки для EN
-  const displayName = useMemo(() => {
-    if (!isEn) return title;
-
-    const slug = slugify(title, { lowercase: true, separator: "-" });
-
-    return slug
-      .split("-")
-      .filter(Boolean)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  }, [isEn, title]);
+  const displayName = useMemo(
+    () => formatApartmentNameForLang(title, isEn ? "en" : "uk"),
+    [isEn, title],
+  );
 
   const streetText = isEn ? `${displayName} Street` : `вул. ${displayName}`;
 

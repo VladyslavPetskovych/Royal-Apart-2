@@ -5,6 +5,7 @@ import "./sliderCategories.css";
 import Slider from "react-slick";
 import { Link } from 'react-router-dom';
 import { apiUrl } from "../../../config/publicSite";
+import { formatApartmentNameForLang } from "../../../utils/apartmentNameDisplay";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -13,16 +14,18 @@ const API_URL = apiUrl("/api/aparts");
 
 const Article = ({ data }) => {
   const { name, category, imgurl } = data;
+  const { i18n } = useTranslation();
+  const displayName = formatApartmentNameForLang(name, i18n.language);
 
   return (
     <figure className="snip1584 ">
       <img
         src={apiUrl(`/api/imgs/${imgurl[0]}`)}
-        alt={name}
+        alt={displayName}
         className="w-full h-48 lg:h-[350px] object-cover"
       />
       <figcaption className="">
-        <h3>{name}</h3>
+        <h3>{displayName}</h3>
         <h5>{category}</h5>
       </figcaption>
       <Link to="/aparts"></Link> 

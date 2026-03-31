@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Slider from "./sliderRoom";
 import { useTranslation } from "react-i18next";
-import { slugify } from "transliteration";
+import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
 
 const Maximizee = ({ isOpen, onClose, room }) => {
   const { t, i18n } = useTranslation();
@@ -49,8 +49,7 @@ const Maximizee = ({ isOpen, onClose, room }) => {
             <div className="flex flex-row justify-between mb-5">
               <p></p>
               <p className="text-sm md:text-xl">
-                {t("full_inf_room")}{" "}
-                {isEnglish ? slugify(room.name).charAt(0).toUpperCase() + slugify(room.name).slice(1) : room.name}
+                {t("full_inf_room")} {roomTitle}
               </p>
               <button onClick={onClose} className="p-1 m-1 md:text-xl bg-red-400">
               ✖️

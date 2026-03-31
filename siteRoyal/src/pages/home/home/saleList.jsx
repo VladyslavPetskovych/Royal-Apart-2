@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { apiUrl } from "../../../config/publicSite";
+import { formatApartmentNameForLang } from "../../../utils/apartmentNameDisplay";
 
 function OneSale({ sale, room }) {
+  const { i18n } = useTranslation();
+  const displayName = formatApartmentNameForLang(room.name, i18n.language);
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(sale.tillDate));
 
   useEffect(() => {
@@ -21,11 +25,11 @@ function OneSale({ sale, room }) {
   return (
     <div className="flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center mb-6">
-        <p className="text-2xl mb-1">{room.name}</p>
+        <p className="text-2xl mb-1">{displayName}</p>
         {room.imgurl && room.imgurl[0] && (
           <img
             src={apiUrl(`/api/imgsRoyal/${room.wubid}/${room.imgurl[0]}`)}
-            alt={room.name}
+            alt={displayName}
             className="md:w-[50%] "
           />
         )}
