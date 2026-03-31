@@ -91,7 +91,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) 
                 <a
                   href="https://t.me/RoyalApartBot"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
                 >
                   <span className="text-[16px]">✈</span> Telegram
@@ -100,7 +100,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) 
                 <a
                   href="https://wa.me/380676777330"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]"
                 >
                   <span className="text-[16px]">☻</span> WhatsApp
@@ -119,7 +119,7 @@ function MobileBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp }) 
               <a
                 href="https://t.me/RoyalApartBot"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-between gap-3 border border-[#7B2D2D]/60 px-4 py-2.5 text-[12px] font-semibold text-[#7B2D2D]"
               >
                 @RoyalApartBot{" "}

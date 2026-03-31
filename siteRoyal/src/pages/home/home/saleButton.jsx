@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Modal from "./saleModal";
 import axios from "axios";
+import { apiUrl } from "../../../config/publicSite";
 
 function SaleButton() {
   const { t } = useTranslation();
@@ -15,9 +16,7 @@ function SaleButton() {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const salesResponse = await axios.get(
-          "https://royalapart.online/api/sales/all"
-        );
+        const salesResponse = await axios.get(apiUrl("/api/sales/all"));
         if (salesResponse.data.length > 0) {
           setHasSales(true);
         }

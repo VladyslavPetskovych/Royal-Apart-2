@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { apiUrl } from "../../../config/publicSite";
 
 function OneSale({ sale, room }) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(sale.tillDate));
@@ -23,7 +24,7 @@ function OneSale({ sale, room }) {
         <p className="text-2xl mb-1">{room.name}</p>
         {room.imgurl && room.imgurl[0] && (
           <img
-            src={`https://royalapart.online/api/imgsRoyal/${room.wubid}/${room.imgurl[0]}`}
+            src={apiUrl(`/api/imgsRoyal/${room.wubid}/${room.imgurl[0]}`)}
             alt={room.name}
             className="md:w-[50%] "
           />

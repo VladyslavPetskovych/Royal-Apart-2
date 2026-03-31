@@ -1,12 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { apiUrl } from "../config/publicSite";
 
 export const fetchApartments = createAsyncThunk(
   "apartStore/fetchApartments",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        "https://royalapart.online/api/siteRoyal/get-all-wodoo"
+        apiUrl("/api/siteRoyal/get-all-wodoo")
       );
       return res.data?.data || [];
     } catch (err) {

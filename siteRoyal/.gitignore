@@ -22,3 +22,8 @@ node_modules
 *.sln
 *.sw?
 /dist/
+
+# Env with optional overrides (never commit secrets — client bundle still exposes VITE_* if used)
+.env
+.env.local
+.env.*.local

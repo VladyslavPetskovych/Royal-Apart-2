@@ -74,7 +74,7 @@ export default function Footer() {
               <a
                 href="https://t.me/+380676777330"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 aria-label="Telegram"
                 className="text-black/85 transition-opacity hover:opacity-70"
               >
@@ -91,7 +91,7 @@ export default function Footer() {
               <a
                 href="https://wa.me/380676777330"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 aria-label="WhatsApp"
                 className="text-black/85 transition-opacity hover:opacity-70"
               >
@@ -182,7 +182,7 @@ export default function Footer() {
             <a
               href="https://t.me/RoyalApartBot"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="mt-5 inline-flex items-center justify-start gap-4 border border-[#8B3A3A] px-6 py-4 text-[#8B3A3A]"
             >
               <span className="font-finlandica text-[16px] font-semibold">

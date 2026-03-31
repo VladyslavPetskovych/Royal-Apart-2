@@ -148,7 +148,7 @@ function DesktopBurgerMenu({ onClose, isActiveRoute, copied, onCopy, t: tProp })
                 <a
                   href="https://t.me/RoyalApartBot"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 border border-[#7B2D2D]/50 bg-transparent px-6 py-3 text-[13px] font-semibold text-[#7B2D2D] hover:border-[#7B2D2D] hover:bg-[#7B2D2D]/5"
                 >
                   @RoyalApartBot{" "}

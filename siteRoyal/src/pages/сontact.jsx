@@ -206,7 +206,7 @@ export default function Contact() {
                   <a
                     href="https://t.me/RoyalApartBot"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="
                     group inline-flex items-center justify-center gap-4
                     border border-brand-bordo/40
@@ -307,7 +307,7 @@ export default function Contact() {
                     <a
                       href="https://t.me/Royalreservation"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="
                       group inline-flex items-center justify-between gap-4
                       rounded-[6px]
@@ -330,7 +330,7 @@ export default function Contact() {
                     <a
                       href="https://wa.me/380676777330"
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="
                       group inline-flex items-center justify-between gap-4
                       rounded-[6px]

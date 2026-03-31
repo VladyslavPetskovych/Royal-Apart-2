@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 import "./sliderCategories.css";
 import Slider from "react-slick";
 import { Link } from 'react-router-dom';
+import { apiUrl } from "../../../config/publicSite";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const API_URL = "https://royalapart.online/api/aparts";
+const API_URL = apiUrl("/api/aparts");
 
 const Article = ({ data }) => {
   const { name, category, imgurl } = data;
@@ -16,7 +17,7 @@ const Article = ({ data }) => {
   return (
     <figure className="snip1584 ">
       <img
-        src={`https://royalapart.online/api/imgs/${imgurl[0]}`}
+        src={apiUrl(`/api/imgs/${imgurl[0]}`)}
         alt={name}
         className="w-full h-48 lg:h-[350px] object-cover"
       />
@@ -98,7 +99,7 @@ function SliderCategories() {
 
   useEffect(() => {
     axios
-      .get("https://royalapart.online/api/aparts")
+      .get(API_URL)
       .then((response) => {
         setData(response.data);
         setLoading(false);

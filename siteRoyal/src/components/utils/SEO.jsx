@@ -2,12 +2,13 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
+import { getSiteOrigin } from "../../config/publicSite";
 
 function SEO({ title, description }) {
   const { i18n } = useTranslation();
   const location = useLocation();
 
-  const baseUrl = "https://royalapart.online";
+  const baseUrl = getSiteOrigin();
   const currentUrl = baseUrl + location.pathname;
 
   const defaultTitle = "Оренда квартир у Львові подобово | Royal Apart";
@@ -30,7 +31,7 @@ function SEO({ title, description }) {
       />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:type" content="website" />
-      <meta property="og:image" content="https://royalapart.online/og.jpg" />
+      <meta property="og:image" content={`${baseUrl}/og.jpg`} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title || defaultTitle} />
@@ -38,7 +39,7 @@ function SEO({ title, description }) {
         name="twitter:description"
         content={description || defaultDescription}
       />
-      <meta name="twitter:image" content="https://royalapart.online/og.jpg" />
+      <meta name="twitter:image" content={`${baseUrl}/og.jpg`} />
     </Helmet>
   );
 }

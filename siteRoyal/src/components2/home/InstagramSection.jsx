@@ -28,7 +28,7 @@ function IgTile({ src, href, startAt = 0 }) {
   };
 
   return (
-    <a href={href} target="_blank" rel="noreferrer">
+    <a href={href} target="_blank" rel="noopener noreferrer">
       <div className="relative aspect-square w-full">
         <video
           src={src}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SaleList from "./saleList";
+import { apiUrl } from "../../../config/publicSite";
 
 function SaleModal({ toggleModal }) {
   const [sales, setSales] = useState([]);
@@ -19,13 +20,11 @@ function SaleModal({ toggleModal }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const salesResponse = await axios.get(
-          "https://royalapart.online/api/sales/all"
-        );
+        const salesResponse = await axios.get(apiUrl("/api/sales/all"));
         setSales(salesResponse.data);
 
         const roomsResponse = await axios.get(
-          "https://royalapart.online/api/siteRoyal/copied-rooms"
+          apiUrl("/api/siteRoyal/copied-rooms")
         );
         setRooms(roomsResponse.data.data);
         console.log(roomsResponse.data.data)

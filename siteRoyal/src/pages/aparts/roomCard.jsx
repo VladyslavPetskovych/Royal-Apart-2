@@ -4,6 +4,7 @@ import SingleRoom from "./singleRoom";
 import SearchBar from "./searchBar";
 import { useTranslation } from "react-i18next";
 import bathData from "/bath.json";
+import { apiUrl } from "../../config/publicSite";
 
 function RoomCard({ selectedNumRoom, selectedCategory }) {
   const [rooms, setRooms] = useState([]);
@@ -23,7 +24,9 @@ function RoomCard({ selectedNumRoom, selectedCategory }) {
       setLoading(true);
       try {
         const response = await axios.get(
-          `https://royalapart.online/api/siteRoyal/get-all-wodoo?page=${currentPage}&limit=${itemsPerPage}`
+          apiUrl(
+            `/api/siteRoyal/get-all-wodoo?page=${currentPage}&limit=${itemsPerPage}`
+          )
         );
 
         if (response.data.success) {
