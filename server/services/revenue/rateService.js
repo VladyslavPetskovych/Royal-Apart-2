@@ -2,22 +2,53 @@ const RatePlanPrice = require("../../models/ratePlanPrice");
 const { fetchPlanPrices, fetchProducts } = require("./wubookClient");
 const { parseFlexibleDate, rangeDatesISO } = require("./dateUtils");
 
+function resolveToken(explicitToken) {
+  return (
+    explicitToken ||
+    process.env.WUBOOK_TOKEN ||
+    process.env.WUBOOK_XMLRPC_TOKEN ||
+    process.env.WUBOOK_WR_TOKEN ||
+    null
+  );
+}
+
+function resolveLcode(explicitLcode) {
+  const value =
+    explicitLcode ||
+    process.env.WUBOOK_LCODE ||
+    process.env.WUBOOK_PROPERTY_LCODE ||
+    null;
+  return value === null ? null : Number(value);
+}
+
 async function syncRatePlanPrices({
   planId,
   dateFrom,
   dateTo,
-  token = process.env.WUBOOK_TOKEN,
-  lcode = process.env.WUBOOK_LCODE,
+  token,
+  lcode,
   currency = process.env.WUBOOK_CURRENCY || "UAH",
   forceRefresh = false,
 }) {
+  const resolvedToken = resolveToken(token);
+  const resolvedLcode = resolveLcode(lcode);
   const fromDate = parseFlexibleDate(dateFrom);
   const toDate = parseFlexibleDate(dateTo);
   if (!fromDate || !toDate) throw new Error("Invalid date range");
+  if (!resolvedToken) {
+    throw new Error(
+      "Missing WUBOOK token. Set WUBOOK_TOKEN in server env or pass token in request body."
+    );
+  }
+  if (resolvedLcode === null || Number.isNaN(resolvedLcode)) {
+    throw new Error(
+      "Missing WUBOOK lcode. Set WUBOOK_LCODE in server env or pass lcode in request body."
+    );
+  }
 
   const dateKeys = rangeDatesISO(fromDate, toDate);
   const query = {
-    plan_id: Number(planId),
+    plan_id: Number(planId ?? 0),
     date: { $gte: fromDate, $lte: toDate },
   };
   const existing = forceRefresh ? [] : await RatePlanPrice.find(query).lean();
@@ -33,9 +64,9 @@ async function syncRatePlanPrices({
   }
 
   const fetched = await fetchPlanPrices({
-    token,
-    lcode,
-    planId,
+    token: resolvedToken,
+    lcode: resolvedLcode,
+    planId: Number(planId ?? 0),
     dateFrom: fromDate,
     dateTo: toDate,
   });
@@ -44,7 +75,7 @@ async function syncRatePlanPrices({
     updateOne: {
       filter: {
         date: parseFlexibleDate(item.date),
-        plan_id: Number(planId),
+        plan_id: Number(planId ?? 0),
         room_code: item.room_code || "",
         room_type_code: item.room_type_code || "",
       },
@@ -53,7 +84,7 @@ async function syncRatePlanPrices({
           date: parseFlexibleDate(item.date),
           room_code: item.room_code || "",
           room_type_code: item.room_type_code || "",
-          plan_id: Number(planId),
+          plan_id: Number(planId ?? 0),
           tariff_price: Number(item.tariff_price),
           currency,
           fetched_at: new Date(),

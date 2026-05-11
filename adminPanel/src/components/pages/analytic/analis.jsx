@@ -16,8 +16,8 @@ function Analis() {
   const [bookingFile, setBookingFile] = useState(null);
   const [syncForm, setSyncForm] = useState({
     plan_id: "",
-    date_from: "",
-    date_to: "",
+    token: "",
+    lcode: "",
     force_refresh: false,
   });
   const [dashboardRange, setDashboardRange] = useState({
@@ -50,10 +50,18 @@ function Analis() {
     try {
       const formData = new FormData();
       formData.append("file", bookingFile);
+      formData.append("auto_sync_rates", "true");
+      if (syncForm.plan_id) formData.append("plan_id", syncForm.plan_id);
+      if (syncForm.token) formData.append("token", syncForm.token);
+      if (syncForm.lcode) formData.append("lcode", syncForm.lcode);
+      formData.append("force_refresh", String(syncForm.force_refresh));
       const res = await axios.post(`${apiBase}/bookings/import`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setImportResult(res.data);
+      if (res.data?.auto_sync) {
+        setSyncResult(res.data.auto_sync);
+      }
     } catch (error) {
       alert(`Помилка імпорту: ${error.response?.data?.error || error.message}`);
     } finally {
@@ -62,10 +70,6 @@ function Analis() {
   };
 
   const syncRates = async () => {
-    if (!syncForm.plan_id || !syncForm.date_from || !syncForm.date_to) {
-      alert("Заповніть plan_id, date_from, date_to");
-      return;
-    }
     setSyncLoading(true);
     try {
       const res = await axios.post(`${apiBase}/rates/sync`, syncForm);
@@ -199,18 +203,18 @@ function Analis() {
               force refresh
             </label>
             <input
-              type="date"
-              value={syncForm.date_from}
+              placeholder="token (optional if env is set)"
+              value={syncForm.token}
               onChange={(e) =>
-                setSyncForm((p) => ({ ...p, date_from: e.target.value }))
+                setSyncForm((p) => ({ ...p, token: e.target.value }))
               }
               className="bg-gray-700 px-3 py-2 rounded"
             />
             <input
-              type="date"
-              value={syncForm.date_to}
+              placeholder="lcode (optional if env is set)"
+              value={syncForm.lcode}
               onChange={(e) =>
-                setSyncForm((p) => ({ ...p, date_to: e.target.value }))
+                setSyncForm((p) => ({ ...p, lcode: e.target.value }))
               }
               className="bg-gray-700 px-3 py-2 rounded"
             />
@@ -227,6 +231,10 @@ function Analis() {
               fetched: {syncResult.fetchedCount || 0}, saved:{" "}
               {syncResult.saved || 0}, cache:{" "}
               {syncResult.fromCache ? "так" : "ні"}
+              {syncResult.used_range
+                ? `, range: ${syncResult.used_range.from} → ${syncResult.used_range.to}`
+                : ""}
+              {syncResult.error ? `, error: ${syncResult.error}` : ""}
             </div>
           )}
         </div>

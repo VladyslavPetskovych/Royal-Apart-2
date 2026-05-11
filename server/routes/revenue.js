@@ -25,6 +25,26 @@ const uploadDir = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 const upload = multer({ dest: uploadDir });
 
+async function detectBookingRange(sourceFile = null) {
+  const matchStage = sourceFile ? { source_file: sourceFile } : {};
+  const stats = await Booking.aggregate([
+    { $match: matchStage },
+    {
+      $group: {
+        _id: null,
+        minFrom: { $min: "$from_date" },
+        maxTo: { $max: "$to_date" },
+      },
+    },
+  ]);
+  const row = stats[0];
+  if (!row?.minFrom || !row?.maxTo) return null;
+  return {
+    from: row.minFrom,
+    to: row.maxTo,
+  };
+}
+
 router.post("/bookings/import", upload.single("file"), async (req, res) => {
   let tempPath = null;
   try {
@@ -34,7 +54,40 @@ router.post("/bookings/import", upload.single("file"), async (req, res) => {
       req.file.path,
       req.file.originalname
     );
-    return res.json({ success: true, ...result });
+    const payload = { success: true, ...result };
+
+    const autoSync = req.body?.auto_sync_rates === "true" || req.body?.auto_sync_rates === true;
+    if (autoSync && result.imported > 0) {
+      const sourceName = path.basename(req.file.originalname);
+      const range = await detectBookingRange(sourceName);
+      if (range) {
+        try {
+          const syncResult = await syncRatePlanPrices({
+            planId: Number(req.body?.plan_id ?? 0),
+            dateFrom: range.from,
+            dateTo: range.to,
+            token: req.body?.token,
+            lcode: req.body?.lcode,
+            forceRefresh: req.body?.force_refresh === "true" || req.body?.force_refresh === true,
+          });
+          payload.auto_sync = {
+            success: true,
+            used_range: {
+              from: range.from.toISOString().slice(0, 10),
+              to: range.to.toISOString().slice(0, 10),
+            },
+            ...syncResult,
+          };
+        } catch (syncError) {
+          payload.auto_sync = {
+            success: false,
+            error: syncError.message,
+          };
+        }
+      }
+    }
+
+    return res.json(payload);
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   } finally {
@@ -53,22 +106,44 @@ router.get("/wubook/products", async (req, res) => {
 
 router.post("/rates/sync", async (req, res) => {
   try {
-    const { plan_id, date_from, date_to, force_refresh } = req.body;
-    if (plan_id === undefined || !date_from || !date_to) {
-      return res.status(400).json({
-        success: false,
-        error: "plan_id, date_from, date_to are required",
-      });
+    const { plan_id, date_from, date_to, force_refresh, token, lcode } = req.body;
+
+    let rangeFrom = date_from;
+    let rangeTo = date_to;
+    let autoDetectedRange = null;
+    if (!rangeFrom || !rangeTo) {
+      const range = await detectBookingRange();
+      if (!range) {
+        return res.status(400).json({
+          success: false,
+          error: "No booking date range found. Upload bookings first or pass date_from/date_to.",
+        });
+      }
+      rangeFrom = range.from;
+      rangeTo = range.to;
+      autoDetectedRange = {
+        from: range.from.toISOString().slice(0, 10),
+        to: range.to.toISOString().slice(0, 10),
+      };
     }
 
     const result = await syncRatePlanPrices({
-      planId: Number(plan_id),
-      dateFrom: date_from,
-      dateTo: date_to,
+      planId: Number(plan_id ?? 0),
+      dateFrom: rangeFrom,
+      dateTo: rangeTo,
+      token,
+      lcode,
       forceRefresh: Boolean(force_refresh),
     });
 
-    return res.json({ success: true, ...result });
+    return res.json({
+      success: true,
+      used_range: autoDetectedRange || {
+        from: new Date(rangeFrom).toISOString().slice(0, 10),
+        to: new Date(rangeTo).toISOString().slice(0, 10),
+      },
+      ...result,
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
