@@ -6,10 +6,18 @@ const { parseFlexibleDate } = require("./dateUtils");
 
 const SUPPORTED_EXT = new Set([".csv", ".xlsx", ".xls"]);
 
+function normalizeHeaderKey(value) {
+  return String(value || "")
+    .replace(/^\uFEFF/, "")
+    .replace(/^"+|"+$/g, "")
+    .trim()
+    .toLowerCase();
+}
+
 function buildKeyIndex(row) {
   const index = {};
   Object.keys(row || {}).forEach((k) => {
-    index[String(k).trim().toLowerCase()] = k;
+    index[normalizeHeaderKey(k)] = k;
   });
   return index;
 }
@@ -19,7 +27,7 @@ function pickField(row, aliases = []) {
   for (const alias of aliases) {
     const direct = row?.[alias];
     if (direct !== undefined) return direct;
-    const found = keyIndex[String(alias).trim().toLowerCase()];
+    const found = keyIndex[normalizeHeaderKey(alias)];
     if (found !== undefined) return row[found];
   }
   return "";
@@ -121,7 +129,7 @@ async function importBookingsFromFile(filePath, sourceName = filePath) {
     missing_code: 0,
     missing_from_date: 0,
     missing_to_date: 0,
-    missing_room_code: 0,
+    missing_room_reference: 0,
     missing_row_type: 0,
   };
   const valid = [];
@@ -139,8 +147,8 @@ async function importBookingsFromFile(filePath, sourceName = filePath) {
       invalidReasons.missing_to_date++;
       isValid = false;
     }
-    if (!b.room_code) {
-      invalidReasons.missing_room_code++;
+    if (!b.room_code && !b.room_type_code && !b.room_name) {
+      invalidReasons.missing_room_reference++;
       isValid = false;
     }
     if (!b.row_type) {

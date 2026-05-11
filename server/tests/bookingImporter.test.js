@@ -55,6 +55,18 @@ test("normalizes row with alternative header aliases", () => {
   assert.equal(normalized.row_type, "ROOM");
 });
 
+test("maps BOM+quoted Code header", () => {
+  const row = {
+    '\uFEFF"Code"': "PV-0028",
+    From: "01.04.2025",
+    To: "02.04.2025",
+    "Row Type": "TOTAL",
+    "Type Code": "kt16",
+  };
+  const normalized = normalizeBookingRow(row, "bom.csv");
+  assert.equal(normalized.code, "PV-0028");
+});
+
 test("parses csv by original filename even when temp file has no extension", () => {
   const tempPath = path.join(os.tmpdir(), `booking-upload-${Date.now()}`);
   const csvContent = "Code,From,To,Room Code,Row Type\nA1,01.04.2025,02.04.2025,RM1,ROOM\n";
