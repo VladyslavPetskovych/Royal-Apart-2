@@ -16,8 +16,6 @@ function Analis() {
   const [bookingFile, setBookingFile] = useState(null);
   const [syncForm, setSyncForm] = useState({
     plan_id: "",
-    token: "",
-    lcode: "",
     force_refresh: false,
   });
   const [dashboardRange, setDashboardRange] = useState({
@@ -41,6 +39,27 @@ function Analis() {
     return "https://royalapart.online/api/revenue";
   }, []);
 
+  const loadDashboardByRange = async (from, to) => {
+    const safeFrom = from || dashboardRange.from;
+    const safeTo = to || dashboardRange.to;
+    if (!safeFrom || !safeTo) return;
+
+    const summaryRes = await axios.get(`${apiBase}/analytics/summary`, {
+      params: {
+        from: safeFrom,
+        to: safeTo,
+        capacity: dashboardRange.capacity || undefined,
+      },
+    });
+    setDashboardResult(summaryRes.data?.analytics || null);
+
+    const compRes = await axios.get(`${apiBase}/comparison`, {
+      params: { from: safeFrom, to: safeTo },
+    });
+    setComparisonRows(compRes.data?.comparisons || []);
+    setDashboardRange((p) => ({ ...p, from: safeFrom, to: safeTo }));
+  };
+
   const uploadBookings = async () => {
     if (!bookingFile) {
       alert("Оберіть CSV/XLSX файл бронювань");
@@ -52,8 +71,6 @@ function Analis() {
       formData.append("file", bookingFile);
       formData.append("auto_sync_rates", "true");
       if (syncForm.plan_id) formData.append("plan_id", syncForm.plan_id);
-      if (syncForm.token) formData.append("token", syncForm.token);
-      if (syncForm.lcode) formData.append("lcode", syncForm.lcode);
       formData.append("force_refresh", String(syncForm.force_refresh));
       const res = await axios.post(`${apiBase}/bookings/import`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -61,6 +78,12 @@ function Analis() {
       setImportResult(res.data);
       if (res.data?.auto_sync) {
         setSyncResult(res.data.auto_sync);
+        if (res.data.auto_sync.success && res.data.auto_sync.used_range) {
+          await loadDashboardByRange(
+            res.data.auto_sync.used_range.from,
+            res.data.auto_sync.used_range.to
+          );
+        }
       }
     } catch (error) {
       alert(`Помилка імпорту: ${error.response?.data?.error || error.message}`);
@@ -74,6 +97,9 @@ function Analis() {
     try {
       const res = await axios.post(`${apiBase}/rates/sync`, syncForm);
       setSyncResult(res.data);
+      if (res.data?.used_range) {
+        await loadDashboardByRange(res.data.used_range.from, res.data.used_range.to);
+      }
     } catch (error) {
       alert(`Помилка sync: ${error.response?.data?.error || error.message}`);
     } finally {
@@ -89,19 +115,7 @@ function Analis() {
 
     setDashboardLoading(true);
     try {
-      const summaryRes = await axios.get(`${apiBase}/analytics/summary`, {
-        params: {
-          from: dashboardRange.from,
-          to: dashboardRange.to,
-          capacity: dashboardRange.capacity || undefined,
-        },
-      });
-      setDashboardResult(summaryRes.data?.analytics || null);
-
-      const compRes = await axios.get(`${apiBase}/comparison`, {
-        params: { from: dashboardRange.from, to: dashboardRange.to },
-      });
-      setComparisonRows(compRes.data?.comparisons || []);
+      await loadDashboardByRange(dashboardRange.from, dashboardRange.to);
     } catch (error) {
       alert(
         `Помилка dashboard: ${error.response?.data?.error || error.message}`
@@ -202,22 +216,12 @@ function Analis() {
               />
               force refresh
             </label>
-            <input
-              placeholder="token (optional if env is set)"
-              value={syncForm.token}
-              onChange={(e) =>
-                setSyncForm((p) => ({ ...p, token: e.target.value }))
-              }
-              className="bg-gray-700 px-3 py-2 rounded"
-            />
-            <input
-              placeholder="lcode (optional if env is set)"
-              value={syncForm.lcode}
-              onChange={(e) =>
-                setSyncForm((p) => ({ ...p, lcode: e.target.value }))
-              }
-              className="bg-gray-700 px-3 py-2 rounded"
-            />
+            <div className="bg-gray-700 px-3 py-2 rounded text-xs text-gray-300 flex items-center">
+              Після імпорту діапазон і WuBook credentials визначаються автоматично.
+            </div>
+            <div className="bg-gray-700 px-3 py-2 rounded text-xs text-gray-300 flex items-center">
+              Натисни sync лише якщо потрібно перерахувати кеш.
+            </div>
           </div>
           <button
             onClick={syncRates}
@@ -348,6 +352,67 @@ function Analis() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="mt-4 bg-gray-900 rounded p-3">
+          <h3 className="font-semibold mb-2 text-sm">
+            Price comparison table (tariff vs actual)
+          </h3>
+          <div className="max-h-80 overflow-auto">
+            <table className="w-full text-xs">
+              <thead className="bg-gray-800 sticky top-0">
+                <tr>
+                  <th className="text-left px-2 py-2">Date</th>
+                  <th className="text-left px-2 py-2">Room</th>
+                  <th className="text-left px-2 py-2">Type</th>
+                  <th className="text-right px-2 py-2">Actual</th>
+                  <th className="text-right px-2 py-2">Tariff</th>
+                  <th className="text-right px-2 py-2">Diff</th>
+                  <th className="text-right px-2 py-2">Diff %</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.slice(0, 300).map((r, idx) => (
+                  <tr key={`${r.booking_code}-${r.stay_date}-${idx}`} className="border-b border-gray-800">
+                    <td className="px-2 py-1">{r.stay_date}</td>
+                    <td className="px-2 py-1">{r.room_code || "-"}</td>
+                    <td className="px-2 py-1">{r.room_type_code || "-"}</td>
+                    <td className="px-2 py-1 text-right">{r.actual_daily_price}</td>
+                    <td className="px-2 py-1 text-right">{r.tariff_price}</td>
+                    <td
+                      className={`px-2 py-1 text-right ${
+                        r.diff_amount > 0
+                          ? "text-green-400"
+                          : r.diff_amount < 0
+                          ? "text-red-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {r.diff_amount}
+                    </td>
+                    <td
+                      className={`px-2 py-1 text-right ${
+                        r.diff_percent > 0
+                          ? "text-green-400"
+                          : r.diff_percent < 0
+                          ? "text-red-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      {r.diff_percent}
+                    </td>
+                  </tr>
+                ))}
+                {!comparisonRows.length && (
+                  <tr>
+                    <td colSpan={7} className="px-2 py-3 text-center text-gray-400">
+                      Немає даних comparison
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

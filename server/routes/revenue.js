@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const multer = require("multer");
+const mongoose = require("../db");
 const Booking = require("../models/booking");
 const RatePlanPrice = require("../models/ratePlanPrice");
 const {
@@ -45,6 +46,41 @@ async function detectBookingRange(sourceFile = null) {
   };
 }
 
+async function detectWuBookCredentials() {
+  const token =
+    process.env.WUBOOK_TOKEN ||
+    process.env.WUBOOK_XMLRPC_TOKEN ||
+    process.env.WUBOOK_WR_TOKEN ||
+    "wr_9fd536d9-2894-441a-85eb-4b1a670e2ff2";
+
+  let lcode =
+    process.env.WUBOOK_LCODE ||
+    process.env.WUBOOK_PROPERTY_LCODE ||
+    null;
+
+  if (!lcode) {
+    try {
+      const db = mongoose.connection.useDb("apartments");
+      const room = await db.collection("wodoo_aparts").findOne(
+        { lcode: { $exists: true } },
+        { projection: { lcode: 1 } }
+      );
+      if (room?.lcode !== undefined && room?.lcode !== null) {
+        lcode = room.lcode;
+      }
+    } catch (_e) {
+      // noop
+    }
+  }
+
+  if (!lcode) lcode = 1638349860;
+
+  return {
+    token,
+    lcode: Number(lcode),
+  };
+}
+
 router.post("/bookings/import", upload.single("file"), async (req, res) => {
   let tempPath = null;
   try {
@@ -62,12 +98,13 @@ router.post("/bookings/import", upload.single("file"), async (req, res) => {
       const range = await detectBookingRange(sourceName);
       if (range) {
         try {
+          const creds = await detectWuBookCredentials();
           const syncResult = await syncRatePlanPrices({
             planId: Number(req.body?.plan_id ?? 0),
             dateFrom: range.from,
             dateTo: range.to,
-            token: req.body?.token,
-            lcode: req.body?.lcode,
+            token: creds.token,
+            lcode: creds.lcode,
             forceRefresh: req.body?.force_refresh === "true" || req.body?.force_refresh === true,
           });
           payload.auto_sync = {
@@ -106,7 +143,7 @@ router.get("/wubook/products", async (req, res) => {
 
 router.post("/rates/sync", async (req, res) => {
   try {
-    const { plan_id, date_from, date_to, force_refresh, token, lcode } = req.body;
+    const { plan_id, date_from, date_to, force_refresh } = req.body;
 
     let rangeFrom = date_from;
     let rangeTo = date_to;
@@ -127,12 +164,13 @@ router.post("/rates/sync", async (req, res) => {
       };
     }
 
+    const creds = await detectWuBookCredentials();
     const result = await syncRatePlanPrices({
       planId: Number(plan_id ?? 0),
       dateFrom: rangeFrom,
       dateTo: rangeTo,
-      token,
-      lcode,
+      token: creds.token,
+      lcode: creds.lcode,
       forceRefresh: Boolean(force_refresh),
     });
 
