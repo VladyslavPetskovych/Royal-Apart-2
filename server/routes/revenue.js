@@ -26,13 +26,19 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 const upload = multer({ dest: uploadDir });
 
 router.post("/bookings/import", upload.single("file"), async (req, res) => {
+  let tempPath = null;
   try {
     if (!req.file) return res.status(400).json({ error: "file is required" });
-    const result = await importBookingsFromFile(req.file.path);
-    fs.unlink(req.file.path, () => {});
+    tempPath = req.file.path;
+    const result = await importBookingsFromFile(
+      req.file.path,
+      req.file.originalname
+    );
     return res.json({ success: true, ...result });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
+  } finally {
+    if (tempPath) fs.unlink(tempPath, () => {});
   }
 });
 

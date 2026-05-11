@@ -1,6 +1,12 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { normalizeBookingRow } = require("../services/revenue/bookingImporter");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const {
+  normalizeBookingRow,
+  parseBookingFile,
+} = require("../services/revenue/bookingImporter");
 
 test("normalizes booking import row", () => {
   const row = {
@@ -29,4 +35,17 @@ test("normalizes booking import row", () => {
   assert.equal(normalized.row_type, "ROOM");
   assert.equal(normalized.room_daily_price, 1600);
   assert.equal(normalized.total_price, 3200);
+});
+
+test("parses csv by original filename even when temp file has no extension", () => {
+  const tempPath = path.join(os.tmpdir(), `booking-upload-${Date.now()}`);
+  const csvContent = "Code,From,To,Room Code,Row Type\nA1,01.04.2025,02.04.2025,RM1,ROOM\n";
+  fs.writeFileSync(tempPath, csvContent, "utf8");
+  try {
+    const rows = parseBookingFile(tempPath, "bookings.csv");
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].Code, "A1");
+  } finally {
+    fs.unlinkSync(tempPath);
+  }
 });

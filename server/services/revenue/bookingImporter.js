@@ -53,8 +53,8 @@ function parseCsv(content) {
   return XLSX.utils.sheet_to_json(sheet, { defval: "" });
 }
 
-function parseBookingFile(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
+function parseBookingFile(filePath, originalName = filePath) {
+  const ext = path.extname(originalName).toLowerCase();
   if (!SUPPORTED_EXT.has(ext)) {
     throw new Error(`Unsupported file extension: ${ext}`);
   }
@@ -69,9 +69,9 @@ function parseBookingFile(filePath) {
   return XLSX.utils.sheet_to_json(sheet, { defval: "" });
 }
 
-async function importBookingsFromFile(filePath) {
-  const rows = parseBookingFile(filePath);
-  const sourceFile = path.basename(filePath);
+async function importBookingsFromFile(filePath, sourceName = filePath) {
+  const rows = parseBookingFile(filePath, sourceName);
+  const sourceFile = path.basename(sourceName);
   const normalized = rows.map((r) => normalizeBookingRow(r, sourceFile));
 
   const valid = normalized.filter(
