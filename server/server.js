@@ -27,6 +27,7 @@ const allchatIdRouter = require("./routes/getAllUsers");
 const salesRouter = require("./routes/sales")
 const wubookRouter = require("./routes/analis");
 const forecastRouter = require('./routes/forecast');
+const revenueRouter = require("./routes/revenue");
 
 app.use('/forecast', forecastRouter);
 app.use("/aparts", apartRouter);
@@ -40,6 +41,7 @@ app.use("/advert", advertRouter);
 app.use("/getAllUsers", allchatIdRouter);
 app.use("/sales", salesRouter)
 app.use("/analis", wubookRouter);
+app.use("/revenue", revenueRouter);
 
 // Proxy to Telegram bot (getData - send adverts to users)
 

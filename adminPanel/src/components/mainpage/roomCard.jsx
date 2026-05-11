@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 function AnalisButton() {
   return (
     <Link
-      to="/analis"
+      to="/analytics"
       className="bg-orange-800 h-8 w-[170px] m-1 px-3 ml-4 text-sm font-semibold text-white flex justify-center items-center gap-2 hover:bg-orange-700 rounded-lg transition"
     >
       <svg

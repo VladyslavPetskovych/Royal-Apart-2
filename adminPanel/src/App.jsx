@@ -34,6 +34,18 @@ function App() {
               )
             }
           />
+          <Route
+            path="/analytics"
+            element={
+              isLoggedIn ? (
+                <Analis />
+              ) : (
+                <div className="text-white text-center p-10">
+                  <p>Спочатку авторизуйтесь, щоб отримати доступ до Analytics.</p>
+                </div>
+              )
+            }
+          />
         </Routes>
       </div>
     </BrowserRouter>
