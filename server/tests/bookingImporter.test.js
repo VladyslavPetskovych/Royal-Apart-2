@@ -37,6 +37,24 @@ test("normalizes booking import row", () => {
   assert.equal(normalized.total_price, 3200);
 });
 
+test("normalizes row with alternative header aliases", () => {
+  const row = {
+    Code: "PV-0028",
+    "Id Wuboo": "17455551",
+    Status: "Cancelled",
+    Created: "01/04/2025",
+    CheckIn: "10/04/2025",
+    To: "12/04/2025",
+    "Room Code": "Ricarda",
+    RowType: "ROOM",
+    Price: "5500",
+  };
+  const normalized = normalizeBookingRow(row, "aliases.csv");
+  assert.equal(normalized.wubook_id, "17455551");
+  assert.equal(normalized.from_date instanceof Date, true);
+  assert.equal(normalized.row_type, "ROOM");
+});
+
 test("parses csv by original filename even when temp file has no extension", () => {
   const tempPath = path.join(os.tmpdir(), `booking-upload-${Date.now()}`);
   const csvContent = "Code,From,To,Room Code,Row Type\nA1,01.04.2025,02.04.2025,RM1,ROOM\n";

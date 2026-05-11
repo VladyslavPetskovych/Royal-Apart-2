@@ -6,6 +6,25 @@ const { parseFlexibleDate } = require("./dateUtils");
 
 const SUPPORTED_EXT = new Set([".csv", ".xlsx", ".xls"]);
 
+function buildKeyIndex(row) {
+  const index = {};
+  Object.keys(row || {}).forEach((k) => {
+    index[String(k).trim().toLowerCase()] = k;
+  });
+  return index;
+}
+
+function pickField(row, aliases = []) {
+  const keyIndex = buildKeyIndex(row);
+  for (const alias of aliases) {
+    const direct = row?.[alias];
+    if (direct !== undefined) return direct;
+    const found = keyIndex[String(alias).trim().toLowerCase()];
+    if (found !== undefined) return row[found];
+  }
+  return "";
+}
+
 function toNumber(value, fallback = 0) {
   if (value === null || value === undefined || value === "") return fallback;
   const normalized = String(value).replace(",", ".").trim();
@@ -14,34 +33,58 @@ function toNumber(value, fallback = 0) {
 }
 
 function normalizeBookingRow(row, sourceFile = "") {
-  const fromDate = parseFlexibleDate(row.From);
-  const toDate = parseFlexibleDate(row.To);
-  const createdAt = parseFlexibleDate(row.Created);
-  const cancelledAt = parseFlexibleDate(row.Cancellation);
+  const fromRaw = pickField(row, ["From", "CheckIn", "Arrival", "Date From"]);
+  const toRaw = pickField(row, ["To", "CheckOut", "Departure", "Date To"]);
+  const createdRaw = pickField(row, ["Created", "Creation", "Booked At"]);
+  const cancelledRaw = pickField(row, ["Cancellation", "Cancelled", "Canceled"]);
+
+  const fromDate = parseFlexibleDate(fromRaw);
+  const toDate = parseFlexibleDate(toRaw);
+  const createdAt = parseFlexibleDate(createdRaw);
+  const cancelledAt = parseFlexibleDate(cancelledRaw);
 
   return {
-    code: row.Code ? String(row.Code).trim() : "",
-    wubook_id: row["Id Wubook"] ? String(row["Id Wubook"]).trim() : "",
-    status: row.Status ? String(row.Status).trim() : "",
+    code: pickField(row, ["Code", "Booking Code"])
+      ? String(pickField(row, ["Code", "Booking Code"])).trim()
+      : "",
+    wubook_id: pickField(row, ["Id Wubook", "Id Wuboo", "Wubook Id", "ID WuBook"])
+      ? String(
+          pickField(row, ["Id Wubook", "Id Wuboo", "Wubook Id", "ID WuBook"])
+        ).trim()
+      : "",
+    status: pickField(row, ["Status"]) ? String(pickField(row, ["Status"])).trim() : "",
     created_at: createdAt,
     cancelled_at: cancelledAt,
     from_date: fromDate,
     to_date: toDate,
-    nights: toNumber(row.Nights, 0),
-    room_code: row["Room Code"] ? String(row["Room Code"]).trim() : "",
-    room_name: row["Room Name"] ? String(row["Room Name"]).trim() : "",
-    room_type_code: row["Type Code"] ? String(row["Type Code"]).trim() : "",
-    room_type_name: row["Type Name"] ? String(row["Type Name"]).trim() : "",
-    row_type: row["Row Type"] ? String(row["Row Type"]).trim() : "",
-    total_price: toNumber(row.Price, 0),
-    room_daily_price: toNumber(row["Room daily price"], 0),
-    adults: toNumber(row.Adults, 0),
-    teens: toNumber(row.Teens, 0),
-    children: toNumber(row.Children, 0),
-    board: row.Board ? String(row.Board).trim() : "",
-    policy: row.Policy ? String(row.Policy).trim() : "",
-    agency: row.Agency ? String(row.Agency).trim() : "",
-    country: row.Country ? String(row.Country).trim() : "",
+    nights: toNumber(pickField(row, ["Nights"]), 0),
+    room_code: pickField(row, ["Room Code", "RoomCode"])
+      ? String(pickField(row, ["Room Code", "RoomCode"])).trim()
+      : "",
+    room_name: pickField(row, ["Room Name", "RoomName"])
+      ? String(pickField(row, ["Room Name", "RoomName"])).trim()
+      : "",
+    room_type_code: pickField(row, ["Type Code", "TypeCode"])
+      ? String(pickField(row, ["Type Code", "TypeCode"])).trim()
+      : "",
+    room_type_name: pickField(row, ["Type Name", "TypeName"])
+      ? String(pickField(row, ["Type Name", "TypeName"])).trim()
+      : "",
+    row_type: pickField(row, ["Row Type", "RowType"])
+      ? String(pickField(row, ["Row Type", "RowType"])).trim()
+      : "",
+    total_price: toNumber(pickField(row, ["Price", "Total", "TOTAL"]), 0),
+    room_daily_price: toNumber(
+      pickField(row, ["Room daily price", "Room Daily Price", "Daily Price"]),
+      0
+    ),
+    adults: toNumber(pickField(row, ["Adults"]), 0),
+    teens: toNumber(pickField(row, ["Teens"]), 0),
+    children: toNumber(pickField(row, ["Children"]), 0),
+    board: pickField(row, ["Board"]) ? String(pickField(row, ["Board"])).trim() : "",
+    policy: pickField(row, ["Policy"]) ? String(pickField(row, ["Policy"])).trim() : "",
+    agency: pickField(row, ["Agency"]) ? String(pickField(row, ["Agency"])).trim() : "",
+    country: pickField(row, ["Country"]) ? String(pickField(row, ["Country"])).trim() : "",
     source_file: sourceFile,
     raw: row,
   };
@@ -74,12 +117,47 @@ async function importBookingsFromFile(filePath, sourceName = filePath) {
   const sourceFile = path.basename(sourceName);
   const normalized = rows.map((r) => normalizeBookingRow(r, sourceFile));
 
-  const valid = normalized.filter(
-    (b) => b.code && b.from_date && b.to_date && b.room_code && b.row_type
-  );
+  const invalidReasons = {
+    missing_code: 0,
+    missing_from_date: 0,
+    missing_to_date: 0,
+    missing_room_code: 0,
+    missing_row_type: 0,
+  };
+  const valid = [];
+  normalized.forEach((b) => {
+    let isValid = true;
+    if (!b.code) {
+      invalidReasons.missing_code++;
+      isValid = false;
+    }
+    if (!b.from_date) {
+      invalidReasons.missing_from_date++;
+      isValid = false;
+    }
+    if (!b.to_date) {
+      invalidReasons.missing_to_date++;
+      isValid = false;
+    }
+    if (!b.room_code) {
+      invalidReasons.missing_room_code++;
+      isValid = false;
+    }
+    if (!b.row_type) {
+      invalidReasons.missing_row_type++;
+      isValid = false;
+    }
+    if (isValid) valid.push(b);
+  });
 
   if (!valid.length) {
-    return { imported: 0, skipped: normalized.length };
+    return {
+      imported: 0,
+      skipped: normalized.length,
+      totalRows: normalized.length,
+      invalid_reasons: invalidReasons,
+      detected_columns: rows?.[0] ? Object.keys(rows[0]) : [],
+    };
   }
 
   const ops = valid.map((doc) => ({
@@ -102,6 +180,8 @@ async function importBookingsFromFile(filePath, sourceName = filePath) {
     imported: valid.length,
     skipped: normalized.length - valid.length,
     totalRows: normalized.length,
+    invalid_reasons: invalidReasons,
+    detected_columns: rows?.[0] ? Object.keys(rows[0]) : [],
   };
 }
 
