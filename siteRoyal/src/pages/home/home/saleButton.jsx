@@ -17,9 +17,11 @@ function SaleButton() {
     const fetchSales = async () => {
       try {
         const salesResponse = await axios.get(apiUrl("/api/sales/all"));
-        if (salesResponse.data.length > 0) {
-          setHasSales(true);
-        }
+        const now = new Date();
+        const hasActive = salesResponse.data.some(
+          (sale) => new Date(sale.tillDate) > now
+        );
+        setHasSales(hasActive);
       } catch (error) {
         console.error("Error fetching sales:", error);
       }
@@ -39,12 +41,11 @@ function SaleButton() {
     <div>
       {hasSales && !isOpen && (
         <button
-          className="h-16 w-[120px] fixed right-0 bottom-0 z-30 m-3 md:m-12 bg-black opacity-50 hover:bg-red-500 hover:opacity-80"
+          type="button"
           onClick={toggleModal}
+          className="fixed bottom-4 right-4 z-30 bg-brand-bordo px-4 py-3 font-finlandica text-[12px] font-medium text-brand-beige shadow-[0_6px_20px_rgba(99,18,27,0.3)] transition hover:brightness-110 md:bottom-8 md:right-8"
         >
-          <p className="font-roboto shadow-lg shadow-orange-500/50">
-            {t("special_offers")}
-          </p>
+          {t("special_offers")}
         </button>
       )}
 

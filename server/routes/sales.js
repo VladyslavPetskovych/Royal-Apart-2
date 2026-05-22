@@ -5,13 +5,16 @@ router.use(express.json());
 
 router.post("/", async (req, res) => {
   const { roomId, discount, tillDate } = req.body;
-  let sale = {
-    roomId: Number(roomId), 
-    discount: Number(discount), 
+  const sale = {
+    roomId: Number(roomId),
+    discount: Number(discount),
     tillDate: new Date(tillDate),
   };
   try {
-    await Sale.create(sale);
+    await Sale.findOneAndUpdate({ roomId: sale.roomId }, sale, {
+      upsert: true,
+      new: true,
+    });
     return res.status(200).send("Sale added");
   } catch (error) {
     console.error(error);
@@ -21,8 +24,15 @@ router.post("/", async (req, res) => {
 
 router.get("/all", async (req, res) => {
   try {
-    const allSales = await Sale.find({});
-    return res.status(200).json(allSales);
+    const allSales = await Sale.find({}).sort({ tillDate: -1 }).lean();
+    const byRoomId = new Map();
+    for (const sale of allSales) {
+      const id = Number(sale.roomId);
+      if (!byRoomId.has(id)) {
+        byRoomId.set(id, sale);
+      }
+    }
+    return res.status(200).json([...byRoomId.values()]);
   } catch (error) {
     console.error(error);
     return res.status(400).send("Error fetching sales");

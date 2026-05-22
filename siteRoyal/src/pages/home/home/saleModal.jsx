@@ -9,28 +9,22 @@ function SaleModal({ toggleModal }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Disable scrolling when modal is open
     document.body.classList.add("overflow-hidden");
-    return () => {
-      // Re-enable scrolling when modal is closed
-      document.body.classList.remove("overflow-hidden");
-    };
+    return () => document.body.classList.remove("overflow-hidden");
   }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const salesResponse = await axios.get(apiUrl("/api/sales/all"));
+        const [salesResponse, roomsResponse] = await Promise.all([
+          axios.get(apiUrl("/api/sales/all")),
+          axios.get(apiUrl("/api/siteRoyal/copied-rooms")),
+        ]);
         setSales(salesResponse.data);
-
-        const roomsResponse = await axios.get(
-          apiUrl("/api/siteRoyal/copied-rooms")
-        );
         setRooms(roomsResponse.data.data);
-        console.log(roomsResponse.data.data)
-        setLoading(false); // Set loading to false after data is fetched
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -44,31 +38,39 @@ function SaleModal({ toggleModal }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white text-black rounded-lg p-5 w-[85%] h-[70%] lg:w-1/2 lg:h-1/2 overflow-auto flex items-center justify-center">
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-brand-black/40 px-4"
       onClick={handleOverlayClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="sale-modal-title"
     >
-      <div className="relative bg-white mt-16 text-black font-roboto text-lg rounded-lg p-5 w-[85%] md:w-[75%]  lg:w-2/3 lg:h-[84%] overflow-auto">
-        <button
-          onClick={toggleModal}
-          className="absolute top-0 right-0 mt-2 mr-10 bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Х
-        </button>
-        <div className="mt-10">
-          <SaleList sales={sales} rooms={rooms} />
+      <div className="relative max-h-[80vh] w-full max-w-md overflow-auto rounded-[4px] bg-brand-beige p-5 shadow-[0_16px_40px_rgba(19,18,23,0.15)] sm:max-w-lg sm:p-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h2
+            id="sale-modal-title"
+            className="font-oranienbaum text-[24px] text-brand-black"
+          >
+            Акції
+          </h2>
+          <button
+            type="button"
+            onClick={toggleModal}
+            className="font-finlandica text-[22px] leading-none text-brand-black/40 transition hover:text-brand-bordo"
+            aria-label="Закрити"
+          >
+            ×
+          </button>
         </div>
+
+        {loading ? (
+          <p className="py-8 text-center font-finlandica text-[14px] text-brand-black/50">
+            …
+          </p>
+        ) : (
+          <SaleList sales={sales} rooms={rooms} />
+        )}
       </div>
     </div>
   );
