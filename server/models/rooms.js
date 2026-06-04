@@ -23,6 +23,7 @@ const roomSchema = mongoose.Schema(
       required: true,
     },
     wubid: { type: Number },
+    wdid: { type: String },
     imgurl: [],
     globalId: {
       type: Number,

@@ -19,6 +19,7 @@ function SingleRoom({ room, onDelete }) {
     numrooms: room.numrooms,
     category: room.category,
     wubid: room.wubid,
+    wdid: room.wdid || "",
     floor: room.floor,
     beds: room.beds,
     guests: room.guests,
@@ -99,6 +100,7 @@ function SingleRoom({ room, onDelete }) {
     formDataToSend.append("numrooms", editedRoomData.numrooms);
     formDataToSend.append("category", editedRoomData.category);
     formDataToSend.append("wubid", editedRoomData.wubid);
+    formDataToSend.append("wdid", editedRoomData.wdid);
     formDataToSend.append("floor", editedRoomData.floor);
     formDataToSend.append("guests", editedRoomData.guests);
     formDataToSend.append("surface", editedRoomData.surface);
@@ -290,6 +292,16 @@ function SingleRoom({ room, onDelete }) {
                       type="number"
                       name="wubid"
                       value={editedRoomData.wubid || ""}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">WDID</label>
+                    <input
+                      type="text"
+                      name="wdid"
+                      value={editedRoomData.wdid || ""}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />

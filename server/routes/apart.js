@@ -145,7 +145,7 @@ router.put("/:id", upload.single("file"), async (req, res) => {
 router.post("/newRoom", upload.single("image"), async (req, res) => {
   try {
     const {
-      address, body, category, roomcount, price, floor, beds, guests, square, wubid,
+      address, body, category, roomcount, price, floor, beds, guests, square, wubid, wdid,
       additionalProperties,
     } = req.body;
     if (!req.file) {
@@ -173,6 +173,7 @@ router.post("/newRoom", upload.single("image"), async (req, res) => {
       floor: floor,
       surface: square,
       wubid: wubid,
+      wdid: wdid,
       additionalProperties: parsedAdditional,
     });
     await newRoom.save();

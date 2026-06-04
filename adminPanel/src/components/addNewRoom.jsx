@@ -20,6 +20,7 @@ export default function FormComponent() {
   const [floor, setFloor] = useState(4);
   const [square, setSquare] = useState(50);
   const [wubid, setWubid] = useState(50);
+  const [wdid, setWdid] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
   const [additionalProps, setAdditionalProps] = useState(() => getDefaultAdditionalProperties());
 
@@ -59,6 +60,7 @@ export default function FormComponent() {
     formData.append("square", square);
     formData.append("floor", floor);
     formData.append("wubid", wubid);
+    formData.append("wdid", wdid);
     const additionalPropsObj = {};
     ADDITIONAL_PROPERTY_KEYS.forEach(({ key, default: def, type }) => {
       let val = additionalProps[key];
@@ -184,6 +186,15 @@ export default function FormComponent() {
             >
               Знайти ID
             </button>
+            <div className="min-w-[140px]">
+              <label className="block text-sm font-medium text-slate-700 mb-1">WDID</label>
+              <input
+                type="text"
+                value={wdid}
+                onChange={(e) => setWdid(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
           <div className="hidden">
             <select
