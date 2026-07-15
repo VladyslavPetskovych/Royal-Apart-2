@@ -46,6 +46,7 @@ function ArrowIcon({ direction = "left", className = "" }) {
   );
 }
 
+
 export default function ReviewsBlock({
   reviews: reviewsProp,
   autoplay = true,
