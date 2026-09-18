@@ -1,6 +1,15 @@
 <!doctype html>
 <html lang="uk">
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G1TK3SGLC4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-G1TK3SGLC4');
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/ico" href="/favicon.ico" />
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -122,19 +131,6 @@
   <body>
     <div id="root"></div>
 
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-G1TK3SGLC4"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-G1TK3SGLC4");
-    </script>
     <script type="module" src="/src/main.jsx"></script>
     <script>
       (function (h, o, t, j, a, r) {
