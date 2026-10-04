@@ -41,6 +41,10 @@ const roomSchema = mongoose.Schema(
       type: Number,
     },
     currentbookings: [],
+    // display order on the site / admin panel (lower = first)
+    sortOrder: {
+      type: Number,
+    },
     additionalProperties: {
       type: mongoose.Schema.Types.Mixed,
       default: () => ({}),

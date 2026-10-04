@@ -16,6 +16,7 @@ const wodooRoomSchema = new mongoose.Schema(
     guests: { type: Number },
     currentbookings: [],
     wdid: { type: String }, // нове поле
+    sortOrder: { type: Number }, // порядок відображення (менше = вище)
     additionalProperties: {
       type: mongoose.Schema.Types.Mixed,
       default: () => ({}),

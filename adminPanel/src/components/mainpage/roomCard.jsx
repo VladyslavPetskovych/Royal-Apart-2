@@ -7,6 +7,7 @@ import SingleRoom from "./singleRoom";
 import AdvertModule from "../advertModule";
 import SiteCopyDB from "./siteCopyDB";
 import AddSale from "./sale/addSale";
+import RoomsOrder from "./roomsOrder";
 import { Link } from "react-router-dom";
 
 function AnalisButton() {
@@ -196,6 +197,7 @@ function RoomCard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      <RoomsOrder rooms={rooms} onSaved={updateRooms} />
       <div className="flex flex-wrap ">
         <AddRoom />
         {Array.isArray(rooms) && rooms.length > 0 ? (

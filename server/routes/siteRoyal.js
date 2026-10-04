@@ -4,6 +4,7 @@ const Room = require("../models/rooms");
 const axios = require("axios");
 
 const WodooApart = require("../models/wodooAparts");
+const { sortRooms } = require("../services/roomOrder");
 
 const mongoose = require("../db");
 const fs = require("fs");
@@ -178,7 +179,9 @@ router.get("/copied-rooms", async (req, res) => {
   try {
     const db = mongoose.connection.useDb("apartments");
 
-    const copiedRooms = await db.collection("copy_aparts").find({}).toArray();
+    const copiedRooms = sortRooms(
+      await db.collection("copy_aparts").find({}).toArray()
+    );
 
     return res.json({
       data: copiedRooms,
@@ -206,7 +209,7 @@ router.get("/get-all-wodoo", async (req, res) => {
 
     // If no pagination params provided, return all records (backward compatibility)
     if (!req.query.page && !req.query.limit) {
-      const allRooms = await WodooApart.find().lean();
+      const allRooms = sortRooms(await WodooApart.find().lean());
       return res.json({
         success: true,
         count: allRooms.length,
@@ -217,8 +220,11 @@ router.get("/get-all-wodoo", async (req, res) => {
     // Get total count for pagination metadata
     const totalCount = await WodooApart.countDocuments();
 
-    // Fetch paginated results
-    const rooms = await WodooApart.find().skip(skip).limit(validLimit).lean();
+    // Fetch paginated results (sorted by sortOrder first, then sliced)
+    const rooms = sortRooms(await WodooApart.find().lean()).slice(
+      skip,
+      skip + validLimit
+    );
 
     const totalPages = Math.ceil(totalCount / validLimit);
 
