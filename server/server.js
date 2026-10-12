@@ -46,22 +46,32 @@ app.use("/revenue", revenueRouter);
 // Proxy to Telegram bot (getData - send adverts to users)
 
 
-cron.schedule("0 * * * *", async () => {
+// Runs every 2 hours (00:00, 02:00, 04:00, ...).
+// Each step runs independently so one failure doesn't block the price update.
+cron.schedule("0 */2 * * *", async () => {
   try {
-
     const response = await axios.delete("https://royalapart.online/api/sales/delete-expired");
     console.log(response.data);
+  } catch (error) {
+    console.error("Error deleting expired sales:", error.message);
+  }
+
+  try {
     await axios.get(
       "https://royalapart.online/api/getprices"
     );
     console.log("First request: Prices updated successfully.");
+  } catch (error) {
+    console.error("Error updating globalIds:", error.message);
+  }
 
+  try {
     await axios.get(
       "https://royalapart.online/api/getprices/setPrice"
     );
     console.log("Second request: Successfully fetched data.");
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error setting prices:", error.message);
   }
 });
 

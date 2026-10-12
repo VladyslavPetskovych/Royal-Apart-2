@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require('axios');
 const Roomsrr = require("../models/rooms");
+const mongoose = require("../db");
 require("dotenv").config();
 
 router.get("/", async (req, res) => {
@@ -58,8 +59,15 @@ router.get("/setPrice", async (req, res) => {
       },
     });
     const responseData = response.data.data;
+    const db = mongoose.connection.useDb("apartments");
+    const copyCollection = db.collection("copy_aparts");
+    const wodooCollection = db.collection("wodoo_aparts");
     for (const roomId in responseData) {
-      const priceData = responseData[roomId][0];
+      const priceData = responseData[roomId]?.[0];
+      if (!priceData || priceData.p == null || !Number.isFinite(Number(priceData.p))) {
+        console.log(`No price for room with globalId ${roomId}, skipping`);
+        continue;
+      }
       const updatedRoom = await Roomsrr.findOneAndUpdate(
         { globalId: parseInt(roomId) },
         { $set: { price: priceData.p } },
@@ -67,6 +75,22 @@ router.get("/setPrice", async (req, res) => {
       );
       if (updatedRoom) {
         console.log(`Updated price for room with globalId ${roomId} to ${priceData.p}`);
+        // Keep site copies (used by special offers / site cards) in sync,
+        // otherwise they show the price from the last "copy-db" run.
+        try {
+          const matchQuery =
+            updatedRoom.wubid != null
+              ? { wubid: updatedRoom.wubid }
+              : { name: updatedRoom.name };
+          await copyCollection.updateMany(matchQuery, {
+            $set: { price: updatedRoom.price },
+          });
+          await wodooCollection.updateMany(matchQuery, {
+            $set: { price: updatedRoom.price },
+          });
+        } catch (syncErr) {
+          console.error(`Error syncing price for '${updatedRoom.name}':`, syncErr.message);
+        }
       } else {
         console.log(`Room with globalId ${roomId} not found in MongoDB`);
       }
