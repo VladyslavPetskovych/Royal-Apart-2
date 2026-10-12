@@ -183,8 +183,30 @@ router.get("/copied-rooms", async (req, res) => {
       await db.collection("copy_aparts").find({}).toArray()
     );
 
+    // Special offers show prices from here — take the live price from aparts
+    // (updated by the cron from WuBook), not the price from the last "copy-db".
+    let data = copiedRooms;
+    try {
+      const liveRooms = await Room.find({ wubid: { $ne: null } })
+        .select("wubid price")
+        .lean();
+      const livePriceByWubid = new Map();
+      for (const room of liveRooms) {
+        if (Number.isFinite(room.price)) {
+          livePriceByWubid.set(room.wubid, room.price);
+        }
+      }
+      data = copiedRooms.map((room) =>
+        livePriceByWubid.has(room.wubid)
+          ? { ...room, price: livePriceByWubid.get(room.wubid) }
+          : room
+      );
+    } catch (priceErr) {
+      console.error("Error loading live prices (using copied prices):", priceErr);
+    }
+
     return res.json({
-      data: copiedRooms,
+      data,
     });
   } catch (error) {
     console.error("Error fetching copied rooms:", error);
