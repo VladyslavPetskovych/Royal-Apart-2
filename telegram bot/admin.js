@@ -74,6 +74,10 @@ const adminMenu = {
         { text: "🏠 Вільні сьогодні", callback_data: "admin:free_today" },
         { text: "🏠 Вільні завтра", callback_data: "admin:free_tomorrow" },
       ],
+      [
+        { text: "💰 Ціни WuBook", callback_data: "admin:prices" },
+        { text: "🏷 Знижки", callback_data: "admin:sales" },
+      ],
       [{ text: "📢 Розсилка", callback_data: "admin:broadcast" }],
       [{ text: "🚪 Вийти з адмінки", callback_data: "admin:logout" }],
       [{ text: "🔙 Меню ●", callback_data: "back_to_menu" }],
@@ -109,17 +113,172 @@ const kyivDate = (days = 0) => {
   return moment(today, "DD/MM/YYYY").add(days, "day").format("DD/MM/YYYY");
 };
 
+// Prices >= this are placeholders for "negotiable / long-term only" (same rule as the room cards)
+const NEGOTIABLE_PRICE = 10000;
+const WEEKDAYS = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+
+const money = (n) => `${Math.round(n).toLocaleString("uk-UA")} грн`;
+
+// Read-only API helpers
+const fetchUserIds = async () => {
+  const { data } = await axios.get(`${API_URL}/getAllUsers/AllUsers`, { timeout: 15000 });
+  return (data.userIds || []).filter(Boolean);
+};
+const fetchApartments = async () => {
+  const { data } = await axios.get(`${API_URL}/aparts`, { timeout: 15000 });
+  return Array.isArray(data?.data) ? data.data : [];
+};
+const fetchSales = async () => {
+  const { data } = await axios.get(`${API_URL}/sales/all`, { timeout: 15000 });
+  return Array.isArray(data) ? data : [];
+};
+const fetchWubookPrices = async () => {
+  const { data } = await axios.get(`${API_URL}/analis/tarifPrices/current`, { timeout: 60000 });
+  return Array.isArray(data?.prices) ? data.prices : [];
+};
+
+const startOfKyivToday = () => moment(kyivDate(0), "DD/MM/YYYY").toDate();
+const activeSales = (sales) =>
+  sales.filter((s) => new Date(s.tillDate) >= startOfKyivToday() && Number(s.discount) > 0);
+
 const sendStats = async (chatId) => {
+  // Each source is independent: one failing endpoint only hides its own line
+  const [users, aparts, sales] = await Promise.allSettled([
+    fetchUserIds(),
+    fetchApartments(),
+    fetchSales(),
+  ]);
+  const lines = ["📊 <b>Статистика</b>", ""];
+
+  if (users.status === "fulfilled") {
+    lines.push(`👥 Користувачів бота: <b>${users.value.length}</b>`);
+  } else {
+    console.error("[Admin] stats users:", users.reason?.message);
+    lines.push("👥 Користувачі: ❌ недоступно");
+  }
+
+  if (aparts.status === "fulfilled" && aparts.value.length) {
+    const rooms = aparts.value;
+    const byCategory = {};
+    rooms.forEach((r) => {
+      const key = r.category || "інше";
+      byCategory[key] = (byCategory[key] || 0) + 1;
+    });
+    const categories = Object.entries(byCategory)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => `${escapeHtml(name)} ${count}`)
+      .join(" · ");
+    lines.push(`🏠 Квартир: <b>${rooms.length}</b> (${categories})`);
+
+    const prices = rooms.map((r) => Number(r.price)).filter((p) => p > 0 && p < NEGOTIABLE_PRICE);
+    if (prices.length) {
+      const avg = prices.reduce((s, p) => s + p, 0) / prices.length;
+      lines.push(
+        `💵 Базова ціна: сер. <b>${money(avg)}</b> (${money(Math.min(...prices))} – ${money(Math.max(...prices))})`
+      );
+    }
+    const guests = rooms.reduce((s, r) => s + (Number(r.guests) || 0), 0);
+    if (guests) lines.push(`🛏 Місткість: ${guests} гостей`);
+  } else {
+    if (aparts.status === "rejected") console.error("[Admin] stats aparts:", aparts.reason?.message);
+    lines.push("🏠 Квартири: ❌ недоступно");
+  }
+
+  if (sales.status === "fulfilled") {
+    lines.push(`🏷 Активних знижок: <b>${activeSales(sales.value).length}</b>`);
+  } else {
+    console.error("[Admin] stats sales:", sales.reason?.message);
+    lines.push("🏷 Знижки: ❌ недоступно");
+  }
+
+  await bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...adminMenu });
+};
+
+const sendPrices = async (chatId) => {
+  await bot.sendMessage(chatId, "⏳ Отримую ціни з WuBook...");
   try {
-    const { data } = await axios.get(`${API_URL}/getAllUsers/AllUsers`, { timeout: 15000 });
-    const total = (data.userIds || []).filter(Boolean).length;
-    await bot.sendMessage(chatId, `📊 Користувачів бота: <b>${total}</b>`, {
+    const prices = await fetchWubookPrices();
+    const today = startOfKyivToday();
+
+    // date -> regular (non-negotiable) prices
+    const byDate = new Map();
+    let negotiableToday = 0;
+    for (const p of prices) {
+      const date = moment(p.date, "DD/MM/YYYY", true);
+      const price = Number(p.price);
+      if (!date.isValid() || date.toDate() < today || !(price > 0)) continue;
+      const key = date.format("YYYY-MM-DD");
+      if (!byDate.has(key)) byDate.set(key, []);
+      if (price >= NEGOTIABLE_PRICE) {
+        if (date.isSame(today, "day")) negotiableToday++;
+        continue;
+      }
+      byDate.get(key).push({ price, name: p.roomName });
+    }
+
+    const days = [...byDate.keys()].sort();
+    if (!days.length) {
+      return await bot.sendMessage(chatId, "Немає даних про ціни на найближчі дні.", adminMenu);
+    }
+
+    const lines = ["💰 <b>Ціни WuBook</b>", ""];
+    let prevAvg = null;
+    for (const day of days) {
+      const items = byDate.get(day);
+      if (!items.length) continue;
+      const avg = items.reduce((s, i) => s + i.price, 0) / items.length;
+      const trend = prevAvg === null ? "" : avg > prevAvg ? " ↑" : avg < prevAvg ? " ↓" : "";
+      const d = moment(day, "YYYY-MM-DD");
+      lines.push(
+        `${WEEKDAYS[d.day()]} ${d.format("DD.MM")} — сер. <b>${money(avg)}</b>${trend} (${money(
+          Math.min(...items.map((i) => i.price))
+        )} – ${money(Math.max(...items.map((i) => i.price)))})`
+      );
+      prevAvg = avg;
+    }
+
+    const todayItems = (byDate.get(days[0]) || []).slice().sort((a, b) => b.price - a.price);
+    if (todayItems.length) {
+      const fmt = (i) => `${escapeHtml(i.name)} — ${money(i.price)}`;
+      lines.push("", `🔝 Найдорожчі (${moment(days[0]).format("DD.MM")}):`);
+      todayItems.slice(0, 3).forEach((i) => lines.push(`• ${fmt(i)}`));
+      lines.push("💸 Найдешевші:");
+      todayItems.slice(-3).reverse().forEach((i) => lines.push(`• ${fmt(i)}`));
+    }
+    if (negotiableToday) lines.push("", `🤝 Договірна ціна сьогодні: ${negotiableToday} кв.`);
+
+    await bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...adminMenu });
+  } catch (err) {
+    console.error("[Admin] prices:", err.message);
+    await bot.sendMessage(chatId, "❌ Не вдалося отримати ціни з WuBook.", adminMenu);
+  }
+};
+
+const sendSales = async (chatId) => {
+  try {
+    const [sales, aparts] = await Promise.all([fetchSales(), fetchApartments().catch(() => [])]);
+    const nameByWubid = new Map(aparts.map((r) => [Number(r.wubid), r.name]));
+    const active = activeSales(sales).sort((a, b) => new Date(a.tillDate) - new Date(b.tillDate));
+
+    const list = active.length
+      ? active
+          .slice(0, 50)
+          .map(
+            (s) =>
+              `• ${escapeHtml(nameByWubid.get(Number(s.roomId)) || `ID ${s.roomId}`)} — <b>-${Number(
+                s.discount
+              )}%</b> до ${moment(s.tillDate).format("DD.MM.YYYY")}`
+          )
+          .join("\n")
+      : "Активних знижок немає.";
+
+    await bot.sendMessage(chatId, `🏷 <b>Активні знижки: ${active.length}</b>\n\n${list}`, {
       parse_mode: "HTML",
       ...adminMenu,
     });
   } catch (err) {
-    console.error("[Admin] stats:", err.message);
-    await bot.sendMessage(chatId, "❌ Не вдалося отримати статистику.", adminMenu);
+    console.error("[Admin] sales:", err.message);
+    await bot.sendMessage(chatId, "❌ Не вдалося отримати знижки.", adminMenu);
   }
 };
 
@@ -128,14 +287,27 @@ const sendFreeRooms = async (chatId, offsetDays) => {
   const dto = kyivDate(offsetDays + 1);
   await bot.sendMessage(chatId, `⏳ Перевіряю вільні квартири на ${dfrom}...`);
   try {
-    const { data } = await axios.post(`${API_URL}/freeRooms`, { dfrom, dto }, { timeout: 60000 });
+    const [{ data }, aparts] = await Promise.all([
+      axios.post(`${API_URL}/freeRooms`, { dfrom, dto }, { timeout: 60000 }),
+      fetchApartments().catch(() => []),
+    ]);
     const rooms = data.data || [];
     const list = rooms.length
       ? rooms.map((r, i) => `${i + 1}. ${escapeHtml(r.name)}`).join("\n")
       : "Немає вільних квартир.";
+
+    // /freeRooms checks every apartment that has a WuBook id
+    const total = aparts.filter((r) => r.wubid).length;
+    const occupancy =
+      total >= rooms.length && total > 0
+        ? `\n📈 Завантаженість: <b>${Math.round(((total - rooms.length) / total) * 100)}%</b> (зайнято ${
+            total - rooms.length
+          } з ${total})`
+        : "";
+
     await bot.sendMessage(
       chatId,
-      `🏠 Вільні на ніч ${dfrom} → ${dto}: <b>${rooms.length}</b>\n\n${list}`,
+      `🏠 Вільні на ніч ${dfrom} → ${dto}: <b>${rooms.length}</b>${occupancy}\n\n${list}`,
       { parse_mode: "HTML", ...adminMenu }
     );
   } catch (err) {
@@ -285,6 +457,10 @@ bot.on("callback_query", async (query) => {
         return await sendFreeRooms(chatId, 0);
       case "admin:free_tomorrow":
         return await sendFreeRooms(chatId, 1);
+      case "admin:prices":
+        return await sendPrices(chatId);
+      case "admin:sales":
+        return await sendSales(chatId);
       case "admin:broadcast":
         if (broadcastRunning) {
           return await bot.sendMessage(chatId, "⏳ Розсилка вже виконується.");
