@@ -27,6 +27,9 @@ jobs:
             git pull --ff-only
             # rebuilds and recreates only changed services, no full shutdown
             docker compose up -d --build --remove-orphans
+            # nginx renders its template only on start: re-render, test, and reload without downtime
+            # (if the test fails, the old config keeps serving and the deploy is marked failed)
+            docker compose exec -T nginx sh -c "/docker-entrypoint.d/20-envsubst-on-templates.sh >/dev/null && nginx -t && nginx -s reload"
             docker compose ps
             set +e
 
