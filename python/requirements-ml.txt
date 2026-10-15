@@ -1,0 +1,7 @@
+# Runtime deps for the ml container (ml_price_check.py).
+# Versions match the ones the models were trained/pickled with.
+numpy==2.3.5
+pandas==2.3.3
+scikit-learn==1.7.2
+joblib==1.5.2
+tzdata

@@ -11,6 +11,9 @@ services:
       - PSTOKEN=${PSTOKEN}
       - WUDOO_API_KEY=${WUDOO_API_KEY}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - ADMIN_AUTH_ENFORCE=${ADMIN_AUTH_ENFORCE:-false}
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -72,11 +75,33 @@ services:
       - ADMIN_PHONES=${ADMIN_PHONES:-+380983405578}
       - WUBOOK_WEBHOOK_SECRET=${WUBOOK_WEBHOOK_SECRET}
       - WUBOOK_PROPERTY_ID=${WUBOOK_PROPERTY_ID}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - ML_RESULTS_FILE=/ml-data/price_check.json
     expose:
       - "3001"
     volumes:
       - ./telegram bot:/app
       - /app/node_modules
+      - ./ml-data:/ml-data:ro
+    networks:
+      - royal-apart-app
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Daily ML price check (python/ml_price_check.py) -> ./ml-data/price_check.json for the bot
+  ml:
+    build:
+      context: ./python
+    environment:
+      - API_URL=http://api:3000
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - ML_OUTPUT=/ml-data/price_check.json
+      - ML_RUN_HOUR=9
+    volumes:
+      - ./server/data2025:/server/data2025:ro
+      - ./ml-data:/ml-data
+    mem_limit: 1g
     networks:
       - royal-apart-app
     depends_on:

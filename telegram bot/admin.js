@@ -78,6 +78,11 @@ const adminMenu = {
         { text: "💰 Ціни WuBook", callback_data: "admin:prices" },
         { text: "🏷 Знижки", callback_data: "admin:sales" },
       ],
+      [
+        { text: "📅 Календар 14 днів", callback_data: "admin:calendar" },
+        { text: "📡 Канали продажів", callback_data: "admin:channels:30" },
+      ],
+      [{ text: "🤖 ML-перевірка цін", callback_data: "admin:ml" }],
       [{ text: "📢 Розсилка", callback_data: "admin:broadcast" }],
       [{ text: "🚪 Вийти з адмінки", callback_data: "admin:logout" }],
       [{ text: "🔙 Меню ●", callback_data: "back_to_menu" }],
@@ -282,6 +287,190 @@ const sendSales = async (chatId) => {
   }
 };
 
+const fetchOccupancy = async (days) => {
+  const { data } = await axios.get(`${API_URL}/adminStats/occupancy`, {
+    params: { days },
+    timeout: 90000,
+  });
+  return Array.isArray(data?.days) ? data.days : [];
+};
+
+const bar = (rate) => {
+  const filled = Math.max(0, Math.min(10, Math.round(rate / 10)));
+  return "█".repeat(filled) + "░".repeat(10 - filled);
+};
+
+const sendCalendar = async (chatId) => {
+  await bot.sendMessage(chatId, "⏳ Рахую завантаженість на 14 днів...");
+  try {
+    const days = await fetchOccupancy(14);
+    if (!days.length) {
+      return await bot.sendMessage(chatId, "Немає даних про завантаженість.", adminMenu);
+    }
+    const rows = days.map((d) => {
+      const date = moment(d.date, "YYYY-MM-DD");
+      const price = d.avgPrice ? ` ${Math.round(d.avgPrice / 100) / 10}k` : "";
+      return `${WEEKDAYS[date.day()]} ${date.format("DD.MM")} ${bar(d.rate)} ${String(Math.round(d.rate)).padStart(3)}% ${String(d.free).padStart(2)} віл.${price}`;
+    });
+    const avgRate = days.reduce((s, d) => s + d.rate, 0) / days.length;
+    const weakest = days
+      .slice()
+      .sort((a, b) => a.rate - b.rate)
+      .slice(0, 3)
+      .map((d) => {
+        const date = moment(d.date, "YYYY-MM-DD");
+        return `${WEEKDAYS[date.day()]} ${date.format("DD.MM")} — ${Math.round(d.rate)}% (${d.free} віл.)`;
+      });
+    const lines = [
+      `📅 <b>Завантаженість ${moment(days[0].date).format("DD.MM")} – ${moment(days[days.length - 1].date).format("DD.MM")}</b>`,
+      `Середня: <b>${Math.round(avgRate)}%</b> · квартир у продажу: ${days[0].total}`,
+      "",
+      `<pre>${rows.join("\n")}</pre>`,
+      "📉 Найслабші дні (кандидати на знижку):",
+      ...weakest.map((w) => `• ${w}`),
+      "",
+      "<i>віл. — вільних квартир, k — середня ціна, тис. грн</i>",
+    ];
+    await bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...adminMenu });
+  } catch (err) {
+    console.error("[Admin] calendar:", err.message);
+    await bot.sendMessage(chatId, "❌ Не вдалося отримати завантаженість.", adminMenu);
+  }
+};
+
+const channelsMenu = (days) => ({
+  reply_markup: JSON.stringify({
+    inline_keyboard: [
+      [30, 90].map((d) => ({
+        text: `${d === days ? "• " : ""}${d} днів`,
+        callback_data: `admin:channels:${d}`,
+      })),
+      [{ text: "🔐 Адмін-панель", callback_data: "admin:panel" }],
+    ],
+  }),
+});
+
+const sendChannels = async (chatId, days) => {
+  await bot.sendMessage(chatId, `⏳ Аналізую бронювання за ${days} днів...`);
+  try {
+    const { data } = await axios.get(`${API_URL}/adminStats/channels`, {
+      params: { days },
+      timeout: 180000,
+    });
+    const t = data.totals || {};
+    const cur = (n) =>
+      data.currency === "UAH" ? money(n) : `${Math.round(n).toLocaleString("uk-UA")} ${escapeHtml(data.currency)}`;
+    const lines = [
+      `📡 <b>Канали продажів</b> (${moment(data.from).format("DD.MM")} – ${moment(data.to).format("DD.MM")}, за датою бронювання)`,
+      "",
+      `Бронювань: <b>${t.bookings || 0}</b> · підтв. ${t.confirmed || 0} · скас. ${t.cancelled || 0} (${t.cancelRate || 0}%)${
+        t.pending ? ` · очікують ${t.pending}` : ""
+      }`,
+      `Дохід: <b>${cur(t.revenue || 0)}</b> · ночей ${t.nights || 0}${t.adr ? ` · ADR ${cur(t.adr)}` : ""}`,
+    ];
+    const channels = Array.isArray(data.channels) ? data.channels : [];
+    if (!channels.length) lines.push("", "Бронювань за період немає.");
+    channels.slice(0, 15).forEach((c, i) => {
+      const share = t.revenue ? Math.round((c.revenue / t.revenue) * 100) : 0;
+      const details = [
+        c.adr ? `ADR ${cur(c.adr)}` : null,
+        `скас. ${c.cancelRate}%`,
+        c.avgLeadDays !== null && c.avgLeadDays !== undefined ? `бронюють за ${c.avgLeadDays} дн.` : null,
+      ].filter(Boolean);
+      lines.push(
+        "",
+        `${i + 1}. <b>${escapeHtml(c.name)}</b> — ${c.bookings} брон. · ${cur(c.revenue)} (${share}%)`,
+        `   ${details.join(" · ")}`
+      );
+    });
+    await bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...channelsMenu(days) });
+  } catch (err) {
+    console.error("[Admin] channels:", err.message);
+    await bot.sendMessage(chatId, "❌ Не вдалося отримати статистику каналів.", adminMenu);
+  }
+};
+
+// ----- ML price check (results written daily by the ml container) -----
+
+const ML_RESULTS_FILE = process.env.ML_RESULTS_FILE || path.join(__dirname, "..", "ml-data", "price_check.json");
+const ML_WATCH_INTERVAL_MS = 10 * 60 * 1000;
+
+const readMlResults = () => {
+  try {
+    const data = JSON.parse(fs.readFileSync(ML_RESULTS_FILE, "utf8"));
+    return data && Array.isArray(data.results) ? data : null;
+  } catch (_e) {
+    return null;
+  }
+};
+
+const buildMlMessage = (data, freeToday) => {
+  const ref = (r) => (r.optimal > 0 ? r.optimal : r.predicted);
+  const free = (r) => (freeToday.has(r.room) ? " 🟡 вільна" : "");
+  const fmt = (r) => `• ${escapeHtml(r.room)} — ${money(r.price)} → ~${money(ref(r))}${free(r)}`;
+
+  // Free-today apartments first (that's where a price change matters), then by size of the gap
+  const byFreeThenGap = (gap) => (a, b) =>
+    Number(freeToday.has(b.room)) - Number(freeToday.has(a.room)) || gap(b) - gap(a);
+  const low = data.results
+    .filter((r) => r.statusCode === 0 && ref(r) > r.price)
+    .sort(byFreeThenGap((r) => ref(r) - r.price));
+  const high = data.results
+    .filter((r) => r.statusCode === 2 && ref(r) < r.price)
+    .sort(byFreeThenGap((r) => r.price - ref(r)));
+  const normal = data.results.length - low.length - high.length;
+  const notableFree = [...low, ...high].filter((r) => freeToday.has(r.room)).length;
+
+  const updated = moment(data.generatedAt);
+  const lines = [
+    `🤖 <b>ML-перевірка цін</b> на ${escapeHtml(data.date)} (оновлено ${
+      updated.isValid() ? updated.format("DD.MM HH:mm") : "-"
+    })`,
+    `Перевірено: ${data.results.length} · ✅ норм. ${normal} · 🔻 занижені ${low.length} · 🔺 завищені ${high.length}${
+      data.errors ? ` · помилок ${data.errors}` : ""
+    }`,
+  ];
+  if (low.length) lines.push("", "🔻 <b>Нижче ринку</b> (можна підняти):", ...low.slice(0, 10).map(fmt));
+  if (high.length) lines.push("", "🔺 <b>Вище ринку</b> (ризик не продати):", ...high.slice(0, 10).map(fmt));
+  if (!low.length && !high.length) lines.push("", "Усі ціни в нормі 👍");
+  lines.push("", "<i>→ ~ ціна, яку радить модель. 🟡 — вільна сьогодні</i>");
+  return { text: lines.join("\n"), notableFree };
+};
+
+const freeTodaySet = async () => {
+  try {
+    const [today] = await fetchOccupancy(1);
+    return new Set(today?.freeRooms || []);
+  } catch (_e) {
+    return new Set();
+  }
+};
+
+const sendMlCheck = async (chatId) => {
+  const data = readMlResults();
+  if (!data) {
+    return bot.sendMessage(
+      chatId,
+      "🤖 Результатів ML-перевірки ще немає. Вона запускається щодня о 09:00 (і після деплою).",
+      adminMenu
+    );
+  }
+  const { text } = buildMlMessage(data, await freeTodaySet());
+  return bot.sendMessage(chatId, text, { parse_mode: "HTML", ...adminMenu });
+};
+
+// Push the daily ML result to admins once, when a new file appears
+let lastMlRun = readMlResults()?.generatedAt || null;
+setInterval(async () => {
+  const data = readMlResults();
+  if (!data || data.generatedAt === lastMlRun) return;
+  lastMlRun = data.generatedAt;
+  if (!getAdminIds().length) return;
+  // Only push when a free-today apartment is flagged — booked ones need no action
+  const { text, notableFree } = buildMlMessage(data, await freeTodaySet());
+  if (notableFree) await notifyAdmins(text);
+}, ML_WATCH_INTERVAL_MS).unref();
+
 const sendFreeRooms = async (chatId, offsetDays) => {
   const dfrom = kyivDate(offsetDays);
   const dto = kyivDate(offsetDays + 1);
@@ -461,6 +650,14 @@ bot.on("callback_query", async (query) => {
         return await sendPrices(chatId);
       case "admin:sales":
         return await sendSales(chatId);
+      case "admin:calendar":
+        return await sendCalendar(chatId);
+      case "admin:channels:30":
+        return await sendChannels(chatId, 30);
+      case "admin:channels:90":
+        return await sendChannels(chatId, 90);
+      case "admin:ml":
+        return await sendMlCheck(chatId);
       case "admin:broadcast":
         if (broadcastRunning) {
           return await bot.sendMessage(chatId, "⏳ Розсилка вже виконується.");

@@ -21,7 +21,7 @@ router.post("/sendEmail", async (req, res) => {
 
     let chatId = req.body.chatId;
     console.log(chatId);
-    let response = await axios.get(`http://localhost:3000/users/${chatId}`);
+    let response = await axios.get(`http://localhost:3000/users/${encodeURIComponent(chatId)}`);
     let userData = response.data;
     console.log(chatId);
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!dfsdfdsfdsfdsfdsfdsds!!!!");

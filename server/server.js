@@ -4,6 +4,14 @@ var cors = require("cors");
 const cron = require("node-cron");
 const axios = require("axios");
 const dbConfig = require("./db");
+const {
+  requireInternal,
+  requireAdmin,
+  accessRules,
+  attachInternalKey,
+} = require("./middleware/auth");
+
+attachInternalKey(axios);
 
 app.use(cors());
 app.use(express.json());
@@ -28,20 +36,47 @@ const salesRouter = require("./routes/sales")
 const wubookRouter = require("./routes/analis");
 const forecastRouter = require('./routes/forecast');
 const revenueRouter = require("./routes/revenue");
+const adminStatsRouter = require("./routes/adminStats");
 
-app.use('/forecast', forecastRouter);
-app.use("/aparts", apartRouter);
-app.use("/users", userRouter);
-app.use("/freeRooms", froomsRouter);
-app.use("/getprices", pricesRouter);
-app.use("/email", emailRouter);
+// Access levels (see middleware/auth.js). In mixed routers anything not listed is admin-only.
+// public: website · internal: telegram bot / cron · admin: admin panel (JWT) or internal key
+app.use('/forecast', requireAdmin, forecastRouter);
+app.use(
+  "/aparts",
+  accessRules([{ method: "GET", path: /^\/?$/, level: "public" }]),
+  apartRouter
+);
+app.use("/users", requireInternal, userRouter);
+app.use("/freeRooms", requireInternal, froomsRouter);
+app.use(
+  "/getprices",
+  accessRules([{ method: "GET", path: /^\/getprices\/?$/i, level: "internal" }]),
+  pricesRouter
+);
+app.use("/email", requireInternal, emailRouter);
 app.use("/auth", authRouter);
-app.use("/siteRoyal", siteRouter);
-app.use("/advert", advertRouter);
-app.use("/getAllUsers", allchatIdRouter);
-app.use("/sales", salesRouter)
-app.use("/analis", wubookRouter);
-app.use("/revenue", revenueRouter);
+app.use(
+  "/siteRoyal",
+  accessRules([
+    { method: "GET", path: /^\/copied-rooms\/?$/i, level: "public" },
+    { method: "GET", path: /^\/get-all-wodoo\/?$/i, level: "public" },
+  ]),
+  siteRouter
+);
+app.use(
+  "/advert",
+  accessRules([{ method: "GET", path: /^\/consume\/?$/i, level: "internal" }]),
+  advertRouter
+);
+app.use("/getAllUsers", requireInternal, allchatIdRouter);
+app.use(
+  "/sales",
+  accessRules([{ method: "GET", path: /^\/[^/]+\/?$/, level: "public" }]), // /all and /:roomId
+  salesRouter
+)
+app.use("/analis", requireAdmin, wubookRouter);
+app.use("/revenue", requireAdmin, revenueRouter);
+app.use("/adminStats", requireAdmin, adminStatsRouter);
 
 // Proxy to Telegram bot (getData - send adverts to users)
 

@@ -10,3 +10,6 @@
 
 .env
 /certbot/
+
+# ML price check results (generated)
+/ml-data/
