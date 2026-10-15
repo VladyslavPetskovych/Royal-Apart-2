@@ -82,7 +82,10 @@ const adminMenu = {
         { text: "📅 Календар 14 днів", callback_data: "admin:calendar" },
         { text: "📡 Канали продажів", callback_data: "admin:channels:30" },
       ],
-      [{ text: "🤖 ML-перевірка цін", callback_data: "admin:ml" }],
+      [
+        { text: "📈 Прогноз", callback_data: "admin:fc" },
+        { text: "🤖 ML-перевірка цін", callback_data: "admin:ml" },
+      ],
       [{ text: "📢 Розсилка", callback_data: "admin:broadcast" }],
       [{ text: "🚪 Вийти з адмінки", callback_data: "admin:logout" }],
       [{ text: "🔙 Меню ●", callback_data: "back_to_menu" }],
@@ -459,16 +462,268 @@ const sendMlCheck = async (chatId) => {
   return bot.sendMessage(chatId, text, { parse_mode: "HTML", ...adminMenu });
 };
 
-// Push the daily ML result to admins once, when a new file appears
-let lastMlRun = readMlResults()?.generatedAt || null;
+// ----- Forecast (python/forecast_engine.py, written daily by the ml container) -----
+
+const FORECAST_FILE =
+  process.env.ML_FORECAST_FILE || path.join(path.dirname(ML_RESULTS_FILE), "forecast.json");
+
+const readForecast = () => {
+  try {
+    const data = JSON.parse(fs.readFileSync(FORECAST_FILE, "utf8"));
+    return data && Array.isArray(data.days) ? data : null;
+  } catch (_e) {
+    return null;
+  }
+};
+
+const forecastMenu = {
+  reply_markup: JSON.stringify({
+    inline_keyboard: [
+      [
+        { text: "📈 Завантаженість", callback_data: "admin:fc:occ" },
+        { text: "💰 Дохід", callback_data: "admin:fc:rev" },
+      ],
+      [
+        { text: "🏁 Темп vs минулий рік", callback_data: "admin:fc:pace" },
+        { text: "💡 Ціни", callback_data: "admin:fc:prices" },
+      ],
+      [{ text: "🎯 Точність прогнозу", callback_data: "admin:fc:acc" }],
+      [{ text: "🔐 Адмін-панель", callback_data: "admin:panel" }],
+    ],
+  }),
+};
+
+const dayLabel = (iso) => {
+  const d = moment(iso, "YYYY-MM-DD");
+  return `${WEEKDAYS[d.day()]} ${d.format("DD.MM")}`;
+};
+const pct = (v) => (v === null || v === undefined ? "—" : `${Math.round(v)}%`);
+const signed = (v) => (v > 0 ? `+${v}` : `${v}`);
+
+// █ already booked · ▒ expected pickup · ░ free
+const forecastBar = (otbRate, fcRate) => {
+  const booked = Math.max(0, Math.min(10, Math.round(otbRate / 10)));
+  const total = Math.max(booked, Math.min(10, Math.round(fcRate / 10)));
+  return "█".repeat(booked) + "▒".repeat(total - booked) + "░".repeat(10 - total);
+};
+
+const forecastHeader = (fc) =>
+  `<i>Прогноз від ${moment(fc.generatedAt).format("DD.MM HH:mm")} · ${fc.reservations} бронювань у даних</i>`;
+
+const noForecast = (chatId) =>
+  bot.sendMessage(
+    chatId,
+    "📈 Прогнозу ще немає. Він рахується щодня о 09:00 після синхронізації бронювань із Zak.",
+    adminMenu
+  );
+
+const sendForecastMenu = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const s = fc.summary;
+  const lines = [
+    "📈 <b>Прогноз</b>",
+    "",
+    `7 днів: <b>~${pct(s.next7.forecastRate)}</b> завантаженість · ~${money(s.next7.forecastRevenue)}`,
+    `30 днів: <b>~${pct(s.next30.forecastRate)}</b> · ~${money(s.next30.forecastRevenue)}`,
+    "",
+    forecastHeader(fc),
+  ];
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+const sendForecastOccupancy = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const days = fc.days.slice(0, 30);
+  const rows = days.map((d) => {
+    const otbRate = d.capacity ? (d.otbRooms / d.capacity) * 100 : 0;
+    return `${dayLabel(d.date)} ${forecastBar(otbRate, d.forecastRate)} ${String(Math.round(otbRate)).padStart(3)}→${String(Math.round(d.forecastRate)).padStart(3)}%`;
+  });
+  const s = fc.summary;
+  const n7 = days.slice(0, 7);
+  const lines = [
+    "📈 <b>Прогноз завантаженості, 30 днів</b>",
+    `7 днів: <b>~${pct(s.next7.forecastRate)}</b> (діапазон ${pct(Math.min(...n7.map((d) => d.lowRate)))}–${pct(Math.max(...n7.map((d) => d.highRate)))}) · вже заброньовано ${s.next7.otbRooms} ночей`,
+    `30 днів: <b>~${pct(s.next30.forecastRate)}</b> · вже заброньовано ${s.next30.otbRooms} з ~${s.next30.forecastRooms} очікуваних ночей`,
+    "",
+    `<pre>${rows.join("\n")}</pre>`,
+    "<i>█ вже заброньовано · ▒ очікувані бронювання · ░ вільно\nзаброньовано→прогноз, % квартир</i>",
+    forecastHeader(fc),
+  ];
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+const sendForecastRevenue = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const s = fc.summary;
+  const m = s.month;
+  const monthName = moment(`${m.month}-01`).format("MM.YYYY");
+  const adr = (w) => (w.forecastRooms ? money(w.forecastRevenue / w.forecastRooms) : "—");
+  const lines = [
+    "💰 <b>Прогноз доходу</b>",
+    "",
+    `7 днів: <b>~${money(s.next7.forecastRevenue)}</b> · вже заброньовано ${money(s.next7.otbRevenue)} · ADR ~${adr(s.next7)}`,
+    `30 днів: <b>~${money(s.next30.forecastRevenue)}</b> · вже ${money(s.next30.otbRevenue)} · ADR ~${adr(s.next30)}`,
+    `60 днів: <b>~${money(s.next60.forecastRevenue)}</b> · вже ${money(s.next60.otbRevenue)}`,
+    "",
+    `📆 Місяць ${monthName}: вже прожито <b>${money(m.realizedRevenue)}</b> (${m.realizedRooms} ночей)`,
+    `+ прогноз на решту місяця ~${money(m.remaining.forecastRevenue)}`,
+    `= <b>~${money(m.realizedRevenue + m.remaining.forecastRevenue)}</b> за місяць`,
+    "",
+    "<i>Дохід — сума за проживання з Zak. Очікувані бронювання оцінено за цінами останніх «пізніх» бронювань для цього дня тижня з урахуванням сезону.</i>",
+    forecastHeader(fc),
+  ];
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+const sendForecastPace = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const line = (label, w) => {
+    if (w.otbRoomsLySameLead === null || w.otbRoomsLySameLead === undefined) return `${label}: немає даних за минулий рік`;
+    const diff = w.otbRooms - w.otbRoomsLySameLead;
+    const rel = w.otbRoomsLySameLead ? Math.round((diff / w.otbRoomsLySameLead) * 100) : null;
+    const icon = diff >= 0 ? "🟢" : "🔴";
+    return `${icon} ${label}: <b>${w.otbRooms}</b> ночей vs ${w.otbRoomsLySameLead} минулого року (${signed(diff)}${rel !== null ? `, ${signed(rel)}%` : ""})${
+      w.finalRoomsLy !== null && w.finalRoomsLy !== undefined ? `\n    у підсумку минулого року: ${w.finalRoomsLy}, прогноз зараз: ~${w.forecastRooms}` : ""
+    }`;
+  };
+  const s = fc.summary;
+  const lines = [
+    "🏁 <b>Темп бронювань vs минулий рік</b>",
+    "<i>Заброньовано зараз vs заброньовано рік тому на ті самі дні тижня за стільки ж днів до заїзду</i>",
+    "",
+    line("7 днів", s.next7),
+    line("30 днів", s.next30),
+    line("60 днів", s.next60),
+    "",
+    forecastHeader(fc),
+  ];
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+const sendForecastPrices = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const recs = (fc.priceRecommendations || []).filter(
+    (r) => moment(r.date).diff(moment(fc.asOf), "days") < 14
+  );
+  const lines = ["💡 <b>Рекомендації цін</b> (вільні квартири, 14 днів)"];
+  if (!recs.length) {
+    lines.push("", "Ціни відповідають прогнозу попиту 👍");
+  } else {
+    const shown = recs.slice().sort((a, b) => Math.abs(b.diffPct) - Math.abs(a.diffPct)).slice(0, 20);
+    shown.sort((a, b) => a.date.localeCompare(b.date) || Math.abs(b.diffPct) - Math.abs(a.diffPct));
+    let current = null;
+    for (const r of shown) {
+      if (r.date !== current) {
+        current = r.date;
+        const day = fc.days.find((d) => d.date === r.date);
+        lines.push("", `<b>${dayLabel(r.date)}</b> · прогноз ${pct(day && day.forecastRate)}`);
+      }
+      lines.push(
+        `${r.diffPct > 0 ? "🔺" : "🔻"} ${escapeHtml(r.room)}: ${money(r.current)} → <b>${money(r.recommended)}</b> (${signed(r.diffPct)}%)`
+      );
+    }
+    if (recs.length > shown.length) lines.push("", `…і ще ${recs.length - shown.length}`);
+  }
+  lines.push(
+    "",
+    "<i>Порівняння з іншими квартирами: скільки гості реально платили за 120 днів vs ваша поточна ціна, плюс прогноз попиту на цю ніч. Це підказка, а не автоматична зміна цін.</i>",
+    forecastHeader(fc)
+  );
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+const FEATURE_LABELS = {
+  lead: "днів до заїзду",
+  otb_rate: "вже заброньовано",
+  dow: "день тижня",
+  month: "місяць",
+  doy_sin: "сезон",
+  doy_cos: "сезон",
+  weekend: "Пт/Сб",
+  holiday: "свята",
+  festive: "новорічний сезон",
+  ly_final: "минулий рік",
+  ly_otb_same_lead: "темп минулого року",
+  recent_level_28d: "завантаженість останніх 4 тижнів",
+  recent_pickup_14d: "недавній добір бронювань",
+  capacity: "кількість квартир",
+  recent_level_7d: "завантаженість останнього тижня",
+};
+
+const sendForecastAccuracy = (chatId) => {
+  const fc = readForecast();
+  if (!fc) return noForecast(chatId);
+  const a = fc.accuracy;
+  const m = a.maePts;
+  const lines = [
+    "🎯 <b>Точність прогнозу</b>",
+    `<i>Перевірка на минулих датах ${moment(a.testFrom).format("DD.MM.YY")}–${moment(a.testTo).format("DD.MM.YY")} (${a.samples.toLocaleString("uk-UA")} прогнозів), модель не бачила цих даних</i>`,
+    "",
+    `Середня помилка завантаженості:`,
+    `• <b>наша модель: ${m.model} п.п.</b> (~${a.maeRooms.model} кв. на день)`,
+    ...(m.recent7dAverage !== undefined ? [`• «як останні 7 днів»: ${m.recent7dAverage} п.п.`] : []),
+    `• «середнє за 4 тижні»: ${m.recent28dAverage} п.п.`,
+    `• «як минулого року»: ${m.lastYearSameWeekday} п.п.`,
+    `• «заброньовано + середній добір»: ${m.otbPlusAvgPickup} п.п.`,
+    "",
+    "За горизонтом (модель / «як останні 7 днів»):",
+    ...a.byLead.map((b) => `• ${b.leads} дн.: <b>${b.model}</b> / ${b.recent7d ?? b.pickupBaseline} п.п.`),
+  ];
+  // capacity mostly reflects how the business grew over time — not useful to show
+  const fi = (fc.featureImportance || []).filter((f) => f.maeIncreasePts > 0 && f.feature !== "capacity");
+  if (fi.length) {
+    const labels = [...new Set(fi.map((f) => FEATURE_LABELS[f.feature] || f.feature))];
+    lines.push("", `Найважливіше для прогнозу: ${labels.slice(0, 4).join(", ")}`);
+  }
+  lines.push("", forecastHeader(fc));
+  return bot.sendMessage(chatId, lines.join("\n"), { parse_mode: "HTML", ...forecastMenu });
+};
+
+// Morning summary: pushed once when a new forecast appears
+const buildMorningSummary = (fc) => {
+  const s = fc.summary;
+  const today = fc.days[0];
+  const soon = (fc.priceRecommendations || []).filter((r) => moment(r.date).diff(moment(fc.asOf), "days") < 3);
+  const pace = s.next30.otbRoomsLySameLead
+    ? Math.round(((s.next30.otbRooms - s.next30.otbRoomsLySameLead) / s.next30.otbRoomsLySameLead) * 100)
+    : null;
+  const lines = [
+    "☀️ <b>Ранковий прогноз</b>",
+    "",
+    `Сьогодні: заброньовано ${today.otbRooms} з ${today.capacity}, прогноз ~${pct(today.forecastRate)}`,
+    `7 днів: ~${pct(s.next7.forecastRate)} · ~${money(s.next7.forecastRevenue)}`,
+    `30 днів: ~${pct(s.next30.forecastRate)} · ~${money(s.next30.forecastRevenue)}`,
+  ];
+  if (pace !== null) lines.push(`Темп vs минулий рік (30 дн.): ${pace >= 0 ? "🟢" : "🔴"} ${signed(pace)}%`);
+  if (soon.length) {
+    lines.push("", `💡 Ціни на найближчі 3 дні — ${soon.length} рекомендацій, напр.:`);
+    soon
+      .slice()
+      .sort((a, b) => Math.abs(b.diffPct) - Math.abs(a.diffPct))
+      .slice(0, 3)
+      .forEach((r) =>
+        lines.push(`• ${dayLabel(r.date)} ${escapeHtml(r.room)}: ${money(r.current)} → ${money(r.recommended)}`)
+      );
+  }
+  return lines.join("\n");
+};
+
+let lastForecastRun = readForecast()?.generatedAt || null;
 setInterval(async () => {
-  const data = readMlResults();
-  if (!data || data.generatedAt === lastMlRun) return;
-  lastMlRun = data.generatedAt;
+  const fc = readForecast();
+  if (!fc || fc.generatedAt === lastForecastRun) return;
+  lastForecastRun = fc.generatedAt;
   if (!getAdminIds().length) return;
-  // Only push when a free-today apartment is flagged — booked ones need no action
-  const { text, notableFree } = buildMlMessage(data, await freeTodaySet());
-  if (notableFree) await notifyAdmins(text);
+  try {
+    await notifyAdmins(buildMorningSummary(fc));
+  } catch (err) {
+    console.error("[Admin] morning summary:", err.message);
+  }
 }, ML_WATCH_INTERVAL_MS).unref();
 
 const sendFreeRooms = async (chatId, offsetDays) => {
@@ -658,6 +913,18 @@ bot.on("callback_query", async (query) => {
         return await sendChannels(chatId, 90);
       case "admin:ml":
         return await sendMlCheck(chatId);
+      case "admin:fc":
+        return await sendForecastMenu(chatId);
+      case "admin:fc:occ":
+        return await sendForecastOccupancy(chatId);
+      case "admin:fc:rev":
+        return await sendForecastRevenue(chatId);
+      case "admin:fc:pace":
+        return await sendForecastPace(chatId);
+      case "admin:fc:prices":
+        return await sendForecastPrices(chatId);
+      case "admin:fc:acc":
+        return await sendForecastAccuracy(chatId);
       case "admin:broadcast":
         if (broadcastRunning) {
           return await bot.sendMessage(chatId, "⏳ Розсилка вже виконується.");

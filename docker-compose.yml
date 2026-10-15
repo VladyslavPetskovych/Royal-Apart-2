@@ -97,6 +97,7 @@ services:
       - API_URL=http://api:3000
       - INTERNAL_API_KEY=${INTERNAL_API_KEY}
       - ML_OUTPUT=/ml-data/price_check.json
+      - ML_FORECAST_OUTPUT=/ml-data/forecast.json
       - ML_RUN_HOUR=9
     volumes:
       - ./server/data2025:/server/data2025:ro

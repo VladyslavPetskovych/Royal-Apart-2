@@ -94,9 +94,12 @@ def run_once():
     log(f"done: {len(results)} ok, {errors} errors -> {OUTPUT}")
 
 
-def is_stale():
+FORECAST_OUTPUT = os.environ.get("ML_FORECAST_OUTPUT", "/ml-data/forecast.json")
+
+
+def is_stale(path=OUTPUT):
     try:
-        return time.time() - os.path.getmtime(OUTPUT) > STALE_HOURS * 3600
+        return time.time() - os.path.getmtime(path) > STALE_HOURS * 3600
     except OSError:
         return True
 
@@ -109,11 +112,16 @@ def seconds_until_next_run():
     return (nxt - now).total_seconds()
 
 
+FORECAST_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "forecast_engine.py")
+
+
 def run_in_subprocess():
-    # Separate process so pandas/sklearn memory is released between runs
-    code = subprocess.run([sys.executable, "-u", os.path.abspath(__file__)]).returncode
-    if code != 0:
-        log(f"run failed with exit code {code}")
+    # Separate processes so pandas/sklearn memory is released between runs;
+    # one failing job does not stop the other
+    for script in (os.path.abspath(__file__), FORECAST_SCRIPT):
+        code = subprocess.run([sys.executable, "-u", script]).returncode
+        if code != 0:
+            log(f"{os.path.basename(script)} failed with exit code {code}")
 
 
 if __name__ == "__main__":
@@ -122,9 +130,13 @@ if __name__ == "__main__":
         sys.exit(0)
 
     log(f"loop started, daily run at {RUN_HOUR:02d}:00 Kyiv")
-    if is_stale():
+    if is_stale() or is_stale(FORECAST_OUTPUT):
         time.sleep(60)  # give the API time to start after a deploy
         run_in_subprocess()
     while True:
-        time.sleep(seconds_until_next_run())
+        # Until the first forecast exists (reservation history still syncing), retry hourly
+        if is_stale(FORECAST_OUTPUT):
+            time.sleep(min(3600, seconds_until_next_run()))
+        else:
+            time.sleep(seconds_until_next_run())
         run_in_subprocess()

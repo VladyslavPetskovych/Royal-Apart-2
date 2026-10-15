@@ -111,3 +111,6 @@ cron.schedule("0 */2 * * *", async () => {
 });
 
 app.listen(3000);
+
+// Background sync of Zak reservations for analytics / forecasting (ZAK_SYNC=off disables)
+require("./services/zakSync").start();
