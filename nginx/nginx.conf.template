@@ -27,6 +27,21 @@ server {
         proxy_pass http://api:3000/;
     }
 
+    # WuBook Wired webhook -> telegram bot (secret is in the path, so don't log it)
+    location /wubook-webhook/ {
+        access_log off;
+        client_max_body_size 256k;
+        limit_except POST { deny all; }
+        # resolve at request time so nginx still starts if tgbot is down
+        resolver 127.0.0.11 valid=30s ipv6=off;
+        set $tgbot_upstream tgbot:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass http://$tgbot_upstream;
+    }
+
     location ~ /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }

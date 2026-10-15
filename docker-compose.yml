@@ -63,6 +63,10 @@ services:
     environment:
       - token=${TG_BOT_TOKEN}
       - ADMIN_PHONES=${ADMIN_PHONES:-+380983405578}
+      - WUBOOK_WEBHOOK_SECRET=${WUBOOK_WEBHOOK_SECRET}
+      - WUBOOK_PROPERTY_ID=${WUBOOK_PROPERTY_ID}
+    expose:
+      - "3001"
     volumes:
       - ./telegram bot:/app
       - /app/node_modules

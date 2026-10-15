@@ -19,11 +19,16 @@ jobs:
       - name: connect and deploy with safe cleanup
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
-            cd ${{ secrets.WORK_DIR }} && \
-            echo "🔄 Updating code..." && \
-            docker compose down --remove-orphans && \
-            git checkout ${{ secrets.MAIN_BRANCH }} && git pull && \
-            docker compose up -d --build
+            set -e
+            cd ${{ secrets.WORK_DIR }}
+            echo "🔄 Updating code..."
+            git checkout ${{ secrets.MAIN_BRANCH }}
+            # fails (and keeps the running version up) if the server has local changes
+            git pull --ff-only
+            # rebuilds and recreates only changed services, no full shutdown
+            docker compose up -d --build --remove-orphans
+            docker compose ps
+            set +e
 
             echo "📊 Checking disk usage..."
             USED=$(df -h / | tail -1 | awk "{print \$5}" | tr -d "%")
