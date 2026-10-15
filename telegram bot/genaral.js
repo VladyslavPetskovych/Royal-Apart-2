@@ -1,5 +1,6 @@
 const bot = require("./bot");
 const axios = require("axios");
+const { isAdmin } = require("./admin");
 
 const startButton = async (chatId) =>{
   const checkedRoomsData = {
@@ -15,7 +16,16 @@ const startButton = async (chatId) =>{
       " \n\n  Правила бронювання - /info . \n\n"+ 
       "Є запитання?\n"+
       "[Чат з менеджером](https://t.me/Royalreservation) ✍️👩‍💼",
-    { parse_mode: "Markdown", disable_web_page_preview: true }
+    {
+      parse_mode: "Markdown",
+      disable_web_page_preview: true,
+      // chatId equals the user's id only in private chats; access is re-checked on click
+      ...(isAdmin(chatId) && {
+        reply_markup: JSON.stringify({
+          inline_keyboard: [[{ text: "🔐 Адмін-панель", callback_data: "admin:panel" }]],
+        }),
+      }),
+    }
   );
 }
 

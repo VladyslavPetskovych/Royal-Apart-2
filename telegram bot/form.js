@@ -1,5 +1,6 @@
 const axios = require("axios");
 const bot = require("./bot");
+const { notifyAdmins, escapeHtml } = require("./admin");
 const roomMap = new Map();
 const userStates = {};
 const formButtons = {
@@ -19,6 +20,24 @@ const formButtons = {
 };
 
 const cooldowns = new Map();
+
+const notifyAdminsAboutRequest = async (chatId) => {
+  try {
+    const { data: u } = await axios.get(`https://royalapart.online/api/users/${chatId}`);
+    await notifyAdmins(
+      `🔔 <b>Нова заявка на бронювання</b>\n\n` +
+        `Квартира: ${escapeHtml(u.currentroom?.name || "-")}\n` +
+        `Ціна: ${escapeHtml(u.currentroom?.price ?? "-")}\n` +
+        `Дати: ${escapeHtml(u.chkin || "-")} → ${escapeHtml(u.chkout || "-")}\n` +
+        `Ім'я: ${escapeHtml(u.name || "-")}\n` +
+        `Телефон: ${escapeHtml(u.phone || "-")}\n` +
+        `Коментар: ${escapeHtml(u.coment || "-")}\n` +
+        `<a href="tg://user?id=${Number(chatId)}">Написати гостю</a>`
+    );
+  } catch (error) {
+    console.error("[Admin] Failed to notify about request:", error.message);
+  }
+};
 
 const resetUserState = (chatId) => {
   roomMap.delete(chatId); // Remove the user's data from roomMap
@@ -63,6 +82,7 @@ const sendUserData = async (chatId) => {
     chatId: chatId,
   };
   await axios.post("https://royalapart.online/api/email/sendEmail", data);
+  notifyAdminsAboutRequest(chatId);
   bot.sendMessage(
     chatId,
     "Ваші дані надіслані менеджеру, дякуємо за бронювання, очікуйте."
