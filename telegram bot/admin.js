@@ -7,7 +7,7 @@ const bot = require("./bot");
 const API_URL = "https://royalapart.online/api";
 
 // Phones allowed to become admins (comma-separated in env). Compared by digits only.
-const ADMIN_PHONES = (process.env.ADMIN_PHONES || "+380983405578,+380664390205")
+const ADMIN_PHONES = (process.env.ADMIN_PHONES || "+380983405578,+380664390205,+380631815240")
   .split(",")
   .map((p) => p.replace(/\D/g, ""))
   .filter(Boolean);
