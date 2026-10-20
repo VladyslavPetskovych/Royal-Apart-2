@@ -7,6 +7,7 @@ const dbConfig = require("./db");
 const {
   requireInternal,
   requireAdmin,
+  requireService,
   accessRules,
   attachInternalKey,
 } = require("./middleware/auth");
@@ -76,7 +77,8 @@ app.use(
 )
 app.use("/analis", requireAdmin, wubookRouter);
 app.use("/revenue", requireAdmin, revenueRouter);
-app.use("/adminStats", requireAdmin, adminStatsRouter);
+// Reservations, revenue, occupancy: telegram bot + ml container only, never public
+app.use("/adminStats", requireService, adminStatsRouter);
 
 // Proxy to Telegram bot (getData - send adverts to users)
 

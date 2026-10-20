@@ -64,11 +64,22 @@ const checkAdmin = (req, res, next) => {
   return hasInternalKey(req) || hasAdminToken(req) ? next() : deny(res);
 };
 
+// Services only, closed by default: without INTERNAL_API_KEY configured nobody gets in.
+// For endpoints added together with this protection (no old clients to keep working).
+const checkInternalStrict = (req, res, next) => {
+  if (!INTERNAL_API_KEY) {
+    warnOnce("strict", "INTERNAL_API_KEY is not set: service-only endpoints are disabled");
+    return res.status(503).json({ error: "Not configured" });
+  }
+  return hasInternalKey(req) ? next() : deny(res);
+};
+
 const CHECKS = { public: (req, res, next) => next(), internal: checkInternal, admin: checkAdmin };
 
 // Whole router at one level
 const requireInternal = checkInternal;
 const requireAdmin = checkAdmin;
+const requireService = checkInternalStrict;
 
 // Mixed router: first matching rule wins, anything not listed is "admin".
 // rules: [{ method: "GET", path: /^\/all\/?$/i, level: "public" }]
@@ -98,6 +109,7 @@ const attachInternalKey = (axios) => {
 module.exports = {
   requireInternal,
   requireAdmin,
+  requireService,
   accessRules,
   signAdminToken,
   attachInternalKey,
