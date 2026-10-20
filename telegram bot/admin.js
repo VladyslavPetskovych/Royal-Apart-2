@@ -15,6 +15,8 @@ const ADMIN_PHONES = (process.env.ADMIN_PHONES || "+380983405578,+380664390205,+
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // re-verify phone every 30 days
 const PENDING_TTL_MS = 5 * 60 * 1000; // time to share contact after /admin
 const BROADCAST_TTL_MS = 10 * 60 * 1000; // time to send broadcast draft
+// Broadcast to all bot users is off unless BROADCAST_ENABLED=true
+const BROADCAST_ENABLED = process.env.BROADCAST_ENABLED === "true";
 
 const dataDir = path.join(__dirname, "data");
 const adminsFile = path.join(dataDir, "admins.json");
@@ -86,7 +88,12 @@ const adminMenu = {
         { text: "📈 Прогноз", callback_data: "admin:fc" },
         { text: "🤖 ML-перевірка цін", callback_data: "admin:ml" },
       ],
-      [{ text: "📢 Розсилка", callback_data: "admin:broadcast" }],
+      [
+        {
+          text: BROADCAST_ENABLED ? "📢 Розсилка" : "📢 Розсилка (вимкнено)",
+          callback_data: "admin:broadcast",
+        },
+      ],
       [{ text: "🚪 Вийти з адмінки", callback_data: "admin:logout" }],
       [{ text: "🔙 Меню ●", callback_data: "back_to_menu" }],
     ],
@@ -855,7 +862,7 @@ bot.on("message", async (msg) => {
 
   // Broadcast draft input
   if (awaitingBroadcast.has(userId)) {
-    if (!isAdmin(userId)) return awaitingBroadcast.delete(userId);
+    if (!BROADCAST_ENABLED || !isAdmin(userId)) return awaitingBroadcast.delete(userId);
     if (Date.now() > awaitingBroadcast.get(userId)) return awaitingBroadcast.delete(userId);
 
     if (text === "/cancel") {
@@ -892,6 +899,12 @@ bot.on("callback_query", async (query) => {
   const chatId = message.chat.id;
 
   try {
+    // Also blocks old "Надіслати всім" buttons still visible in chat history
+    if (data.startsWith("admin:broadcast") && !BROADCAST_ENABLED) {
+      awaitingBroadcast.delete(userId);
+      broadcastDrafts.delete(userId);
+      return await bot.sendMessage(chatId, "📢 Розсилка тимчасово вимкнена.", adminMenu);
+    }
     switch (data) {
       case "admin:panel":
         return await showAdminPanel(chatId);
