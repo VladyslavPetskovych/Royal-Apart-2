@@ -28,6 +28,16 @@ export function formatApartmentNameForLang(name, lang) {
 }
 
 /**
+ * True when the name already starts with its own street type (проспект, площа, бульвар, ...),
+ * so the UI must not add "вул." / "Street" in front of it.
+ */
+export function hasOwnStreetType(name) {
+  return /^\s*(проспект|просп\.|площа|пл\.|бульвар|бул\.|майдан|провулок|пров\.|узвіз)(\s|$)/i.test(
+    String(name ?? ""),
+  );
+}
+
+/**
  * Lowercase haystack for search: original + Latin form (for EN keyboards).
  */
 export function apartmentNameSearchHaystack(name) {

@@ -8,7 +8,7 @@ import {
 } from "../../redux/apartSlice";
 import { Link } from "react-router-dom";
 import { Square, BedDouble, Users } from "lucide-react";
-import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
+import { formatApartmentNameForLang, hasOwnStreetType } from "../../utils/apartmentNameDisplay";
 
 /** small helper */
 function pickRandom(arr, n) {
@@ -73,7 +73,7 @@ function LikeCard({ apartment }) {
 
       {/* title line */}
       <div className="mt-4 text-[14px] font-extrabold text-start uppercase tracking-[0.06em] text-[#1b1b1b]">
-        {t("room_street_prefix")}{" "}
+        {hasOwnStreetType(apartment?.name) ? "" : `${t("room_street_prefix")} `}
         {formatApartmentNameForLang(
           apartment?.name,
           i18n.language,

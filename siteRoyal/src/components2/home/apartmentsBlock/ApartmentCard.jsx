@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import ApartmentGallery from "./ApartmentGallery";
 
 import { selectLanguage } from "../../../redux/languageSlice";
-import { formatApartmentNameForLang } from "../../../utils/apartmentNameDisplay";
+import { formatApartmentNameForLang, hasOwnStreetType } from "../../../utils/apartmentNameDisplay";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -113,7 +113,11 @@ export default function ApartmentCard({ apartment }) {
     [isEn, title],
   );
 
-  const streetText = isEn ? `${displayName} Street` : `вул. ${displayName}`;
+  const streetText = hasOwnStreetType(title)
+    ? displayName
+    : isEn
+      ? `${displayName} Street`
+      : `вул. ${displayName}`;
 
   return (
     <Link to={wubid ? `/room/${wubid}` : "#"} className="group block">

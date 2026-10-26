@@ -13,7 +13,7 @@ import {
   Star,
   Headphones,
 } from "lucide-react";
-import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
+import { formatApartmentNameForLang, hasOwnStreetType } from "../../utils/apartmentNameDisplay";
 
 /** API bathroomType (UK/RU/EN variants) → i18n key */
 function labelBathroomType(raw, t) {
@@ -132,7 +132,7 @@ export default function ApartmentInfo({ apartment, status }) {
       lang === "en"
         ? formatApartmentNameForLang(raw, "en").toUpperCase()
         : raw.toUpperCase();
-    return `${t("room_street_prefix")} ${name}`;
+    return hasOwnStreetType(raw) ? name : `${t("room_street_prefix")} ${name}`;
   }, [apartment, t, i18n.language]);
 
   if (status !== "succeeded" || !apartment) return null;

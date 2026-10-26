@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { formatApartmentNameForLang } from "../../utils/apartmentNameDisplay";
+import { formatApartmentNameForLang, hasOwnStreetType } from "../../utils/apartmentNameDisplay";
 
 /** Icons tuned to match screenshot (thin outline, soft gray, correct shapes) */
 function IconCube(props) {
@@ -107,8 +107,11 @@ export default function ApartHighlight({ apartment }) {
   );
 
   // street prefix placement
-  const streetText =
-    lang === "en" ? `${displayName} Street` : `вул. ${displayName}`;
+  const streetText = hasOwnStreetType(name)
+    ? displayName
+    : lang === "en"
+      ? `${displayName} Street`
+      : `вул. ${displayName}`;
 
   // route stays unchanged
   const to = wubid ? `/room/${wubid}` : "#";
